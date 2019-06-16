@@ -1,0 +1,43 @@
+# Some substantial blankets here:
+__*/
+__test*
+.*/
+secret*
+
+# Standardish directories
+__pycache__/
+_build/
+develop-eggs/
+dist/
+eggs/
+htmlcov/
+lib/
+lib64/
+log/
+parts/
+sdist/
+temp/
+var/
+
+# Standardish extensions
+*.code-workspace
+*.coverage
+*.egg
+*.egg-info
+*.log
+*.patch
+*.py[cod]
+*.so
+*.swp
+
+# Miscellany
+.DS_Store
+.installed.cfg
+Desktop.ini
+pip-log.txt
+wily-*
+
+# Big stupid globs
+*.pdf
+*.xls
+*.xlsx
