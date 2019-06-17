@@ -4,7 +4,9 @@ import configparser
 import logging
 import runpy
 import subprocess
+import sys
 import textwrap
+import time
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
@@ -14,53 +16,48 @@ from typing import (
     Dict,
     Iterator,
     Mapping,
-    Optional,  # List,
     Sequence,
     Tuple,
     Union,
+    Optional,
 )
 
+import click
 import pandas as pd
 
-from .sql import Channel, Script, Table, execute  # typeignoremaybe # wtf
 from . import toolbox
+from .sql import Channel, Script, Table, execute  # typeignoremaybe # wtf
 
 logger = logging.getLogger(__name__)
 logger.debug(__name__)
-from pathlib import Path
-import logging
-import sys
-import time
-from typing import Optional, Union
-
-import click
 
 
 def run_build(
-    script_path: Union[str, Path], debug: bool = False, log_file: Optional[Path] = None
+    script_path: Union[str, Path],
+    debug: bool = False,
+    log_file: Optional[Path] = Path("./laforge.log"),
 ) -> None:
     """laforge's core build command"""
     path = Path(script_path)
-    if debug:
-        click.echo("Debug mode is on.")
     if path.is_dir():
         path = find_build_config_in_directory(path)
 
     start_time = time.time()
-    if log_file:
-        logger = get_package_logger(log_file, debug)
-    else:
-        logger = logging.getLogger(__name__)
+    global logger
+    logger = get_package_logger(log_file, debug)
 
     # THEN set logging -- helps avoid importing pandas at debug level
 
-    logger.info("%s launched.", script_path)
+    logger.info("%s launched.", path)
+    if debug:
+        click.echo("Debug mode is on.")
+    logger.debug("Debug mode is on.")
 
-    task_list = TaskList(script_path)
+    task_list = TaskList(path)
     task_list.execute()
 
     elapsed = seconds_since(start_time)
-    logger.info("%s completed in %s seconds.", script_path, elapsed)
+    logger.info("%s completed in %s seconds.", path, elapsed)
 
 
 def find_build_config_in_directory(path: Path) -> Path:
@@ -112,14 +109,6 @@ def get_package_logger(log_file: Path, debug: bool) -> logging.Logger:
 
     logging.getLogger().setLevel(noisiness)
     return logging.getLogger(__name__)
-
-
-class TaskList:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def execute(self, *args, **kwargs):
-        pass
 
 
 class Verb(Enum):
