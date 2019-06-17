@@ -3,12 +3,10 @@
 import os
 from datetime import datetime as dt
 from pathlib import Path
-from typing import Mapping, Union
+from typing import Mapping
 
 import click
 import PyInquirer as inq
-
-from . import toolbox
 
 
 def create_ini(path: str, debug: bool) -> None:
@@ -18,7 +16,7 @@ def create_ini(path: str, debug: bool) -> None:
     responses = receive_input(path.parent)
     output = create_output(responses)
     path.write_text(output)
-    print("\nNew laforge INI written at: {path}\nEnjoy!")
+    click.echo(f"\nNew laforge INI written at: {path}\nEnjoy!")
     exit(0)
 
 
@@ -26,8 +24,8 @@ INQ_STYLE = inq.style_from_dict(
     {
         inq.Token.QuestionMark: "#7366ff bold",
         inq.Token.Answer: "#66ccff bold",
-        inq.Token.Selected: "",  # defaults
-        inq.Token.Instruction: "",
+        inq.Token.Selected: "#66ccff bold",
+        inq.Token.Instruction: "",  # defaults
         inq.Token.Question: "",
     }
 )
@@ -40,7 +38,7 @@ def receive_path():
             "type": "input",
             "name": "ini",
             "message": "Creating a new laforge INI at:",
-            "default": "./build.ini",
+            "default": f".{os.sep}build.ini",
         },
         {
             "type": "confirm",
@@ -74,19 +72,19 @@ def receive_input(build_dir):
             "type": "input",
             "name": "read_dir",
             "message": f"Default read directory, relative to {build_dir}{os.sep}:",
-            "default": "./",
+            "default": f".{os.sep}",
         },
         {
             "type": "input",
             "name": "write_dir",
             "message": f"Default write directory, relative to {build_dir}{os.sep}:",
-            "default": "./",
+            "default": f".{os.sep}",
         },
         {
             "type": "input",
             "name": "execute_dir",
             "message": f"Default execute directory, relative to {build_dir}{os.sep}:",
-            "default": "./",
+            "default": f".{os.sep}",
         },
         {
             "type": "list",
@@ -99,19 +97,19 @@ def receive_input(build_dir):
             "type": "input",
             "name": "server",
             "message": "    Server:",
-            "when": lambda a: a["distro"] in ("mssql", "mysql", "postgresql"),
+            "when": lambda a: a["distro"] in ["mssql", "mysql", "postgresql"],
         },
         {
             "type": "input",
             "name": "database",
             "message": "    Database:",
-            "when": lambda a: a["distro"] in ("mssql", "mysql", "postgresql", "sqlite"),
+            "when": lambda a: a["distro"] in ["mssql", "mysql", "postgresql", "sqlite"],
         },
         {
             "type": "input",
             "name": "schema",
             "message": "    Schema:",
-            "when": lambda a: a["distro"] in ("mssql"),
+            "when": lambda a: a["distro"] in ["mssql"],
         },
     ]
 

@@ -5,10 +5,12 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Optional
 
+import click
+
 LOGO = """\
       __      ___      _______ _______ _____   _______ _______
-     / /     /__ |    /______//______//___  \ /______//______/
-    / /     __ | |   _______ __   __ ____/  /__ ____ _______
+     / /     /__ |    /______//______//____ \ /______//______/
+    / /     __ | |   _______ __   __ _____/ /__ ____ _______
    / /     / / | |  / _____// /  / // _  __// //_  // _____/
   / /____ / /__| | / /     / /__/ // / \ \ / /__/ // /_____
  /______//_______|/_/     /______//_/  /_//______//_______/ """  # noqa
@@ -39,7 +41,7 @@ def colorize(s: str, fg: Optional[Color] = None, bg: Optional[Color] = None) -> 
 
 
 def print_fancy() -> None:
-    print(colorize(LOGO, fg=Color(red=102, green=204, blue=255)))
+    click.echo(colorize(LOGO, fg=Color(red=102, green=204, blue=255)))
 
 
 def get_clickable() -> str:
