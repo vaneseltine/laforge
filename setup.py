@@ -29,6 +29,7 @@ setup(
     install_requires=[
         "Click>=7.0",
         "pandas>=0.22",
+        "PyInquirer>=1.0",
         "pyparsing>=2.3",
         "SQLAlchemy>=1.3",
     ],
