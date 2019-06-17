@@ -1,132 +1,129 @@
 """ Create a new build INI. """
 
-from pathlib import Path
-import time
-from collections import namedtuple
+import os
 from datetime import datetime as dt
-from typing import Any, ItemsView, List, Union
+from pathlib import Path
+from typing import Mapping, Union
+
+import click
+import PyInquirer as inq
 
 from . import toolbox
 
-_CONFIG_TEMPLATE = r"""
-[config]
-output_dir = {output_dir}'
-data_dir = {data_dir}
-script_dir = {script_dir}
-stata_executable = {stata_executable}
 
-[config.sql]
-distro = '{distro}'
-server = '{server}'
-database = '{database}'
-schema = '{schema}'
-"""
+def create_ini(path: str, debug: bool) -> None:
+    # path = Path(path)
 
-import click
-
-
-def create_ini(path: Union[str, Path], debug: bool) -> None:
-    path = Path(path)
-    if path.suffix not in (".ini",):
-        print("WARNING: canonical ending of laforge build file is INI.")
-
-    print("Initializing a new laforge build config file: {}".format(path))
-    if path.exists():
-        print("\nWARNING -- will overwrite existing file!")
-        time.sleep(2)
-
-    responses = get_responses()
+    path = receive_path()
+    responses = receive_input(path.parent)
     output = create_output(responses)
-    toolbox.prepare_to_access(path)
     path.write_text(output)
-    print("\nNew laforge build config file written at: {}".format(path))
+    print("\nNew laforge INI written at: {path}\nEnjoy!")
     exit(0)
 
 
-ConfigOption = namedtuple("ConfigOption", ["category", "name", "default", "desc"])
+INQ_STYLE = inq.style_from_dict(
+    {
+        inq.Token.QuestionMark: "#7366ff bold",
+        inq.Token.Answer: "#66ccff bold",
+        inq.Token.Selected: "",  # defaults
+        inq.Token.Instruction: "",
+        inq.Token.Question: "",
+    }
+)
 
 
-def get_responses() -> ItemsView[ConfigOption, Union[None, str, bool]]:
-    cumulative_responses = {}
-    skipping: List[str] = []
+def receive_path():
 
-    options = (
-        # ConfigOption("dir", "build", ".", "Build directory"),
-        ConfigOption(
-            "main",
-            "data_dir",
-            "./data/",
-            "Default/relative directory for READ operations. "
-            "Can be absolute or relative to the location of the build ini.",
-        ),
-        ConfigOption(
-            "main",
-            "output_dir",
-            "./output/",
-            "Default/relative directory for WRITE operations",
-        ),
-        ConfigOption(
-            "main",
-            "script_dir",
-            ".",
-            "Default/relative directory for EXECUTE (.py, .sql) operations",
-        ),
-        ConfigOption(
-            "main", "shell_dir", ".", "Default/relative directory for SHELL operations"
-        ),
-        ConfigOption("_fork", "sql", True, "Add SQL configuration?"),
-        ConfigOption(
-            "sql", "distro", None, "SQL distribution, e.g., MSSQL, MySQL, sqlite)"
-        ),
-        ConfigOption("sql", "server", None, "SQL server"),
-        ConfigOption("sql", "database", None, "SQL database"),
-        ConfigOption("sql", "schema", None, "SQL schema"),
-    )
+    ini_questions = [
+        {
+            "type": "input",
+            "name": "ini",
+            "message": "Creating a new laforge INI at:",
+            "default": "./build.ini",
+        },
+        {
+            "type": "confirm",
+            "name": "confirmed",
+            "message": "This file exists. Okay to overwrite?",
+            "default": False,
+            "when": lambda a: Path(a["ini"]).exists(),
+        },
+    ]
 
-    for option in options:
-        category, name, default, desc = option
-        if category in skipping:
-            continue
-        response = input(
-            "\n{desc}\n> {name} [{default}] ".format(
-                name=name, desc=desc, default=default
-            )
-        ).strip()
-        answer = adjudicate(response, default)
-        if category == "_fork":
-            if not answer:
-                skipping.append(name)
-        else:
-            cumulative_responses[option] = answer
-    return cumulative_responses.items()
+    build_path = None
+    while not build_path:
+        ini_answers = inq.prompt(ini_questions, style=INQ_STYLE)
+        confirmed = ini_answers.get("confirmed", True)
+        if confirmed:
+            build_path = Path(ini_answers["ini"]).resolve()
+    click.echo(f"\nCreating {build_path}\n")
+    return build_path
 
 
-_VALUE_TO_ENTRY = {True: ("yes", "y", "true", "t"), False: ("false", "f", "no", "n")}
-_ENTRY_TO_VALUE = {
-    value: key for key in _VALUE_TO_ENTRY for value in _VALUE_TO_ENTRY[key]
-}
+def receive_input(build_dir):
+    DISTROS = {
+        "Microsoft SQL Server": "mssql",
+        "MySQL/MariaDB": "mysql",
+        "PostgreSQL": "postgresql",
+        "SQLite": "sqlite",
+    }
+
+    questions = [
+        {
+            "type": "input",
+            "name": "read_dir",
+            "message": f"Default read directory, relative to {build_dir}{os.sep}:",
+            "default": "./",
+        },
+        {
+            "type": "input",
+            "name": "write_dir",
+            "message": f"Default write directory, relative to {build_dir}{os.sep}:",
+            "default": "./",
+        },
+        {
+            "type": "input",
+            "name": "execute_dir",
+            "message": f"Default execute directory, relative to {build_dir}{os.sep}:",
+            "default": "./",
+        },
+        {
+            "type": "list",
+            "name": "distro",
+            "message": "SQL Distribution:",
+            "choices": ["None"] + [*DISTROS.keys()],
+            "filter": DISTROS.get,
+        },
+        {
+            "type": "input",
+            "name": "server",
+            "message": "    Server:",
+            "when": lambda a: a["distro"] in ("mssql", "mysql", "postgresql"),
+        },
+        {
+            "type": "input",
+            "name": "database",
+            "message": "    Database:",
+            "when": lambda a: a["distro"] in ("mssql", "mysql", "postgresql", "sqlite"),
+        },
+        {
+            "type": "input",
+            "name": "schema",
+            "message": "    Schema:",
+            "when": lambda a: a["distro"] in ("mssql"),
+        },
+    ]
+
+    return inq.prompt(questions, style=INQ_STYLE)
 
 
-def adjudicate(response: str, default: Any) -> Any:
-    if not response:
-        return default
-    if default is bool(default):
-        return _ENTRY_TO_VALUE.get(response, _ENTRY_TO_VALUE.get(response[0]))
-    return response
-
-
-def create_output(answers: ItemsView[ConfigOption, Any]) -> str:
-    output = ["# laforge configuration generated {}".format(dt.now()), "[DEFAULT]"]
-    for option, answer in answers:
-        _, name, _, desc = option
-        comment = "# " if answer is None else ""
-        output.append("# {desc}".format(desc=desc))
-        output.append(
-            "{comment}{name} = {answer}\n".format(
-                comment=comment, name=name, answer=answer
-            )
-        )
-
-    example = ["[hello]", "SHELL = echo 'Hello, world!'", ""]
-    output.extend(example)
+def create_output(answers: Mapping) -> str:
+    INTRO = ["# laforge configuration generated {}".format(dt.now()), "[DEFAULT]"]
+    OUTTRO = ["\n[hello_world]", "SHELL: echo 'Hello, world!'", ""]
+    output = INTRO
+    for option, answer in answers.items():
+        comment = "# " if not answer else ""
+        output.append(f"{comment}{option}: {answer}")
+    output.extend(OUTTRO)
     return "\n".join(output)

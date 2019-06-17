@@ -35,13 +35,13 @@ def colorize(s: str, fg: Optional[Color] = None, bg: Optional[Color] = None) -> 
 
 
 def print_fancy() -> None:
-    print(colorize(LOGO, fg=Color(red=102, green=187, blue=255)))
+    print(colorize(LOGO, fg=Color(red=102, green=204, blue=255)))
 
 
 def get_clickable() -> str:
     from . import __version__
 
-    logo = colorize(LOGO + " %(version)s\n", fg=Color(102, 187, 255))
+    logo = colorize(LOGO + " %(version)s\n", fg=Color(102, 204, 255))
     lfline = colorize(
         f"laforge {__version__} at {Path(__file__).parent.absolute()}",
         fg=Color(127, 127, 127),

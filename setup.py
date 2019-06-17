@@ -18,6 +18,7 @@ setup(
     author_email="matvan@umich.edu",
     description=laforge.__doc__,
     long_description=long_description,
+    long_description_content_type="text/x-rst",
     url="https://git.sr.ht/~matvan/laforge",
     license="AGPL-3.0-or-later",
     packages=find_packages(),
