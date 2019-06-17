@@ -1,0 +1,6 @@
+include *.rst *.md LICENSE
+graft test
+graft bergholt/quarters
+global-exclude *.py[co]
+exclude test/secrets_config.py
+
