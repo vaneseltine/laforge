@@ -1,0 +1,77 @@
+[[task]]
+description = '(bare) read csv'
+read = 'laforge_test1_read_a.csv'
+
+[[task]]
+description = '(bare) read SQL'
+read = 'laforge_test2_read'
+
+[[task]]
+description = '(bare) execute SQL query'
+execute = 'select * from {schema}.laforge_test3_read;'
+
+[[task]]
+description = '(bare) execute SQL file'
+execute = 'laforge_test4.sql'
+
+[[task]]
+description = '(bare) execute Python script'
+execute = 'laforge_test5.py'
+
+[[task]]
+description = '(bare) execute Python script with no main'
+execute = 'laforge_test6_simple.py'
+
+# CSV out
+
+[[task]]
+description = '(minimal -> csv) read CSV, write CSV'
+read = 'laforge_test7_read_a.csv'
+write = 'laforge_test7_write.csv'
+
+[[task]]
+description = '(minimal -> csv) read table, write CSV'
+read = 'laforge_test8_read'
+write = 'laforge_test8_write.csv'
+
+[[task]]
+description = '(minimal -> csv) execute query, write CSV'
+execute = 'select * from {schema}.laforge_test9_read;'
+write = 'laforge_test9_write.csv'
+
+[[task]]
+description = '(minimal -> csv) execute SQL script, write CSV'
+execute = 'laforge_test10.sql'
+write = 'laforge_test10_write.csv'
+
+[[task]]
+description = '(minimal -> csv) execute Python script, write CSV'
+execute = 'laforge_test11.py'
+write = 'laforge_test11_write.csv'
+
+# SQL out
+
+[[task]]
+description = '(minimal -> sql) read CSV, write SQL'
+read = 'laforge_test12_read_a.csv'
+write = 'laforge_test12_write'
+
+[[task]]
+description = '(minimal -> sql) read table, write SQL'
+read = 'laforge_test13_read'
+write = 'laforge_test13_write'
+
+[[task]]
+description = '(minimal -> sql) execute query, write SQL'
+execute = 'select * from {schema}.laforge_test14_read;'
+write = 'laforge_test14_write'
+
+[[task]]
+description = '(minimal -> sql) execute SQL script, write SQL'
+execute = 'laforge_test15.sql'
+write = 'laforge_test15_write'
+
+[[task]]
+description = '(minimal -> sql) execute Python script, write SQL'
+execute = 'laforge_test16.py'
+write = 'laforge_test16_write'

@@ -1,0 +1,23 @@
+[[task]]
+description = '(bare) read csv'
+read = 'laforge_test1.csv'
+
+[[task]]
+description = '(bare) execute Python script'
+execute = 'laforge_test2.py'
+
+[[task]]
+description = '(bare) execute Python script with no main'
+execute = 'laforge_test3.py'
+
+# CSV out
+
+[[task]]
+description = '(minimal -> csv) read CSV, write CSV'
+read = 'laforge_test4.csv'
+write = 'laforge_test4_write.csv'
+
+[[task]]
+description = '(minimal -> csv) execute Python script, write CSV'
+execute = 'laforge_test5.py'
+write = 'laforge_test5_write.csv'

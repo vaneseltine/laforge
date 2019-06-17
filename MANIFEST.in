@@ -1,6 +1,5 @@
 include *.rst *.md LICENSE
 graft test
-graft bergholt/quarters
+graft laforge/quarters
 global-exclude *.py[co]
 exclude test/secrets_config.py
-
