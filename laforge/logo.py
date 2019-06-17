@@ -15,6 +15,8 @@ LOGO = """\
 
 RESET = "\033[0m"
 
+COLOR_THINGS = not sys.platform.startswith("win")
+
 Color = namedtuple("Color", "red green blue")
 
 
@@ -29,6 +31,8 @@ def truecolor(red: int, green: int, blue: int, background: bool) -> str:
 
 def colorize(s: str, fg: Optional[Color] = None, bg: Optional[Color] = None) -> str:
     """ Add foreground and/or background color to a string. """
+    if not COLOR_THINGS:
+        return s
     forestring = truecolor(*fg, background=False) if fg else ""
     backstring = truecolor(*bg, background=True) if bg else ""
     return f"{RESET}{forestring}{backstring}{s}{RESET}"
