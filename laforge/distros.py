@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 logger.debug(__name__)
 
 
-class SQLDistroNotFoundError(Exception):
+class SQLDistroNotFound(Exception):
     pass
 
 
@@ -180,7 +180,7 @@ class Distro:
             f"Given input `{given_name}`, "
             + f"could not match distribution to known: {known_distros}"
         )
-        raise SQLDistroNotFoundError(err_msg)
+        raise SQLDistroNotFound(err_msg)
 
     def find(
         self, channel: Channel, object_pattern: str = "%", schema_pattern: str = "%"

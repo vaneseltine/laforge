@@ -8,7 +8,7 @@ see: py.test --fixtures
 import pytest
 from hypothesis import given, strategies, settings
 
-from laforge.sql import Channel, SQLTableNotFoundError, Table, SQLIdentifierProblem
+from laforge.sql import Channel, SQLTableNotFound, Table, SQLIdentifierProblem
 
 
 CANONICAL_DISTROS = ["mssql", "mysql", "postgresql", "sqlite"]
@@ -26,7 +26,7 @@ def test_drop_mechanics(make_temp_table, unimportant_df, distro):
     t = make_temp_table(distro)
     t.write(unimportant_df)
     t.drop(ignore_existence=True)
-    with pytest.raises(SQLTableNotFoundError):
+    with pytest.raises(SQLTableNotFound):
         t.drop(ignore_existence=False)
     t.write(unimportant_df)
     t.drop(ignore_existence=False)

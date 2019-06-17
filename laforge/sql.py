@@ -33,11 +33,11 @@ logger = logging.getLogger(__name__)
 logger.debug(__name__)
 
 
-class SQLTableNotFoundError(Exception):
+class SQLTableNotFound(Exception):
     pass
 
 
-class SQLChannelNotFoundError(Exception):
+class SQLChannelNotFound(Exception):
     pass
 
 
@@ -82,10 +82,10 @@ class Channel:
     @classmethod
     def grab(cls) -> "Channel":
         if not cls.known_channels:
-            raise SQLChannelNotFoundError("No known SQL channels exist.")
+            raise SQLChannelNotFound("No known SQL channels exist.")
         if len(cls.known_channels) == 1:
             return next(iter(cls.known_channels.values()))
-        raise SQLChannelNotFoundError("Cannot select from more than one SQL channel.")
+        raise SQLChannelNotFound("Cannot select from more than one SQL channel.")
 
     def _construct_engine(self, **engine_kwargs: str) -> sa.engine.Engine:
         existing_engine = self.retrieve_engine()
@@ -410,7 +410,7 @@ class Table:
 
     def resolve(self, strict: bool = False) -> str:
         if strict and not self.exists():
-            raise SQLTableNotFoundError("{} does not exist.".format(self))
+            raise SQLTableNotFound("{} does not exist.".format(self))
         return self.distro.resolver.format(**self.identifiers)
 
     def write(self, df: pd.DataFrame, if_exists: str = "replace") -> None:
@@ -443,7 +443,7 @@ class Table:
         if self.exists():
             self.metal.drop()
         elif not ignore_existence:
-            raise SQLTableNotFoundError(self)
+            raise SQLTableNotFound(self)
         assert not self.exists()
         logger.debug("%s dropped.", self)
 
