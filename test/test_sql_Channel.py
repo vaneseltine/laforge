@@ -1,28 +1,28 @@
 import pytest
 
 
-from laforge.sql import Channel, Table, Script, SQLChannelNotFoundError, execute
+from laforge.sql import Channel, Table, Script, SQLChannelNotFound, execute
 
 
 @pytest.mark.sqlite
 def test_hail_mary_execute(tmpdir):
-    with pytest.raises(SQLChannelNotFoundError):
+    with pytest.raises(SQLChannelNotFound):
         _ = Channel.grab()
     c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
     _ = Channel.grab()
     c2 = Channel(distro="sqlite", database=tmpdir / "c2.db")
-    with pytest.raises(SQLChannelNotFoundError):
+    with pytest.raises(SQLChannelNotFound):
         _ = Channel.grab()
 
 
 @pytest.mark.sqlite
 def test_grab_channel(tmpdir):
-    with pytest.raises(SQLChannelNotFoundError):
+    with pytest.raises(SQLChannelNotFound):
         _ = execute("select 1 from sqlite_master;", fetch="tuples")
     c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
     _ = execute("select 1 from sqlite_master;", fetch="tuples")
     c2 = Channel(distro="sqlite", database=tmpdir / "c2.db")
-    with pytest.raises(SQLChannelNotFoundError):
+    with pytest.raises(SQLChannelNotFound):
         _ = execute("select 1 from sqlite_master;", fetch="tuples")
 
 

@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import sqlalchemy as sa
 
-from laforge.distros import Distro, SQLDistroNotFoundError
+from laforge.distros import Distro, SQLDistroNotFound
 
 CANONICAL_NAMES = ["mssql", "mysql", "postgresql", "sqlite"]
 
@@ -44,7 +44,7 @@ def test_get_exactly_one_distro_variants(canonical, incoming):
 
 @pytest.mark.parametrize("badname", ["", 293, "asdf"])
 def test_fail_bad_distros(badname):
-    with pytest.raises(SQLDistroNotFoundError):
+    with pytest.raises(SQLDistroNotFound):
         Distro.get(badname)
 
 
@@ -52,7 +52,7 @@ def test_fail_bad_distros(badname):
     "vaguename", ["sql", "m sql", "MSQL", "MYSQL SERVER", "SQLITE SERVER"]
 )
 def test_fail_vague_distros(vaguename):
-    with pytest.raises(SQLDistroNotFoundError):
+    with pytest.raises(SQLDistroNotFound):
         Distro.get(vaguename)
 
 
