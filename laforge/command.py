@@ -14,13 +14,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
 @click.version_option(version=LF_VERSION, message=logo.get_clickable())
-@click.option(
-    "--log",
-    default="laforge.log",
-    type=click.Path(resolve_path=True, dir_okay=False),
-    help="Path for log file.",
-)
-def run_cli(log: Path) -> None:
+def run_cli() -> None:
     pass
 
 
@@ -29,29 +23,35 @@ def run_cli(log: Path) -> None:
     "ini", type=click.Path(exists=True, resolve_path=True, dir_okay=True), default="."
 )
 @click.option("--debug", default=False, is_flag=True)
-def build(ini: str, debug: bool) -> None:
+@click.option(
+    "--log",
+    default="laforge.log",
+    type=click.Path(resolve_path=True, dir_okay=False),
+    help="Log build process at LOG.",
+)
+def build(ini: str, debug: bool, log: str) -> None:
     click.echo(f"Building {ini}")
     from .builder import run_build
 
-    run_build(ini, debug)
+    run_build(Path(ini), debug, Path(log))
 
 
 @click.command(help="Interactively create a new laforge build INI.")
 @click.argument(
-    "ini",
-    type=click.Path(writable=True, resolve_path=True, dir_okay=True),
-    default="./build.ini",
+    "path",
+    type=click.Path(writable=True, resolve_path=True, dir_okay=False),
+    default=Path("./build.ini")
+    # help="Write build INI to PATH.",
 )
-@click.option("--debug", default=False, is_flag=True)
-def create(ini: str, debug: bool) -> None:
-    click.echo(f"Creating {ini}")
+def create(path: str) -> None:
+    click.echo(f"Creating {path}")
     from .create_ini import create_ini
 
-    create_ini(ini, debug)
+    create_ini(Path(path))
 
 
 @click.command(hidden=True, help="Receive a quick engineering consultation.")
-@click.option("-n", type=int, default=1, help="Number of responses.")
+@click.option("-n", "--num", type=int, default=1, help="receive NUM consultations")
 def consult(n: int) -> None:
     from .quarters import tech
 

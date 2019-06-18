@@ -33,9 +33,7 @@ logger.debug(__name__)
 
 
 def run_build(
-    script_path: Union[str, Path],
-    debug: bool = False,
-    log_file: Optional[Path] = Path("./laforge.log"),
+    script_path: Path, debug: bool = False, log_file: Path = Path("./laforge.log")
 ) -> None:
     """laforge's core build command"""
     path = Path(script_path)
@@ -43,7 +41,7 @@ def run_build(
         path = find_build_config_in_directory(path)
 
     start_time = time.time()
-    global logger
+    global logger  # pylint: disable=global-statement
     logger = get_package_logger(log_file, debug)
 
     # THEN set logging -- helps avoid importing pandas at debug level
@@ -108,7 +106,10 @@ def get_package_logger(log_file: Path, debug: bool) -> logging.Logger:
     logging.basicConfig(level=logging.INFO, handlers=handlers)
 
     logging.getLogger().setLevel(noisiness)
-    return logging.getLogger(__name__)
+
+    new_logger = logging.getLogger(__name__)
+    new_logger.debug(f"Logging: {log_file}")
+    return new_logger
 
 
 class Verb(Enum):
@@ -557,9 +558,8 @@ class ShellExecutor(BaseTask):
 
 def run_cmd(
     full_command: Sequence[str], cwd: Union[None, Path, str] = None, shell: bool = False
-) -> None:
-    logger.debug("Running %s from %s", full_command, cwd)
-    _ = subprocess.run(full_command, cwd=cwd, shell=shell, check=True)
+) -> subprocess.CompletedProcess:
+    return subprocess.run(full_command, cwd=cwd, shell=shell, check=True)
 
 
 @Task.register(Verb.EXECUTE, Target.DO)

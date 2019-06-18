@@ -7,13 +7,14 @@ from typing import Optional
 
 import click
 
-LOGO = """\
+LOGO = r"""
       __      ___      _______ _______ _____   _______ _______
      / /     /__ |    /______//______//____ \ /______//______/
     / /     __ | |   _______ __   __ _____/ /__ ____ _______
    / /     / / | |  / _____// /  / // _  __// //_  // _____/
   / /____ / /__| | / /     / /__/ // / \ \ / /__/ // /_____
- /______//_______|/_/     /______//_/  /_//______//_______/ """  # noqa
+ /______//_______|/_/     /______//_/  /_//______//_______/ """
+LOGO = LOGO[1:]
 
 RESET = "\033[0m"
 
@@ -31,30 +32,30 @@ def truecolor(red: int, green: int, blue: int, background: bool) -> str:
     return f"\033[{48 if background else 38};2;{red};{green};{blue}m"
 
 
-def colorize(s: str, fg: Optional[Color] = None, bg: Optional[Color] = None) -> str:
+def colorize(s: str, fore: Optional[Color] = None, back: Optional[Color] = None) -> str:
     """ Add foreground and/or background color to a string. """
     if not COLOR_THINGS:
         return s
-    forestring = truecolor(*fg, background=False) if fg else ""
-    backstring = truecolor(*bg, background=True) if bg else ""
+    forestring = truecolor(*fore, background=False) if fore else ""
+    backstring = truecolor(*back, background=True) if back else ""
     return f"{RESET}{forestring}{backstring}{s}{RESET}"
 
 
 def print_fancy() -> None:
-    click.echo(colorize(LOGO, fg=Color(red=102, green=204, blue=255)))
+    click.echo(colorize(LOGO, fore=Color(red=102, green=204, blue=255)))
 
 
 def get_clickable() -> str:
     from . import __version__
 
-    logo = colorize(LOGO + " %(version)s\n", fg=Color(102, 204, 255))
+    logo = colorize(LOGO + " %(version)s\n", fore=Color(102, 204, 255))
     lfline = colorize(
         f"laforge {__version__} at {Path(__file__).parent.absolute()}",
-        fg=Color(127, 127, 127),
+        fore=Color(127, 127, 127),
     )
     pyline = colorize(
         f"Python {sys.version.split(' ')[0]} at {sys.executable}",
-        fg=Color(127, 127, 127),
+        fore=Color(127, 127, 127),
     )
 
     return "\n".join((logo, lfline, pyline))

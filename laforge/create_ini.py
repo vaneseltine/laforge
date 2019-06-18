@@ -3,18 +3,18 @@
 import os
 from datetime import datetime as dt
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Dict, Mapping
 
 import click
 import PyInquirer as inq
 
 
-def create_ini(path: str, debug: bool) -> None:
+def create_ini(path: Path) -> None:
     # path = Path(path)
 
-    path = receive_path()
+    path = receive_path(default=path)
     responses = receive_input(path.parent)
-    output = create_output(responses)
+    output = create_output(path, responses)
     path.write_text(output)
     click.echo(f"\nNew laforge INI written at: {path}\nEnjoy!")
     exit(0)
@@ -31,14 +31,14 @@ INQ_STYLE = inq.style_from_dict(
 )
 
 
-def receive_path():
+def receive_path(default: Path) -> Path:
 
     ini_questions = [
         {
             "type": "input",
             "name": "ini",
             "message": "Creating a new laforge INI at:",
-            "default": f".{os.sep}build.ini",
+            "default": default,
         },
         {
             "type": "confirm",
@@ -54,18 +54,20 @@ def receive_path():
         ini_answers = inq.prompt(ini_questions, style=INQ_STYLE)
         confirmed = ini_answers.get("confirmed", True)
         if confirmed:
-            build_path = Path(ini_answers["ini"]).resolve()
+            build_path = ini_answers["ini"]
     click.echo(f"\nCreating {build_path}\n")
-    return build_path
+    return Path(build_path).resolve()
 
 
-def receive_input(build_dir):
-    DISTROS = {
-        "Microsoft SQL Server": "mssql",
-        "MySQL/MariaDB": "mysql",
-        "PostgreSQL": "postgresql",
-        "SQLite": "sqlite",
-    }
+DISTROS = {
+    "Microsoft SQL Server": "mssql",
+    "MySQL/MariaDB": "mysql",
+    "PostgreSQL": "postgresql",
+    "SQLite": "sqlite",
+}
+
+
+def receive_input(build_dir: Path) -> Dict[str, Any]:
 
     questions = [
         {
@@ -113,15 +115,21 @@ def receive_input(build_dir):
         },
     ]
 
-    return inq.prompt(questions, style=INQ_STYLE)
+    return inq.prompt(questions, style=INQ_STYLE)  # type: ignore
 
 
-def create_output(answers: Mapping) -> str:
-    INTRO = ["# laforge configuration generated {}".format(dt.now()), "[DEFAULT]"]
-    OUTTRO = ["\n[hello_world]", "SHELL: echo 'Hello, world!'", ""]
-    output = INTRO
+def create_output(path: Path, answers: Mapping[str, Any]) -> str:
+    intro = [
+        f"# laforge configuration generated at",
+        f"# {path}",
+        f"# {dt.now().strftime(r'%Y-%m-%d %H:%M:%S')}",
+        "",
+        "[DEFAULT]",
+    ]
+    outtro = ["\n[hello_world]", "SHELL: echo 'Hello, world!'", ""]
+    output = intro
     for option, answer in answers.items():
         comment = "# " if not answer else ""
         output.append(f"{comment}{option}: {answer}")
-    output.extend(OUTTRO)
+    output.extend(outtro)
     return "\n".join(output)
