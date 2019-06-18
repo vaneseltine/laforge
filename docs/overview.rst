@@ -5,14 +5,16 @@ Overview
 
 *laforge* is a low-key build system designed to interoperate
 Python, SQL, and Stata data work, originally developed internally
-for `IRIS, the Institute for Research on Innovation and Science <https://iris.isr.umich.edu>`_
-at the `University of Michigan's Institute for Social Research <https://isr.umich.edu>`_.
+for `IRIS, the Institute for Research on Innovation and Science
+<https://iris.isr.umich.edu>`_
+at the `University of Michigan's Institute for Social Research
+<https://isr.umich.edu>`_.
 
 Features:
 
 * Interoperable: Read, write, and execute Python, SQL, and Stata scripts/data.
 * Straightforward: Simple build config files designed for a one-click build.
-* No lock-in: Scripts remain independent from *laforge*.
+* No lock-in: Easy to keep scripts remain independent from *laforge*.
 
 .. todo::
 
@@ -51,34 +53,48 @@ Each specifies one of the following supported operations:
     Optional human description for logging output.
 
 **read**
-    Runs a Python script by importing it directly. Nothing within the Python file is altered or adjusted, and no parameters are passed.
+    Runs a Python script by importing it directly.
+    Nothing within the Python file is altered or adjusted,
+    and no parameters are passed.
 
-    .. note:: The import process makes the script more accessible for the build process, but it might be helpful to be able to adjust the script depending on whether it is being directly run or imported. (E.g., import paths may need to be tweaked.) Here is one way to determine its status:
+    .. note::
 
-        .. code-block:: Python
+        The import process makes the script more accessible for the build
+        process, but it might be helpful to be able to adjust the script
+        depending on whether it is being directly run or imported.
+        (E.g., import paths may need to be tweaked.)
+        Here is one way to determine its status:
 
-            try:
-                assert __file__
-                RUNNING_STANDALONE = True
-            except NameError:
-                RUNNING_STANDALONE = False
+            .. code-block:: Python
+
+                try:
+                    assert __file__
+                    RUNNING_STANDALONE = True
+                except NameError:
+                    RUNNING_STANDALONE = False
 
 
 **execute**
     Execute any number of queries written as a saved ``.sql`` script.
-    No changes are made to the SQL queries in the file, and no parameters are passed.
+    No changes are made to the SQL queries in the file,
+    and no parameters are passed.
 
-    .. note:: In Microsoft SQL Server, the word **go** on a line by itself is parsed as
-        the batch separator.
+    .. note::
+
+        Following Microsoft SQL Server, the word **go** is used
+        as a batch separator across all distributions.
+
 
 **write**
-    balh blah (relative to SCRIPT_DIR) that yields data from its final query (i.e, a SELECT)
+    balh blah (relative to SCRIPT_DIR) that yields data from its final query
+    (i.e, a SELECT)
 
 
 Build configuration
 ================================
 
-The config section of the TOML establishes core directories and references for SQL connectivity.
+The config section of the TOML establishes core directories
+and references for SQL connectivity.
 
 **config.dir**
     Paths can be absolute or relative to the build configuration TOML.
