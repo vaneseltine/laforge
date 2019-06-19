@@ -5,8 +5,6 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Optional
 
-import click
-
 LOGO = r"""
       __      ___      _______ _______ _____   _______ _______
      / /     /__ |    /______//______//____ \ /______//______/

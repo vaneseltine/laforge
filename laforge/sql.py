@@ -462,7 +462,7 @@ class Table:
 
     def __len__(self) -> int:
         count_query = sa.select([sa.func.count()]).select_from(self.metal)
-        return Scalar(self.metadata.bind.execute(count_query)).to_int()
+        return int(Scalar(self.metadata.bind.execute(count_query)))
 
     def __str__(self) -> str:
         return self.resolve(strict=False)
@@ -484,10 +484,10 @@ class Scalar:
         self.item = prox.first()[0]
         prox.close()
 
-    def to_int(self) -> int:
+    def __int__(self) -> int:
         return int(self.item)
 
-    def to_str(self) -> str:
+    def __str__(self) -> str:
         return str(self.item)
 
 
