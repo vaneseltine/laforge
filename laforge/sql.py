@@ -122,6 +122,7 @@ class Channel:
             De-messify
 
         """
+        statement = self.clean_up_statement(statement)
         assert fetch in ("df", "tuples", False)
         if fetch == "df":
             try:
@@ -143,6 +144,14 @@ class Channel:
                 finally:
                     transxn.commit()
         return final_result
+
+    @staticmethod
+    def clean_up_statement(s):
+        s = s.strip()
+        for quote_char in ('"', "'"):
+            while s.startswith(quote_char) and s.endswith(quote_char):
+                s = s.strip(quote_char)
+        return s
 
     def find(
         self, object_pattern: str = "%", schema_pattern: str = "%"

@@ -582,15 +582,10 @@ class StataExecutor(BaseTask):
 class SQLQueryReader(BaseTask):
     def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         logger.debug("Reading from %s", self.short_content)
-        # TODO -- factor out query handling with EXIST
-        query = self.content.strip()
-        for quote_char in ('"', "'"):
-            while query.startswith(quote_char) and query.endswith(quote_char):
-                query = query.strip(quote_char)
         fetch: Union[str, bool] = "df"
         if self.verb is Verb.EXECUTE:
             fetch = False
-        df = execute(query, channel=Channel(**self.config["sql"]), fetch=fetch)
+        df = execute(self.content, channel=Channel(**self.config["sql"]), fetch=fetch)
         logger.info("Read in from %s", self.short_content)
         return df
 
@@ -664,7 +659,6 @@ class FileWriter(BaseTask):
 @Task.register(Verb.EXIST)
 class ExistenceChecker(BaseTask):
     def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
-        # TODO generally assert that content exists to avoid accidental blanks
         # Ensure that some content exists in these lines
         lines = [s for s in self.content.splitlines() if s.strip()]
         assert lines, "Accidental blank line?"
@@ -690,11 +684,7 @@ class ExistenceChecker(BaseTask):
         assert table.exists()
 
     def _check_existence_sql_raw_query(self, line: str) -> None:
-        query = line.strip()
-        for quote_char in ('"', "'"):
-            while query.startswith(quote_char) and query.endswith(quote_char):
-                query = query.strip(quote_char)
         df: pd.DataFrame = execute(
-            query, channel=Channel(**self.config["sql"]), fetch="df"
+            line, channel=Channel(**self.config["sql"]), fetch="df"
         )
         assert not df.empty

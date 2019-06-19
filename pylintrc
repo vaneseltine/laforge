@@ -170,16 +170,8 @@ include-naming-hint=yes
 docstring-min-length=-1
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names=i,
-           j,
-           k,
-           n,
-           x,
-           y,
-           _,
-           df,
-           s,
-           logger
+good-names = df, i, n, s, logger
+
 
 
 # Regular expression which should only match function or class names that do

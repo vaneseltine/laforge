@@ -2,7 +2,7 @@ import nox
 
 # skip_missing_interpreters=True
 
-nox.options.reuse_existing_virtualenvs = True
+nox.options.reuse_existing_virtualenvs = False
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 
@@ -33,8 +33,8 @@ def pytest(session):
 def cli(session):
     session.install("-e", ".")
     session.chdir("/")
-    session.run("python", "-m", "laforge", "--version")
-    session.run("laforge", "--version")
+    session.run("python", "-m", "laforge", "--version", silent=True)
+    session.run("laforge", "--version", silent=True)
 
 
 @nox.session(python="python3.7")
