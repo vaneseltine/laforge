@@ -73,17 +73,7 @@ from laforge.toolbox import is_reserved_word
 
 @pytest.mark.parametrize(
     "kw",
-    [
-        "else",
-        "table",
-        "row",
-        "privileges",
-        "view",
-        "string",
-        "time",
-        "numeric",
-        "close",
-    ],
+    ["else", "table", "row", "privileges", "view", "string", "time", "numeric", "close"],
 )
 def test_reserved_words(kw):
     assert is_reserved_word(kw)

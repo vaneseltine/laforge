@@ -121,10 +121,7 @@ POS_NAME_SCHEMA = [
     ("breakfast.[spam]"),
     ("[breakfast].[spam]"),
 ]
-POS_NAME_SCHEMA_DATABASE = [
-    ("camelot.breakfast.spam"),
-    ("[camelot].[breakfast].[spam]"),
-]
+POS_NAME_SCHEMA_DATABASE = [("camelot.breakfast.spam"), ("[camelot].[breakfast].[spam]")]
 POS_ALL = [("MPFC.camelot.breakfast.spam"), ("[MPFC].[camelot].[breakfast].[spam]")]
 
 POSITIONAL_CONFIGS = POS_NAME + POS_NAME_SCHEMA + POS_NAME_SCHEMA_DATABASE + POS_ALL

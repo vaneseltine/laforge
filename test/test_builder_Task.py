@@ -16,9 +16,7 @@ def test_shell():
 
 def test_fail_verb():
     with pytest.raises(ValueError):
-        _ = Task.from_strings(
-            raw_verb="meow", raw_content=None, config={"section": "--"}
-        )
+        _ = Task.from_strings(raw_verb="meow", raw_content=None, config={"section": "--"})
 
 
 def test_fail_parse():
