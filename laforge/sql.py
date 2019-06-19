@@ -146,7 +146,7 @@ class Channel:
         return final_result
 
     @staticmethod
-    def clean_up_statement(s):
+    def clean_up_statement(s: str) -> str:
         s = s.strip()
         for quote_char in ('"', "'"):
             while s.startswith(quote_char) and s.endswith(quote_char):

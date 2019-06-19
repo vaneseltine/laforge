@@ -41,10 +41,6 @@ def colorize(s: str, fore: Optional[Color] = None, back: Optional[Color] = None)
     return f"{RESET}{forestring}{backstring}{s}{RESET}"
 
 
-def print_fancy() -> None:
-    click.echo(colorize(LOGO, fore=Color(red=102, green=204, blue=255)))
-
-
 def get_clickable() -> str:
     from . import __version__
 
@@ -59,7 +55,3 @@ def get_clickable() -> str:
     )
 
     return "\n".join((logo, lfline, pyline))
-
-
-if __name__ == "__main__":
-    print_fancy()
