@@ -38,7 +38,7 @@ def receive_path(default: Path) -> Path:
             "type": "input",
             "name": "ini",
             "message": "Creating a new laforge INI at:",
-            "default": default,
+            "default": str(default),
         },
         {
             "type": "confirm",

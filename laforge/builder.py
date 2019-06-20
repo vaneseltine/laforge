@@ -33,7 +33,7 @@ logger.debug(__name__)
 
 
 def run_build(
-    script_path: Path, debug: bool = False, log_file: Path = Path("./laforge.log")
+    script_path: Path, *, log: Path, debug: bool = False, dry_run: bool = False
 ) -> None:
     """laforge's core build command"""
     path = Path(script_path)
@@ -42,7 +42,7 @@ def run_build(
 
     start_time = time.time()
     global logger  # pylint: disable=global-statement
-    logger = get_package_logger(log_file, debug)
+    logger = get_package_logger(log, debug)
 
     # THEN set logging -- helps avoid importing pandas at debug level
 
@@ -52,10 +52,12 @@ def run_build(
     logger.debug("Debug mode is on.")
 
     task_list = TaskList(path)
-    task_list.execute()
-
-    elapsed = seconds_since(start_time)
-    logger.info("%s completed in %s seconds.", path, elapsed)
+    if dry_run:
+        task_list.dry_run()
+    else:
+        task_list.execute()
+        elapsed = seconds_since(start_time)
+        logger.info("%s completed in %s seconds.", path, elapsed)
 
 
 def find_build_config_in_directory(path: Path) -> Path:
@@ -145,8 +147,8 @@ class Target(Enum):
     SQL = ".sql"
     XLS = ".xls"
     XLSX = ".xlsx"
-    RAWQUERY = 1
-    SQLTABLE = 2
+    RAWQUERY = "SQL query"
+    SQLTABLE = "SQL table"
     # NONE = None
     ANY = "(all)"
 
@@ -324,6 +326,13 @@ class TaskList:
             self.prior_results = task.implement(self.prior_results)
             logger.debug("%s complete", log_prefix)
 
+    def dry_run(self) -> None:
+        """List each task in the list. """
+        n_tasks = len(self)
+        spacer = len(str(n_tasks))
+        for i, task in enumerate(self.tasks):
+            logger.info(f"{(i + 1):>{spacer}}/{n_tasks}: {str(task)}")
+
     def __len__(self) -> int:
         return len(self.tasks)
 
@@ -491,6 +500,10 @@ class BaseTask:
             return self.content
         return textwrap.shorten(repr(self.content), 80)
 
+    def __str__(self) -> str:
+        # return repr(self) + "hi"
+        return f"{self.identifier:<30} {self.target.name:<10} {self.content}"
+
     def __repr__(self) -> str:
         return "<{}({}, {}, '{}')>".format(
             self.__class__.__name__, self.verb, self.target, self.short_content
@@ -515,7 +528,6 @@ class FileReader(BaseTask):
     def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         logger.debug("Reading %s", self.path)
         method, kwargs = self.filetypes[self.target]
-
         df = getattr(pd, method)(self.path, **kwargs)
         logger.info("Read %s", self.path)
         return df
@@ -630,7 +642,8 @@ class FileWriter(BaseTask):
         Target.CSV: FileCall(method="to_csv", kwargs={"index": False}),
         Target.DTA: FileCall(method="to_stata", kwargs={"write_index": False}),
         Target.HTML: FileCall(
-            method="to_html", kwargs={"show_dimensions": True, "justify": "left"}
+            method="to_html",
+            kwargs={"show_dimensions": True, "justify": "left", "index": False},
         ),
         Target.XLSX: FileCall(method="to_excel", kwargs={"index": False}),
     }

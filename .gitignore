@@ -37,7 +37,8 @@ Desktop.ini
 pip-log.txt
 wily-*
 
-# Big stupid globs
+# Big lumps we should not need
+*.html
 *.pdf
 *.xls
 *.xlsx

@@ -23,17 +23,21 @@ def run_cli() -> None:
     "ini", type=click.Path(exists=True, resolve_path=True, dir_okay=True), default="."
 )
 @click.option("--debug", default=False, is_flag=True)
+@click.option("--dry-run", "-n", default=False, is_flag=True)
 @click.option(
     "--log",
     default="laforge.log",
     type=click.Path(resolve_path=True, dir_okay=False),
     help="Log build process at LOG.",
 )
-def build(ini: str, debug: bool, log: str) -> None:
+def build(
+    ini: str, log: str = "./laforge.log", debug: bool = False, dry_run: bool = False
+) -> None:
+    print(repr(ini))
     click.echo(f"Building {ini}")
     from .builder import run_build
 
-    run_build(Path(ini), debug, Path(log))
+    run_build(script_path=Path(ini), log=Path(log), debug=debug, dry_run=dry_run)
 
 
 @click.command(help="Interactively create a new laforge build INI.")
