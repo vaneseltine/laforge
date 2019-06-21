@@ -1,8 +1,14 @@
 image: archlinux
 packages:
   - python
+  - python-pip
+  - python-setuptools
 tasks:
-  - testutf8: |
+  - pandas: |
       python -m pip install --user pandas
+  - sys: |
       python -c "import sys; print(sys.stdout.encoding)"
+  - pandas: |
       python -c "import pandas; print(pandas.get_option('display.encoding'))"
+  - pandas_html: |
+      python -c "import pandas as pd; df = pd.DataFrame([2, 3, 4]); df.to_html('hi.html')"
