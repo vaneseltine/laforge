@@ -1,0 +1,8 @@
+image: archlinux
+packages:
+  - python
+tasks:
+  - testutf8: |
+      python -m pip install --user pandas
+      python -c "import sys; print(sys.stdout.encoding)"
+      python -c "import pandas; print(pandas.get_option('display.encoding'))"

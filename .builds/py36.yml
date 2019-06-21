@@ -17,6 +17,7 @@ tasks:
       python3 -m pip install --user -q -r dev-requirements.txt
       python3 -m pip install --user -q -e .
       python3 -c "import sys; print(sys.stdout.encoding)"
+      python3 -c "import pandas; print(pandas.get_option('display.encoding'))"
       python3 -m pytest -x
   - black: |
       cd laforge
