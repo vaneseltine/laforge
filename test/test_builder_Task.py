@@ -69,6 +69,6 @@ def test_write_creates_specified_file(
     try:
         writer.implement(prior_results)
     except UnicodeEncodeError:
-        pytest.skip(reason="Broken on sr.ht")
+        pytest.skip("Broken on sr.ht...")
     else:
         assert final_path.exists()
