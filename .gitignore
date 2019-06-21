@@ -1,8 +1,11 @@
-# Some substantial blankets here:
+# Some substantial exclusions here:
 __*/
 __test*
 .*/
 secret*
+
+# But keep sr.ht builds folder
+!.builds/
 
 # Standardish directories
 __pycache__/

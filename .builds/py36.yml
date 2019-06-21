@@ -1,0 +1,32 @@
+image: ubuntu/latest
+packages:
+  - python3
+  - python3-setuptools
+  - python3-pip
+  - python3-wheel
+  - python3-distutils
+  - python3-dev
+sources:
+  - https://git.sr.ht/~matvan/laforge
+tasks:
+  - setup_laforge: |
+      cd laforge
+      python3 -m pip -V
+      python3 -m pip install -e . --user -q
+      export LANG=C.UTF-8
+      export LC_ALL=C.UTF-8
+  - cli: |
+      python3 -m pip -V
+      python3 -m laforge --version
+  - flake8: |
+      python -m pip install --user flake8
+      python -m flake8 ./laforge
+  - pylint: |
+      python -m pip install --user pylint
+      python -m pylint ./laforge
+  - black: |
+      python -m pip install --user black
+      python -m black --diff ./laforge
+  - pytest: |
+      pip install --user -r dev-requirements.txt
+      python -m pytest
