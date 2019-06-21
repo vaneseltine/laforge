@@ -3,12 +3,33 @@ packages:
   - python
   - python-pip
   - python-setuptools
+  - python-numpy
 tasks:
-  - pip: |
-      python -m pip install --user pandas
-  - sys: |
+  - install: |
+      cd laforge
+      python -m pip -V
+      python -m pip install --user -q -r dev-requirements.txt
+      python -m pip install --user -q -e .
+  - pytest: |
+      cd laforge
+      export LANG=C.UTF-8
+      export LC_ALL=C.UTF-8
       python -c "import sys; print(sys.stdout.encoding)"
-  - pandas: |
       python -c "import pandas; print(pandas.get_option('display.encoding'))"
-  - pandas_html: |
-      python -c "import pandas as pd; df = pd.DataFrame([2, 3, 4]); df.to_html('hi.html')"
+      python -m pytest -x -rs
+  - black: |
+      cd laforge
+      python -m black --version
+      python -m black --diff ./laforge
+  - flake8: |
+      cd laforge
+      python -m flake8 --version
+      python -m flake8 ./laforge
+  - pylint: |
+      cd laforge
+      python -m pylint --version
+      python -m pylint --disable=R,C ./laforge
+  - cli: |
+      export LANG=C.UTF-8
+      export LC_ALL=C.UTF-8
+      python -m laforge --version
