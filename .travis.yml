@@ -16,6 +16,9 @@ python:
   - "3.8-dev"
   - "nightly"
   - "pypy3.6"
+  - "PyPy3.6-alpha"
+  - "pypy3.6-7.0.0"
+  - "PyPy3.6-7.0.0"
 install:
   - pip install -e .
   - pip install -r dev-requirements.txt
