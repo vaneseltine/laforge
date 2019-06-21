@@ -44,11 +44,5 @@ def flake8(session):
 @nox.session
 def pylint(session):
     session.install("pylint")
-    cmd = make_cmd(
-        "pylint ./laforge",
-        "-d missing-docstring",
-        "-d empty-docstring",
-        "-d fixme",
-        "-d import-error",
-    )
+    cmd = make_cmd("pylint ./laforge")
     session.run(*cmd)
