@@ -1,5 +1,7 @@
 image: ubuntu/latest
 environment:
+    LANG: C.UTF-8
+    LC_ALL: C.UTF-8
     PYTHONIOENCODING: UTF-8
 packages:
   - python3
@@ -10,16 +12,14 @@ sources:
   - https://git.sr.ht/~matvan/laforge
 tasks:
   - install: |
+      cat ~/.buildenv
       cd laforge
       python3 -m pip -V
       python3 -m pip install --user -q -r dev-requirements.txt
       python3 -m pip install --user -q -e .
   - pytest: |
       cd laforge
-      export LANG=C.UTF-8
-      export LC_ALL=C.UTF-8
-      python3 -c "import sys; print(sys.stdout.encoding)"
-      python3 -c "import pandas; print(pandas.get_option('display.encoding'))"
+      python3 -c "import sys; print(sys.stdout.encoding); import pandas; print(pandas.get_option('display.encoding'))"
       python3 -m pytest -x -rs
   - black: |
       cd laforge

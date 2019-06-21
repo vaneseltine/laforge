@@ -1,18 +1,23 @@
 image: archlinux
+environment:
+    PATH: "${PATH}:$HOME/.local/bin"
 packages:
   - python
   - python-pip
   - python-setuptools
   - python-numpy
+sources:
+  - https://git.sr.ht/~matvan/laforge
 tasks:
   - install: |
-      export PATH="${PATH}:$HOME/.local/bin"
+      cat ~/.buildenv
       cd laforge
       python -m pip -V
       python -m pip install --user -q -r dev-requirements.txt
       python -m pip install --user -q -e .
   - pytest: |
       cd laforge
+      python -m pytest --version
       python -m pytest -x -rs
   - black: |
       cd laforge
