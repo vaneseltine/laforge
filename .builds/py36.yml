@@ -1,4 +1,6 @@
 image: ubuntu/latest
+environment:
+    PYTHONIOENCODING: UTF-8
 packages:
   - python3
   - python3-setuptools
@@ -13,8 +15,9 @@ tasks:
       cd laforge
       python3 -m pip -V
       python3 -m pip install --user -q -r dev-requirements.txt
-      python3 -m pip install --user -q -e . 
-      python3 -m pytest
+      python3 -m pip install --user -q -e .
+      python3 -c "import sys; print(sys.stdout.encoding)"
+      python3 -m pytest -x
   - black: |
       cd laforge
       python3 -m black --version
