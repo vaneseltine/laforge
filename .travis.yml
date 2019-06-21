@@ -1,10 +1,17 @@
 dist: xenial   # required for Python >= 3.7
 language: python
+matrix:
+  fast_finish: true
+  allow_failures:
+    - python: "3.7-dev"
+    - python: "3.8-dev"
+    - python: "nightly"
 python:
   - "3.6"
   - "3.7"
-  # - "3.8-dev" -- pandas won't build
-  # - "nightly" -- pandas won't build
+  - "3.7-dev"
+  - "3.8-dev"
+  - "nightly"
 install:
   - pip install -e .
   - pip install -r dev-requirements.txt
