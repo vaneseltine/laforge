@@ -336,7 +336,10 @@ class Table:
         self.__server = self.channel.server
         self.__database = identifiers.get("database", self.channel.database)
         self.__schema = identifiers.get("schema", self.channel.schema)
-        self.__name = identifiers["name"]
+        try:
+            self.__name = identifiers["name"]
+        except KeyError:
+            raise SQLIdentifierProblem("Must provide table name.")
         self.__metal = None
 
     @property

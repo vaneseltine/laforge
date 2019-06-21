@@ -105,15 +105,6 @@ def test_iso_table_name_generation_mssql(make_channel, minimal_df, incoming):
         t.drop(ignore_existence=True)
 
 
-mssql_test_info = {
-    "distro": "mssql",
-    "server": "MPFC",
-    "database": "camelot",
-    "schema": "breakfast",
-}
-fake_channel = Channel(**mssql_test_info)
-
-
 POS_NAME = [("spam"), ("[spam]")]
 POS_NAME_SCHEMA = [
     ("breakfast.spam"),
@@ -121,12 +112,32 @@ POS_NAME_SCHEMA = [
     ("breakfast.[spam]"),
     ("[breakfast].[spam]"),
 ]
-POS_NAME_SCHEMA_DATABASE = [("camelot.breakfast.spam"), ("[camelot].[breakfast].[spam]")]
+POS_NAME_SCHEMA_DATABASE = [
+    ("camelot.breakfast.spam"),
+    ("[camelot].[breakfast].[spam]"),
+]
 POS_ALL = [("MPFC.camelot.breakfast.spam"), ("[MPFC].[camelot].[breakfast].[spam]")]
 
 POSITIONAL_CONFIGS = POS_NAME + POS_NAME_SCHEMA + POS_NAME_SCHEMA_DATABASE + POS_ALL
 
 KEYWORD_CONFIGS = [({"schema": "breakfast", "database": "camelot", "server": "MPFC"},)]
+
+
+def fake_channel():
+    pass
+
+
+def fake_distro():
+    pass
+
+
+fake_channel.metadata = "moo"
+fake_channel.distro = fake_distro
+fake_channel.server = "MPFC"
+fake_channel.database = "camelot"
+fake_channel.schema = "breakfast"
+fake_distro.untouchable_identifiers = []
+fake_distro.minimal_keywords = []
 
 
 def test_insufficient_identifiers():
