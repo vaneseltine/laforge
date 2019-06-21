@@ -1,12 +1,18 @@
 import uuid
 import sys
 import pytest
-from test.secret_config import secrets as SECRETS
+
 from pathlib import Path
 from laforge.sql import Channel, Table
 from laforge.builder import Verb
 from tempfile import TemporaryDirectory
 import pandas as pd
+
+try:
+    from test.secret_config import secrets as SECRETS
+except:
+    SECRETS = {"sqlite": {"distro": "sqlite", "database": ":memory:"}}
+    SECRETS["sql"] = SECRETS["sqlite"]
 
 TEST_DIR = Path(__file__).parent / "test"
 TEST_SAMPLES = TEST_DIR / "samples"

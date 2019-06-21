@@ -1,6 +1,6 @@
 import pytest
 from laforge.sql import Channel, Table, Script, execute
-from test.secret_config import secrets
+from laforge.distros import Distro
 
 
 @pytest.mark.mssql
@@ -17,27 +17,20 @@ def test_do_not_add_foolish_semicolon(make_channel):
 
 
 STATEMENTS = {
-    "mssql": [
-        "select top 10 name, schema_id, type_desc from sys.tables;",
-        "select * from sys.tables;",
-    ],
-    "postgresql": ["select * from pg_class where oid >= 13015;"],
+    "mssql": "select top 10 name, schema_id, type_desc from sys.tables;",
+    "postgresql": "select * from pg_class where oid >= 13015;",
 }
 
 
-@pytest.mark.parametrize("stmt", STATEMENTS[secrets["sql"]["distro"]])
-def test_script_or_execute_to_df(secrets, stmt):
-    # Uses implicit channel
-    Channel(**secrets["sql"])
-    scripted = Script(stmt).read()
-    executed = execute(stmt, fetch="df")
-    assert scripted.equals(executed)
+def test_script_or_execute_to_df(secrets):
+    c = Channel(**secrets["sql"])
+    stmt = STATEMENTS.get(c.distro.name)
+    if not stmt:
+        pytest.skip()
+    scripted_r = Script(stmt).read()
+    executed_r = execute(stmt, fetch="df")
+    assert scripted_r.equals(executed_r)
 
-
-@pytest.mark.parametrize("stmt", STATEMENTS[secrets["sql"]["distro"]])
-def test_script_or_execute_to_simplified_tuples(secrets, stmt):
-    # Uses implicit channel
-    Channel(**secrets["sql"])
-    scripted = list(Script(stmt).read().itertuples(name=None, index=False))
-    executed = list(tuple(x) for x in execute(stmt, fetch="tuples"))
-    assert scripted == executed
+    scripted_t = list(Script(stmt).read().itertuples(name=None, index=False))
+    executed_t = list(tuple(x) for x in execute(stmt, fetch="tuples"))
+    assert scripted_t == executed_t

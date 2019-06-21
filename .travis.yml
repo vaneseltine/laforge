@@ -9,6 +9,8 @@ install:
   - pip install -e .
   - pip install -r dev-requirements.txt
 script:
+  - python -m pytest
   - python -m flake8 ./laforge
   - python -m pylint ./laforge
+  - python -m black --check --diff ./laforge
   - laforge --version
