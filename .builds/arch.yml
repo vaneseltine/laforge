@@ -4,7 +4,7 @@ packages:
   - python-pip
   - python-setuptools
 tasks:
-  - pandas: |
+  - pip: |
       python -m pip install --user pandas
   - sys: |
       python -c "import sys; print(sys.stdout.encoding)"
