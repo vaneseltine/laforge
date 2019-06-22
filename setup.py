@@ -9,7 +9,7 @@ extras_require = {
 }
 extras_require["all"] = set(x for y in extras_require.values() for x in y)
 
-long_description = Path("./README.rst").read_text()
+long_description = Path("./README.md").read_text()
 
 setup(
     name="laforge",
@@ -18,7 +18,7 @@ setup(
     author_email="matvan@umich.edu",
     description=laforge.__doc__,
     long_description=long_description,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
     url="https://git.sr.ht/~matvan/laforge",
     license="AGPL-3.0-or-later",
     packages=find_packages(),
