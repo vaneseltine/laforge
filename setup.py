@@ -1,29 +1,30 @@
 from pathlib import Path
 from setuptools import find_packages, setup
-import laforge
+from laforge.__version import __version__
 
 extras_require = {
     "postgresql": ["psycopg2>=2.8"],  # PostgreSQL
     "mysql": ["pymysql>=0.9"],  # MySQL or MariaDB
     "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server
+    "excel": ["xlrd"],  # Pandas backend for *.xls files
 }
-extras_require["all"] = set(x for y in extras_require.values() for x in y)
+extras_require["all"] = list(set(x for y in extras_require.values() for x in y))
 
 long_description = Path("./README.md").read_text()
 
 setup(
     name="laforge",
-    version=laforge.__version__,
+    version=__version__,
     author="Matt VanEseltine",
     author_email="matvan@umich.edu",
-    description=laforge.__doc__,
+    description="A low-key build system for working with data.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://git.sr.ht/~matvan/laforge",
     license="AGPL-3.0-or-later",
     packages=find_packages(),
     include_package_data=True,
-    # data_files=[("config", ["laforge/sql_reserved_words.toml"])],
+    data_files=[glob("laforge/**/*.txt")],
     entry_points={"console_scripts": ["laforge = laforge:run_laforge"]},
     zip_safe=False,
     install_requires=[
@@ -54,5 +55,8 @@ setup(
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Build Tools",
     ],
-    keywords="data build SQL database",
+    keywords=(
+        "build data database pipeline workflow "
+        "MariaDB MSSQL MySQL Pandas PostGreSQL SQL SQLAlchemy SQLite"
+    ),
 )
