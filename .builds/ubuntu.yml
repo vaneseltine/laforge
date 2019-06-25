@@ -1,20 +1,22 @@
 image: ubuntu/latest
-environment: 
+environment:
   LANG: C.UTF-8
   LC_ALL: C.UTF-8
   PYTHONIOENCODING: UTF-8
-packages: 
+packages:
   - python3
   - python3-pip
   - python3-setuptools
   - python3-numpy
-sources: 
+sources:
   - https://git.sr.ht/~matvan/laforge
-tasks: 
+tasks:
   - install: |
         cat ~/.buildenv
         cd laforge
+        python3 -m pip install --user --upgrade pip
         python3 -m pip -V
+        python3 -m pip install --user --upgrade setuptools
         python3 -m pip install --user -q -r dev-requirements.txt
         python3 -m pip install --user -q -e .
   - pytest: |

@@ -14,7 +14,9 @@ tasks:
   - install: |
         cat ~/.buildenv
         cd laforge
+        python -m pip install --user --upgrade pip
         python -m pip -V
+        python -m pip install --user --upgrade setuptools
         python -m pip install --user -q -r dev-requirements.txt
         python -m pip install --user -q -e .
   - pytest: |
