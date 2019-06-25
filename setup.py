@@ -27,7 +27,7 @@ setup(
     license="AGPL-3.0-or-later",
     packages=find_packages(),
     include_package_data=True,
-    data_files=[glob("laforge/**/*.txt")],
+    data_files=glob("laforge/**/*.txt"),
     entry_points={"console_scripts": ["laforge = laforge:run_laforge"]},
     zip_safe=False,
     install_requires=[
@@ -58,8 +58,8 @@ setup(
         "Topic :: Scientific/Engineering",
         "Topic :: Software Development :: Build Tools",
     ],
-    keywords=(
-        "build data database pipeline workflow "
-        "MariaDB MSSQL MySQL Pandas PostGreSQL SQL SQLAlchemy SQLite"
-    ),
+    # keywords=(
+    #     "build data database pipeline workflow "
+    #     "MariaDB MSSQL MySQL Pandas PostGreSQL SQL SQLAlchemy SQLite"
+    # ),
 )
