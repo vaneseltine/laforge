@@ -1,6 +1,5 @@
 ### laforge is a low-key build system for working with data.
 
----
 
 [![Development](https://img.shields.io/badge/development-active-44344f.svg)](https://git.sr.ht/~matvan/laforge)
 [![PyPI](https://img.shields.io/badge/pypi-alpha-564d80.svg)](https://pypi.python.org/pypi/laforge)
@@ -84,4 +83,4 @@ write: results_peek.html
 - Github: https://github.com/vaneseltine
 - Email: matvan@umich.edu
 
-## ‖-)
+#### ‖-)

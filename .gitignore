@@ -8,6 +8,7 @@ secret*
 
 # Standardish directories
 _build/
+build/
 develop-eggs/
 dist/
 eggs/
