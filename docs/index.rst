@@ -1,10 +1,9 @@
 .. _index:
 
-.. image:: _static/logo_header.png
-   :alt: laforge
+.. .. image:: _static/logo_header.png
+..    :alt: laforge
 
-
-A low-key build system for data work.
+*laforge: a low-key build system for data work.*
 
 Contents
 ---------------------
