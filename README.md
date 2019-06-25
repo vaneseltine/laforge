@@ -79,9 +79,24 @@ write: 99_problems.html
 
 ## Testing the output here...
 
-- [x] foo
-  - [ ] bar
-  - [x] baz
-- [ ] bim
+- [x] spam
+- [ ] spam
+- [x] eggs
+- [ ] spam
 
-≣-)
+[x] spam  
+[ ] spam  
+[x] eggs  
+[ ] spam
+
+option: ||-)  
+
+option: ‖-)  
+
+option: ▤-)  
+
+option: ≣-)  
+
+option: ∏-)  
+option: ⋕-)  
+
