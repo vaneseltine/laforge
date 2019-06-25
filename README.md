@@ -1,14 +1,17 @@
 ### laforge is a low-key build system for working with data.
+[![PyPI - License](https://img.shields.io/pypi/l/laforge.svg?color=violet&style=flat-square)](https://www.gnu.org/licenses/agpl-3.0)  
+[![PyPI - Status](https://img.shields.io/pypi/status/laforge.svg?style=flat-square)](https://pypi.python.org/pypi/laforge)  
+[![PyPI - Version](https://img.shields.io/pypi/v/laforge.svg?style=flat-square)](https://pypi.python.org/pypi/laforge)  
+[![Tickets](https://img.shields.io/badge/tickets-sr.ht-yellow.svg?style=flat-square)](https://todo.sr.ht/~matvan/laforge)  
+[![Builds](https://img.shields.io/badge/builds-sr.ht-green.svg?style=flat-square)](https://builds.sr.ht/~matvan/laforge)  
+[![Maintenance](https://img.shields.io/maintenance/yes/2019.svg?style=flat-square)](https://git.sr.ht/~matvan/laforge)  
+[![Dependencies](https://img.shields.io/librariesio/release/pypi/laforge.svg?style=flat-square)](https://libraries.io/pypi/laforge)  
+[![PyPI - Python Versions](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge)  
+[![PyPI - Downloads](https://img.shields.io/pypi/dw/laforge.svg?color=blueviolet&style=flat-square)](https://pepy.tech/project/laforge/week)  
+[![Enjoys - Badges](https://img.shields.io/badge/built_with-☕-black.svg?style=flat-square)](https://pepy.tech/project/laforge/week)  
 
-
-[![Development](https://img.shields.io/badge/development-active-44344f.svg)](https://git.sr.ht/~matvan/laforge)
-[![PyPI](https://img.shields.io/badge/pypi-alpha-564d80.svg)](https://pypi.python.org/pypi/laforge)
-[![AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-98a6d4.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Builds](https://builds.sr.ht/~matvan/laforge.svg)](https://builds.sr.ht/~matvan/laforge?)
-[![Tickets](https://img.shields.io/badge/ticket%20tracking-sr.ht-c0e6c2.svg)](https://todo.sr.ht/~matvan/laforge)
-[![Downloads](https://pepy.tech/badge/laforge/week)](https://pepy.tech/project/laforge/week)  
-
----
+![GitHub release](https://img.shields.io/github/release-pre/vaneseltine/laforge.svg?label=github%20mirror&style=flat-square)  
+<!-- https://readthedocs.org/dashboard/> -->
 
 ### 💻 Getting Started
  
