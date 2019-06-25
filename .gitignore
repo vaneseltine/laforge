@@ -3,12 +3,10 @@ __*/
 __test*
 .*/
 secret*
-
 # But keep sr.ht builds folder
 !.builds/
 
 # Standardish directories
-__pycache__/
 _build/
 develop-eggs/
 dist/
