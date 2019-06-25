@@ -11,10 +11,8 @@ SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 def pytest(session):
     """
 
-    .. note:
-
-    tox required passenv = WINDIR
-    See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
+    Note: tox required passenv = WINDIR
+          See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
 
     """
 
