@@ -10,7 +10,7 @@ import pandas as pd
 
 try:
     from test.secret_config import secrets as SECRETS
-except:
+except (ImportError, ModuleNotFoundError):
     SECRETS = {"sqlite": {"distro": "sqlite", "database": ":memory:"}}
     SECRETS["sql"] = SECRETS["sqlite"]
 
@@ -113,9 +113,7 @@ def task_config():
 
         def test_filename_generator(dir, suffix=None):
             return str(
-                working_test_config["dir"][dir]
-                / random_path()
-                / random_filename(suffix)
+                working_test_config["dir"][dir] / random_path() / random_filename(suffix)
             )
 
         working_test_config["test_filename_generator"] = test_filename_generator

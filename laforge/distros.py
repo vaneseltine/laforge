@@ -244,6 +244,9 @@ class Distro:
     def __hash__(self) -> int:
         return hash(self.name)
 
+    def __eq__(self, other) -> bool:
+        return hash(self) == hash(other)
+
     def __str__(self) -> str:
         return self.name
 

@@ -328,10 +328,8 @@ class TaskList:
 
     def dry_run(self) -> None:
         """List each task in the list. """
-        n_tasks = len(self)
-        spacer = len(str(n_tasks))
         for i, task in enumerate(self.tasks):
-            logger.info(f"{(i + 1):>{spacer}}/{n_tasks}: {str(task)}")
+            logger.info(f"{(i + 1):>2}/{len(self)}: {str(task)}")
 
     def __len__(self) -> int:
         return len(self.tasks)

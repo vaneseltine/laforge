@@ -165,6 +165,9 @@ class Channel:
             str(x) for x in (self.distro, self.server, self.database, self.schema) if x
         )
 
+    def __eq__(self, other) -> bool:
+        return hash(self) == hash(other)
+
     def __repr__(self) -> str:
         pieces = ";".join(
             str(x) for x in (self.distro, self.server, self.database, self.schema) if x
@@ -533,7 +536,7 @@ class Identifier:
         try:
             self._leading_underscore = stringed_input.strip().startswith("_")
         except AttributeError:
-            SQLIdentifierProblem(
+            raise SQLIdentifierProblem(
                 "String or stringlike object required, not {}.".format(stringed_input)
             )
         if stringed_input in self.WHITELIST:
