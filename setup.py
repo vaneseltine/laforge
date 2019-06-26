@@ -12,6 +12,7 @@ install_requires = [
 extras_require = {
     "postgresql": ["psycopg2>=2.8"],  # PostgreSQL
     "mysql": ["pymysql>=0.9"],  # MySQL or MariaDB
+    "mariadb": ["pymysql>=0.9"],  # MySQL or MariaDB
     "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server
     "excel": ["xlrd"],  # Pandas backend for *.xls files
 }

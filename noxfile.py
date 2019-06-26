@@ -17,7 +17,7 @@ def pytest(session):
     """
 
     session.install("-r", "dev-requirements.txt")
-    session.install("-e", ".")
+    session.install("-e", ".[all]")
     session.run(
         "pytest",
         "--cov",
@@ -61,7 +61,7 @@ def flake8(session):
 @nox.session()
 def slow(session):
     session.install("-r", "dev-requirements.txt")
-    session.install("-e", ".")
+    session.install("-e", ".[all]")
     session.run("pytest", "-k", "slow")
 
 
