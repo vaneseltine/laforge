@@ -91,7 +91,7 @@ $ laforge build
 
 <!-- [![PyPI release.](https://img.shields.io/pypi/dw/laforge.svg?label=PyPI%20Downloads&style=for-the-badge&logoWidth=0)](https://pypi.org/project/laforge) -->
 
-![Designed with Diet Coke.](https://img.shields.io/badge/designed_with-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)
+[![Designed with Diet Coke.](https://img.shields.io/badge/designed_with-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)]()
 
 ### 🚀 Release
 
