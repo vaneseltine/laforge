@@ -55,11 +55,14 @@ def create(path: str) -> None:
 
 
 @click.command(hidden=True, help="Receive a quick engineering consultation.")
-@click.option("-n", "--num", type=int, default=1, help="receive NUM consultations")
-def consult(n: int) -> None:
+@click.option("-n", type=int, default=1, help="receive N consultations")
+@click.option(
+    "--match", type=str, default="", help="receive consultation that includes 'MATCH'"
+)
+def consult(n: int, match: str) -> None:
     from .quarters import tech
 
-    tech.nobabble(n=n)
+    tech.nobabble(n=n, match=match)
 
 
 run_cli.add_command(build)
