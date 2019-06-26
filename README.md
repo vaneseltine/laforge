@@ -1,10 +1,8 @@
 <h2>laforge is a low-key build system for working with data.</h2>
 
- [![AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0)
- [![PyPI Version](https://img.shields.io/pypi/v/laforge.svg?style=flat-square&label=pypi%20version)](https://pypi.python.org/pypi/laforge)
- [![Dependencies analysis](https://img.shields.io/librariesio/release/pypi/laforge.svg?style=flat-square)](https://libraries.io/pypi/laforge)
- [![Supports Python 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge)
- [![Project cat is Onigiri](https://img.shields.io/badge/project_cat-Onigiri-333.svg?style=flat-square)](https://raw.githubusercontent.com/vaneseltine/vaneseltine.github.io/master/Oni.jpg)
+ [![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0)
+ [![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge)
+ [![Cat: Onigiri](https://img.shields.io/badge/cat-Onigiri-333.svg?style=flat-square)](https://raw.githubusercontent.com/vaneseltine/vaneseltine.github.io/master/Oni.jpg)
 
 ---
 
@@ -93,11 +91,17 @@ $ laforge build
 
 [![Designed with Diet Coke.](https://img.shields.io/badge/designed_with-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)]()
 
-### 🚀 Release
+### Automation
 
-[![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge)](https://pypi.python.org/pypi/laforge) 
+[![Dependencies analysis](https://img.shields.io/librariesio/release/pypi/laforge.svg?style=for-the-badge)](https://libraries.io/pypi/laforge)
 
 [![Latest version of documentation on Read the Docs](https://img.shields.io/readthedocs/laforge.svg?style=for-the-badge)](https://laforge.readthedocs.io/en/latest/) 
+
+[![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/vaneseltine/laforge.svg?style=for-the-badge)](https://lgtm.com/projects/g/vaneseltine/laforge/)
+
+### 🚀 Derivative Releases
+
+[![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge)](https://pypi.python.org/pypi/laforge) 
 
 [![GitHub releases from sr.ht repository.](https://img.shields.io/github/release-pre/vaneseltine/laforge.svg?label=github&style=for-the-badge)](https://github.com/vaneseltine/laforge)
  
