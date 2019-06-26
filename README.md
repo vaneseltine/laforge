@@ -24,32 +24,45 @@
 
 <!--![GitHub release](https://img.shields.io/github/release-pre/vaneseltine/laforge.svg?label=github%20mirror&style=flat-square) -->
 <!--![GitHub release](https://img.shields.io/readthedocs/laforge.svg?style=flat-square) <!-- https://readthedocs.org/dashboard/> -->
+<br>
 
 ### 💻 Getting Started ‖-)
  
 *You know, I've always thought technology could solve almost any problem.*
 
-```sh
-> pip install laforge
 ```
+$ pip install laforge -q
+...
 
-*Data—I mean—Holmes, old boy, what are we looking for?*
+$ laforge create
+Creating /users/laforge/test/build.ini
+? Creating a new laforge INI at:  /users/laforge/test/build.ini
 
-```sh
-> laforge create build.ini
+Creating /users/laforge/test/build.ini
+
+? Default read directory, relative to /users/laforge/test/:  ./data
+? Default write directory, relative to /users/laforge/test/:  ./output
+? Default execute directory, relative to /users/laforge/test/:  ./
+? SQL Distribution:  SQLite 
+?     Database:  :memory:
+New laforge INI written at: /users/laforge/test/build.ini
+Enjoy!     
+
 ```
 
 *There's theory and then there's application. They don't always jibe.*
 
 ```ini
-> cat ./build.ini
+$ vim ./build.ini
+...
+
+$ cat ./build.ini
 [DEFAULT]
 read_dir: ./data
 write_dir: ./output
-distro: mssql
-server: MSSQL
-database: laforge
-schema: demo
+execute_dir: ./
+distro: sqlite
+database: :memory:
 
 # Reading Excel; writing to a SQL table
 [load_individual] 
@@ -81,7 +94,7 @@ write: results_peek.html
 *Yeah, but that's imposs— yes, sir.*
 
 ```sh
-> laforge build
+$ laforge build
 ```
 
 ### 🚧 Development
