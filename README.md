@@ -1,7 +1,7 @@
 <h2>laforge is a low-key build system for working with data.</h2>
 
  [![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0)
- [![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge)
+ [![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge) ![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)
  [![Cat: Onigiri](https://img.shields.io/badge/cat-Onigiri-333.svg?style=flat-square)](https://raw.githubusercontent.com/vaneseltine/vaneseltine.github.io/master/Oni.jpg)
 
 ---
@@ -77,7 +77,11 @@ write: results_peek.html
 $ laforge build
 ```
 
-### 🚧 Development
+### 📓 Documentation
+
+https://laforge.readthedocs.io/en/latest/
+
+### ⚗️ Development
 
 *Captain, we can do it... It'll take fifteen years and a research team of a hundred.*
 
@@ -91,7 +95,7 @@ $ laforge build
 
 [![Designed with Diet Coke.](https://img.shields.io/badge/designed_with-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)]()
 
-### Automation
+### 🤖 Automation
 
 [![Dependencies analysis](https://img.shields.io/librariesio/release/pypi/laforge.svg?style=for-the-badge)](https://libraries.io/pypi/laforge)
 
@@ -103,7 +107,7 @@ $ laforge build
 
 [![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge)](https://pypi.python.org/pypi/laforge) 
 
-[![GitHub releases from sr.ht repository.](https://img.shields.io/github/release-pre/vaneseltine/laforge.svg?label=github&style=for-the-badge)](https://github.com/vaneseltine/laforge)
+[![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/vaneseltine/laforge.svg?label=github&style=for-the-badge)](https://github.com/vaneseltine/laforge)
  
 ### 🧙‍ Author: Matt VanEseltine
 
