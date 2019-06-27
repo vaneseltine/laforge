@@ -4,7 +4,6 @@ git:
 dist: xenial   # required for Python >= 3.7
 language: python
 matrix:
-  fast_finish: true
   allow_failures:
     - python: "3.8-dev"
     - python: "nightly"
