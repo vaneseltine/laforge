@@ -4,7 +4,7 @@
 __version__ = "0.1.3"
 
 
-def run_laforge() -> None:
+def run_laforge():
     """Launch laforge command line tool."""
     from laforge.command import run_cli
 

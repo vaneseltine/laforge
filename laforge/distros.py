@@ -3,28 +3,11 @@ import re
 
 from importlib import import_module
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    # Generic,
-    List,
-    Mapping,
-    NoReturn,
-    Optional,
-    Pattern,
-    Sequence,
-    Tuple,
-    Type,
-    # TypeVar,
-    Union,
-)
 from urllib import parse
 
-import pandas as pd
 import sqlalchemy as sa
 
-from .sql import Channel, Script, Table
+from .sql import Script, Table
 from .toolbox import round_up
 
 logger = logging.getLogger(__name__)
@@ -48,10 +31,10 @@ class Distro:
     NUMERIC_PADDING_FACTOR = 10
 
     large_number_fallback = None
-    minimal_keywords: List[str] = ["server", "schema", "name"]
-    untouchable_identifiers: List[str] = []
+    minimal_keywords = ["server", "schema", "name"]
+    untouchable_identifiers = []
     varchar_fallback = None
-    varchar_max_specs: int = -1
+    varchar_max_specs = -1
     varchar_override = None
 
     templates = {
@@ -63,13 +46,13 @@ class Distro:
             """
     }
 
-    _registered_distros: List[Tuple[Pattern, Any]] = []  # type: ignore
+    _registered_distros = []
 
-    def __init__(self) -> None:
+    def __init__(self):
         import_module(self.driver)
         self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
 
-    def determine_dtypes(self, df: pd.DataFrame) -> Optional[Dict[Any, Any]]:
+    def determine_dtypes(self, df):
         new_dtypes = {}
         for column in df.columns:
             col = df[column].copy()
@@ -81,9 +64,7 @@ class Distro:
                 new_dtypes[column] = sql_specification
         return new_dtypes
 
-    def _determine_dtype(
-        self, df: pd.DataFrame, column: str
-    ) -> Optional[sa.sql.type_api.TypeEngine]:
+    def _determine_dtype(self, df, column):
         if df[column].dtype in ("object", "unicode_", "string_"):
             return self._get_varchar_spec(df, column)
         if df[column].dtype in ("float64",):
@@ -96,18 +77,14 @@ class Distro:
         return None
 
     @classmethod
-    def _check_float_spec(
-        cls, df: pd.DataFrame, column: str
-    ) -> Union[None, sa.types.Integer, sa.types.BigInteger]:
+    def _check_float_spec(cls, df, column):
         if not df[column].apply(float.is_integer).all():
             return None
         logger.debug("Demoting column [%s] from float...", column)
         return cls._check_integer_spec(df, column)
 
     @classmethod
-    def _check_integer_spec(
-        cls, df: pd.DataFrame, column: str
-    ) -> Union[None, sa.types.Integer, sa.types.BigInteger]:
+    def _check_integer_spec(cls, df, column):
         observed_range = [df[column].min(), df[column].max()]
         for sqltype in (sa.types.SMALLINT, sa.types.INT, sa.types.BIGINT):
             if cls._well_within_range(observed_range, sqltype):
@@ -118,9 +95,7 @@ class Distro:
         return None
 
     @classmethod
-    def _well_within_range(
-        cls, observed: Sequence[int], sqltype: sa.sql.type_api.TypeEngine
-    ) -> bool:
+    def _well_within_range(cls, observed, sqltype):
         limit = cls.NUMERIC_RANGES[sqltype]
         # Convert to Python's int because numpy's int64 will overflow
         max_observed = int(max(abs(x) for x in observed))
@@ -128,9 +103,7 @@ class Distro:
         valid = bool(-limit < -test_level and test_level < limit)
         return valid
 
-    def _get_varchar_spec(
-        self, df: pd.DataFrame, column: str
-    ) -> Optional[sa.sql.type_api.TypeEngine]:
+    def _get_varchar_spec(self, df, column):
         try:
             stringed = df[column].str.encode(encoding="utf-8").str
         except AttributeError:
@@ -143,9 +116,7 @@ class Distro:
         return self._create_varchar_spec(observed_len, column, self)
 
     @classmethod
-    def _create_varchar_spec(
-        cls, max_length: int, field_name: str, distro: Any
-    ) -> Optional[sa.sql.type_api.TypeEngine]:
+    def _create_varchar_spec(cls, max_length, field_name, distro):
         try:
             rounded = round_up(max_length, nearest=50)
         except ValueError:
@@ -161,20 +132,20 @@ class Distro:
         return sa.VARCHAR(rounded)
 
     @classmethod
-    def get(cls, given_name: Any) -> Any:
-        distro_matches: List[Type[Any]] = [
+    def get(cls, given_name):
+        distro_matches = [
             subclass
             for pattern, subclass in cls._registered_distros
             if pattern.match(str(given_name))
         ]
         if len(distro_matches) != 1:
             cls._failed_to_find(given_name)
-        selected_distro: Type[Any] = distro_matches.pop()
-        distro_instance: Any = selected_distro()
+        selected_distro = distro_matches.pop()
+        distro_instance = selected_distro()
         return distro_instance
 
     @classmethod
-    def _failed_to_find(cls, given_name: str) -> NoReturn:
+    def _failed_to_find(cls, given_name):
         known_distros = tuple(x.name for p, x in cls._registered_distros)
         err_msg = (
             f"Given input `{given_name}`, "
@@ -182,9 +153,7 @@ class Distro:
         )
         raise SQLDistroNotFound(err_msg)
 
-    def find(
-        self, channel: Channel, object_pattern: str = "%", schema_pattern: str = "%"
-    ) -> List[Table]:
+    def find(self, channel, object_pattern="%", schema_pattern="%"):
 
         # Lone % causes ValueError on unsupported format character 0x27
         object_pattern = object_pattern.replace(r"%", r"%%")
@@ -201,8 +170,8 @@ class Distro:
         return result_list
 
     @classmethod
-    def register(cls, pattern: str) -> Callable[..., Type[Any]]:
-        def decorator(delegate: Type[Any]) -> Type[Any]:
+    def register(cls, pattern):
+        def decorator(delegate):
             cls._registered_distros.append(
                 (re.compile(pattern, flags=re.IGNORECASE), delegate)
             )
@@ -210,47 +179,34 @@ class Distro:
 
         return decorator
 
-    def create_spec(
-        self,
-        *,
-        server: Optional[str],
-        database: Optional[str],
-        engine_kwargs: Dict[str, Any],
-    ) -> Tuple[str, Mapping[str, str]]:
+    def create_spec(self, *, server, database, engine_kwargs):
         raise NotImplementedError
 
-    def create_engine(
-        self,
-        server: Optional[str],
-        database: Optional[str],
-        engine_kwargs: Dict[str, Any],
-    ) -> sa.engine.Engine:
+    def create_engine(self, server, database, engine_kwargs):
         url, final_engine_kwargs = self.create_spec(
             server=server, database=database, engine_kwargs=engine_kwargs
         )
         return self._create_engine(url, **final_engine_kwargs)
 
     @classmethod
-    def _create_engine(
-        cls, url: str, **engine_kwargs: Mapping[str, Any]
-    ) -> sa.engine.Engine:
+    def _create_engine(cls, url, **engine_kwargs):
         return sa.create_engine(url, **engine_kwargs)
 
     @property
-    def resolver(self) -> str:
+    def resolver(self):
         # Must be implemented per-distro by subclass
         raise NotImplementedError
 
-    def __hash__(self) -> int:
+    def __hash__(self):
         return hash(self.name)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other):
         return hash(self) == hash(other)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"Distro('{self.name}')"
 
 
@@ -261,18 +217,12 @@ class MySQL(Distro):
     varchar_max_specs = 2 ** 16 - 101
     resolver = "{schema}.`{name}`"
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
-        self.varchar_fallback = self.dialect.LONGTEXT  # type: ignore
-        self.large_number_fallback = self.dialect.DOUBLE  # type: ignore
+        self.varchar_fallback = self.dialect.LONGTEXT
+        self.large_number_fallback = self.dialect.DOUBLE
 
-    def create_spec(
-        self,
-        *,
-        server: Optional[str],
-        database: Optional[str],
-        engine_kwargs: Dict[str, Any],
-    ) -> Tuple[str, Mapping[str, str]]:
+    def create_spec(self, *, server, database, engine_kwargs):
         username = engine_kwargs.pop("username")
         password = engine_kwargs.pop("password")
         url = f"{self.name}+{self.driver}://{username}:{password}@{server}/{database}?charset=utf8mb4"
@@ -286,18 +236,12 @@ class PostgresQL(Distro):
     # resolver = '{schema}."{name}"'
     resolver = "{schema}.{name}"
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
-        self.large_number_fallback = self.dialect.DOUBLE_PRECISION  # type: ignore
-        self.varchar_override = self.dialect.TEXT  # type: ignore
+        self.large_number_fallback = self.dialect.DOUBLE_PRECISION
+        self.varchar_override = self.dialect.TEXT
 
-    def create_spec(
-        self,
-        *,
-        server: Optional[str],
-        database: Optional[str],
-        engine_kwargs: Dict[str, Any],
-    ) -> Tuple[str, Mapping[str, str]]:
+    def create_spec(self, *, server, database, engine_kwargs):
         username = engine_kwargs.pop("username")
         password = engine_kwargs.pop("password")
         url = f"{self.name}+{self.driver}://{username}:{password}@{server}/{database}"
@@ -332,18 +276,12 @@ class MSSQL(Distro):
     }
     templates.update(__mssql_specific)
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
-        self.large_number_fallback = self.dialect.DECIMAL  # type: ignore
+        self.large_number_fallback = self.dialect.DECIMAL
 
-    def create_spec(
-        self,
-        *,
-        server: Optional[str],
-        database: Optional[str],
-        engine_kwargs: Dict[str, Any],
-    ) -> Tuple[str, Mapping[str, str]]:
-        spec_dict: Dict[str, Union[str, None]] = {
+    def create_spec(self, *, server, database, engine_kwargs):
+        spec_dict = {
             "server": server,
             "database": database,
             "driver": "SQL Server",
@@ -361,15 +299,13 @@ class MSSQL(Distro):
         return (url, engine_kwargs)
 
     @classmethod
-    def _create_engine(
-        cls, url: str, **engine_kwargs: Mapping[str, Any]
-    ) -> sa.engine.Engine:
+    def _create_engine(cls, url, **engine_kwargs):
         engine = sa.create_engine(url, **engine_kwargs)
         cls.add_fast_executemany(engine)
         return engine
 
     @staticmethod
-    def add_fast_executemany(engine: sa.engine.Engine) -> None:
+    def add_fast_executemany(engine: sa.engine.Engine):
         """ Dramatically improve pyodbc upload performance
 
         Theoretically, just "fast_executemany": "True" should be sufficient
@@ -382,17 +318,15 @@ class MSSQL(Distro):
 
         """
         # pylint: disable=unused-argument, unused-variable
-        @sa.event.listens_for(engine, "before_cursor_execute")  # type: ignore
-        def receive_before_cursor_execute(  # type: ignore
+        @sa.event.listens_for(engine, "before_cursor_execute")
+        def receive_before_cursor_execute(
             conn, cursor, statement, params, context, executemany
-        ) -> None:
+        ):
             if executemany:
                 cursor.fast_executemany = True
                 cursor.commit()
 
-    def find(
-        self, channel: Channel, object_pattern: str = "%", schema_pattern: str = "%"
-    ) -> List[Table]:
+    def find(self, channel, object_pattern="%", schema_pattern="%"):
 
         object_query = self.templates["find"].format(
             schema_pattern=schema_pattern,
@@ -415,9 +349,9 @@ class SQLite(Distro):
     driver = "sqlite3"
     resolver = "{name}"
 
-    minimal_keywords: List[str] = ["database", "name"]
+    minimal_keywords = ["database", "name"]
     # Filenames have wholly different semantics from other SQL identifiers
-    untouchable_identifiers: List[str] = ["database"]
+    untouchable_identifiers = ["database"]
 
     templates = Distro.templates.copy()
     __sqlite_specific = {
@@ -428,17 +362,11 @@ class SQLite(Distro):
     }
     templates.update(__sqlite_specific)
 
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
-        self.varchar_override = self.dialect.TEXT  # type: ignore
+        self.varchar_override = self.dialect.TEXT
 
-    def create_spec(
-        self,
-        *,
-        server: Optional[str],
-        database: Optional[str],
-        engine_kwargs: Dict[str, Any],
-    ) -> Tuple[str, Mapping[str, str]]:
+    def create_spec(self, *, server, database, engine_kwargs):
         assert True or server  # unused
         if not database or database in ("", ":memory:"):
             db_for_url = ":memory:"
@@ -449,9 +377,7 @@ class SQLite(Distro):
         url = f"{self.name}:///{db_for_url}"
         return (url, engine_kwargs)
 
-    def find(
-        self, channel: Channel, object_pattern: str = "%", schema_pattern: str = "%"
-    ) -> List[Table]:
+    def find(self, channel, object_pattern="%", schema_pattern="%"):
 
         object_query = self.templates["find"].format(object_pattern=object_pattern)
         object_script = Script(object_query, channel=channel)
@@ -461,6 +387,6 @@ class SQLite(Distro):
         ]
         return result_list
 
-    def determine_dtypes(self, df: pd.DataFrame) -> None:
+    def determine_dtypes(self, df):
         """SQlite does not make gradations in integers or text, so don't try."""
         return None

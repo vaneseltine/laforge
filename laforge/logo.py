@@ -3,7 +3,6 @@
 import sys
 from collections import namedtuple
 from pathlib import Path
-from typing import Optional
 
 LOGO = r"""
       __      ___      _______ _______ _____   _______ _______
@@ -21,7 +20,7 @@ COLOR_THINGS = not sys.platform.startswith("win")
 Color = namedtuple("Color", "red green blue")
 
 
-def truecolor(red: int, green: int, blue: int, background: bool) -> str:
+def truecolor(red, green, blue, background):
     """ Produce an RGB color escape sequence to prepend strings in terminal.
 
     Thanks to Antti Haapala for this answer to an unrelated question:
@@ -30,7 +29,7 @@ def truecolor(red: int, green: int, blue: int, background: bool) -> str:
     return f"\033[{48 if background else 38};2;{red};{green};{blue}m"
 
 
-def colorize(s: str, fore: Optional[Color] = None, back: Optional[Color] = None) -> str:
+def colorize(s, fore=None, back=None):
     """ Add foreground and/or background color to a string. """
     if not COLOR_THINGS:
         return s
@@ -39,7 +38,7 @@ def colorize(s: str, fore: Optional[Color] = None, back: Optional[Color] = None)
     return f"{RESET}{forestring}{backstring}{s}{RESET}"
 
 
-def get_clickable() -> str:
+def get_clickable():
     from . import __version__
 
     logo = colorize(LOGO + " %(version)s\n", fore=Color(102, 204, 255))

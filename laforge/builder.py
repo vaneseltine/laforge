@@ -10,17 +10,6 @@ import time
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    Mapping,
-    Sequence,
-    Tuple,
-    Union,
-    Optional,
-)
 
 import click
 import pandas as pd
@@ -32,9 +21,7 @@ logger = logging.getLogger(__name__)
 logger.debug(__name__)
 
 
-def run_build(
-    script_path: Path, *, log: Path, debug: bool = False, dry_run: bool = False
-) -> None:
+def run_build(script_path, *, log, debug=False, dry_run=False):
     """laforge's core build command"""
     path = Path(script_path)
     if path.is_dir():
@@ -60,7 +47,7 @@ def run_build(
         logger.info("%s completed in %s seconds.", path, elapsed)
 
 
-def find_build_config_in_directory(path: Path) -> Path:
+def find_build_config_in_directory(path):
     _acceptable_globs = ["build*.ini", "*laforge*.ini"]
     build_files = None
     for fileglob in _acceptable_globs:
@@ -79,14 +66,14 @@ def find_build_config_in_directory(path: Path) -> Path:
     return build_files[0]
 
 
-def seconds_since(previous_time: float, round_to: int = 2) -> float:
+def seconds_since(previous_time, round_to=2):
     elapsed_raw = time.time() - previous_time
     if round_to:
         return round(elapsed_raw, round_to)
     return elapsed_raw
 
 
-def get_package_logger(log_file: Path, debug: bool) -> logging.Logger:
+def get_package_logger(log_file, debug):
 
     noisiness = logging.DEBUG if debug else logging.INFO
 
@@ -122,13 +109,13 @@ class Verb(Enum):
     EXIST = "exist"
 
 
-def get_verb(raw: str) -> Verb:
+def get_verb(raw):
     translations = {"exists": "exist"}
     verb = translations[raw] if raw in translations else raw
     return Verb(verb)
 
 
-def is_verb(raw: str) -> bool:
+def is_verb(raw):
     try:
         _ = get_verb(raw)
     except ValueError:
@@ -153,7 +140,7 @@ class Target(Enum):
     ANY = "(all)"
 
     @classmethod
-    def parse(cls, verb: Verb, raw_content: str) -> "Target":
+    def parse(cls, verb, raw_content):
 
         assert verb
         content = str(raw_content).strip()
@@ -200,7 +187,7 @@ class TaskList:
         # "cache_results": True,
     }
 
-    def __init__(self, from_file: Optional[Path] = None, from_string: str = "") -> None:
+    def __init__(self, from_file=None, from_string=""):
 
         try:
             assert bool(from_file) or bool(from_string)
@@ -226,12 +213,10 @@ class TaskList:
 
         self.tasks = list(self.load_tasks(self.parser, self.location))
         logger.debug("Loaded %s tasks.", len(self.tasks))
-        self.prior_results: Optional[pd.DataFrame] = None
+        self.prior_results = None
 
     @classmethod
-    def load_tasks(
-        cls, parser: "configparser.RawConfigParser", build_location: Path
-    ) -> Iterator["Task"]:
+    def load_tasks(cls, parser, build_location):
         skip_to_start = parser.has_section("start")
         if skip_to_start:
             logger.warning("Starting execution at section [start].")
@@ -240,7 +225,7 @@ class TaskList:
                 if section != "start":
                     continue
                 skip_to_start = False
-            if section == parser.default_section:  # type: ignore
+            if section == parser.default_section:
                 continue
             logger.debug("Loading section %s", section)
             if section.lower() in ("stop", "halt", "quit", "exit"):
@@ -269,8 +254,8 @@ class TaskList:
                 yield task
 
     @classmethod
-    def template_content(cls, content: Any, config: Mapping[Any, Any]) -> str:
-        new_content: str = str(content).strip()
+    def template_content(cls, content, config):
+        new_content = str(content).strip()
         # Passing content through a formatter
         # Allows, e.g., read = {write_dir}/output.csv
         if "{" in new_content or "}" in new_content:
@@ -279,11 +264,9 @@ class TaskList:
         return new_content
 
     @staticmethod
-    def load_section_config(
-        config: Mapping[Any, Any], build_location: Path
-    ) -> Dict[Union[Verb, str], Union[Path, str]]:
+    def load_section_config(config, build_location):
         """Load config from file/string into easy attribute access"""
-        section_config: Dict[Union[Verb, str], Any] = dict(config)
+        section_config = dict(config)
 
         final_build_location = Path(config.get("build_dir") or build_location)
         section_config["build_dir"] = final_build_location.resolve(strict=True)
@@ -308,7 +291,7 @@ class TaskList:
         # pprint(section_config)
         return section_config
 
-    def execute(self) -> None:
+    def execute(self):
         """Execute each task in the list.
 
         .. todo::
@@ -326,15 +309,15 @@ class TaskList:
             self.prior_results = task.implement(self.prior_results)
             logger.debug("%s complete", log_prefix)
 
-    def dry_run(self) -> None:
+    def dry_run(self):
         """List each task in the list. """
         for i, task in enumerate(self.tasks):
             logger.info(f"{(i + 1):>2}/{len(self)}: {str(task)}")
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.tasks)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return "<{} - {} - ({} tasks)>".format(
             self.__class__.__name__, self.source, len(self)
         )
@@ -342,18 +325,16 @@ class TaskList:
 
 class Task:
 
-    _universal_handlers: Dict[Verb, Callable[..., "Task"]] = {}
-    _handlers: Dict[Tuple[Verb, Target], Callable[..., "Task"]] = {}
+    _universal_handlers = {}
+    _handlers = {}
 
     @classmethod
-    def from_strings(
-        cls, *, raw_verb: str, raw_content: str, config: Any = None
-    ) -> "Task":
+    def from_strings(cls, *, raw_verb, raw_content, config=None):
         if not config:
             config = {}
         identifier = f"{config.get('section', '')}.{raw_verb}"
 
-        verb: Verb = get_verb(raw_verb)
+        verb = get_verb(raw_verb)
 
         if verb in cls._universal_handlers:
             target = Target.ANY  # No need to try to parse content.
@@ -361,7 +342,7 @@ class Task:
             # target = cls.determine_target(verb, raw_content)
             target = Target.parse(verb, raw_content)
 
-        handler: Callable[..., "Task"] = cls._get_handler(verb, target)
+        handler = cls._get_handler(verb, target)
         return handler(
             identifier=identifier,
             verb=verb,
@@ -370,35 +351,9 @@ class Task:
             config=config,
         )
 
-    # @classmethod
-    # def determine_target(cls, verb: Verb, raw_content: str) -> 'Target':
-
-    #     content = str(raw_content).strip()
-
-    #     if ";" in content or "\n" in content:
-    #         return Target.RAWQUERY
-
-    #     print(f"verb {verb} raw_content {raw_content} content {content}")
-    #     content_suffix = Path(content).suffix.strip().lower()
-    #     if content_suffix:
-    #         try:
-    #             return Target(content_suffix)
-    #         except KeyError:
-    #             raise TaskConstructionError(
-    #                 f"No known Target to represent {raw_content}."
-    #             )
-    #     return Target.SQLTABLE
-
     @classmethod
-    def from_qualified(
-        cls,
-        verb: Verb,
-        target: Target,
-        content: Any,
-        config: Any = None,
-        identifier: Optional[str] = None,
-    ) -> "Task":
-        handler: Callable[..., "Task"] = cls._get_handler(verb, target)
+    def from_qualified(cls, verb, target, content, config=None, identifier=None):
+        handler = cls._get_handler(verb, target)
         if not identifier:
             identifier = "TBD"
         return handler(
@@ -410,7 +365,7 @@ class Task:
         )
 
     @classmethod
-    def _get_handler(cls, verb: Verb, target: Target) -> Callable[..., "Task"]:
+    def _get_handler(cls, verb, target):
         try:
             handler = cls._universal_handlers.get(verb) or cls._handlers[(verb, target)]
         except KeyError:
@@ -420,8 +375,8 @@ class Task:
         return handler
 
     @classmethod
-    def register(cls, verb: Verb, target: Target = Target.ANY) -> Callable[..., Any]:
-        def decorator(delegate: Callable[..., Any]) -> Callable[..., Any]:
+    def register(cls, verb, target=Target.ANY):
+        def decorator(delegate):
             if target is Target.ANY:
                 cls._universal_handlers[verb] = delegate
                 # cls._handlers[verb] = delegate
@@ -431,17 +386,17 @@ class Task:
 
         return decorator
 
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def implement(self, prior_results=None):
         """Must be implemented by registered classe(s)"""
         raise NotImplementedError
 
     @property
-    def identifier(self) -> str:
+    def identifier(self):
         """Must be implemented by registered classe(s)"""
         raise NotImplementedError
 
     @property
-    def description(self) -> str:
+    def description(self):
         """Must be implemented by registered classe(s)"""
         raise NotImplementedError
 
@@ -456,15 +411,7 @@ class BaseTask:
 
     """
 
-    def __init__(
-        self,
-        *,
-        identifier: str,
-        verb: Verb,
-        target: Target,
-        content: str,
-        config: Dict[Union[str, Verb], Any],
-    ) -> None:
+    def __init__(self, *, identifier, verb, target, content, config):
         """
         Initialize Task.
         """
@@ -475,16 +422,16 @@ class BaseTask:
         self.config = config
         self.description = config.get("description", "")
 
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def implement(self, prior_results=None):
         raise NotImplementedError
 
     @property
-    def path(self) -> Path:
+    def path(self):
         """For handlers where dir[verb] + content = path"""
         parent = Path(self.config.get(self.verb, "."))
         return parent / self.content
 
-    def validate_results(self, results: Optional[Any]) -> None:
+    def validate_results(self, results):
         if results is None:
             raise TaskExecutionError(
                 "No prior results available for {} to write to {}".format(
@@ -493,16 +440,16 @@ class BaseTask:
             )
 
     @property
-    def short_content(self) -> str:
+    def short_content(self):
         if " " not in self.content:
             return self.content
         return textwrap.shorten(repr(self.content), 80)
 
-    def __str__(self) -> str:
+    def __str__(self):
         # return repr(self) + "hi"
         return f"{self.identifier:<30} {self.target.name:<10} {self.content}"
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return "<{}({}, {}, '{}')>".format(
             self.__class__.__name__, self.verb, self.target, self.short_content
         )
@@ -519,11 +466,11 @@ class FileReader(BaseTask):
             method="read_csv", kwargs={"keep_default_na": False, "na_values": [""]}
         ),
         Target.DTA: FileCall(method="read_stata", kwargs={}),
-        Target.XLS: FileCall(method="read_excel", kwargs={"dtype": str}),
-        Target.XLSX: FileCall(method="read_excel", kwargs={"dtype": str}),
+        Target.XLS: FileCall(method="read_excel", kwargs={"dtype"}),
+        Target.XLSX: FileCall(method="read_excel", kwargs={"dtype"}),
     }
 
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def implement(self, prior_results=None):
         logger.debug("Reading %s", self.path)
         method, kwargs = self.filetypes[self.target]
         df = getattr(pd, method)(self.path, **kwargs)
@@ -543,7 +490,7 @@ class InternalPythonExecutor(BaseTask):
 
     """
 
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> None:
+    def implement(self, prior_results=None):
 
         logger.debug("Running %s", self.path)
         runpy.run_path(
@@ -556,7 +503,7 @@ class InternalPythonExecutor(BaseTask):
 
 @Task.register(Verb.SHELL)
 class ShellExecutor(BaseTask):
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> None:
+    def implement(self, prior_results=None):
         logger.debug("Executing: %s", self.content)
         run_cmd(
             full_command=self.content.split(" "),
@@ -566,15 +513,13 @@ class ShellExecutor(BaseTask):
         logger.info("Executed: %s", self.content)
 
 
-def run_cmd(
-    full_command: Sequence[str], cwd: Union[None, Path, str] = None, shell: bool = False
-) -> subprocess.CompletedProcess:
+def run_cmd(full_command, cwd=None, shell=False):
     return subprocess.run(full_command, cwd=cwd, shell=shell, check=True)
 
 
 @Task.register(Verb.EXECUTE, Target.DO)
 class StataExecutor(BaseTask):
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> None:
+    def implement(self, prior_results=None):
         stata_exe = Path(self.config["stata_executable"])
         assert stata_exe.exists()
         do_parameters = self.config.get("stata_parameters", [])
@@ -590,9 +535,9 @@ class StataExecutor(BaseTask):
 @Task.register(Verb.READ, Target.RAWQUERY)
 @Task.register(Verb.EXECUTE, Target.RAWQUERY)
 class SQLQueryReader(BaseTask):
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def implement(self, prior_results=None):
         logger.debug("Reading from %s", self.short_content)
-        fetch: Union[str, bool] = "df"
+        fetch = "df"
         if self.verb is Verb.EXECUTE:
             fetch = False
         df = execute(self.content, channel=Channel(**self.config["sql"]), fetch=fetch)
@@ -602,7 +547,7 @@ class SQLQueryReader(BaseTask):
 
 @Task.register(Verb.EXECUTE, Target.SQL)
 class SQLExecutor(BaseTask):
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> None:
+    def implement(self, prior_results=None):
         query = self.path.read_text()
         query_len = query.count("\n")
         logger.debug(f"Query for execution is {query_len} lines long.")
@@ -614,7 +559,7 @@ class SQLExecutor(BaseTask):
 @Task.register(Verb.READ, Target.SQLTABLE)
 @Task.register(Verb.WRITE, Target.SQLTABLE)
 class SQLReaderWriter(BaseTask):
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def implement(self, prior_results=None):
         table = Table(self.content, channel=Channel(**self.config["sql"]))
         if self.verb is Verb.WRITE:
             logger.debug("Writing %s", table)
@@ -646,14 +591,14 @@ class FileWriter(BaseTask):
         Target.XLSX: FileCall(method="to_excel", kwargs={"index": False}),
     }
 
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> None:
+    def implement(self, prior_results=None):
         logger.debug("Writing %s", self.path)
         self.validate_results(prior_results)
         self.write(path=self.path, target=self.target, df=prior_results)
         logger.info("Wrote %s", self.path)
 
     @classmethod
-    def write(cls, *, path: Path, target: Target, df: pd.DataFrame) -> None:
+    def write(cls, *, path, target, df):
         logger.debug(
             f"Preparing to write {len(df):,} rows of {len(df.columns)} columns to {path}"
         )
@@ -669,7 +614,7 @@ class FileWriter(BaseTask):
 
 @Task.register(Verb.EXIST)
 class ExistenceChecker(BaseTask):
-    def implement(self, prior_results: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def implement(self, prior_results=None):
         # Ensure that some content exists in these lines
         lines = [s for s in self.content.splitlines() if s.strip()]
         assert lines, "Accidental blank line?"
@@ -685,17 +630,15 @@ class ExistenceChecker(BaseTask):
             logger.info(f"Verified that {line} exists.")
 
     @staticmethod
-    def _check_existence_path(line: str) -> None:
+    def _check_existence_path(line):
         path = Path(line).absolute()
         if not path.exists():
             raise FileNotFoundError(path)
 
-    def _check_existence_sql_table(self, line: str) -> None:
+    def _check_existence_sql_table(self, line):
         table = Table(line, channel=Channel(**self.config["sql"]))
         assert table.exists()
 
-    def _check_existence_sql_raw_query(self, line: str) -> None:
-        df: pd.DataFrame = execute(
-            line, channel=Channel(**self.config["sql"]), fetch="df"
-        )
+    def _check_existence_sql_raw_query(self, line):
+        df = execute(line, channel=Channel(**self.config["sql"]), fetch="df")
         assert not df.empty

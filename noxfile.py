@@ -1,7 +1,5 @@
 import nox
 
-# skip_missing_interpreters=True
-
 nox.options.reuse_existing_virtualenvs = False
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
@@ -37,7 +35,7 @@ def cli(session):
 
 @nox.session(python="python3.7")
 def sphinx(session):
-    session.install("-r", "dev-requirements.txt")
+    session.install("-r", "./docs/requirements.txt")
     session.install("-e", ".")
     for target in ["coverage", "html"]:
         session.run(
@@ -47,15 +45,15 @@ def sphinx(session):
             "-E",
             "-b",
             target,
-            "/home/matt/projects/laforge/docs",
-            f"/home/matt/projects/laforge/docs/_build/{target}",
+            "./docs",
+            f"./docs/_build/{target}",
         )
 
 
 @nox.session()
 def flake8(session):
     session.install("flake8")
-    session.run("python", "-m", "flake8", "/home/matt/projects/laforge/laforge")
+    session.run("python", "-m", "flake8", "./laforge")
 
 
 @nox.session()
@@ -68,10 +66,10 @@ def slow(session):
 @nox.session()
 def pylint(session):
     session.install("pylint")
-    session.run("pylint", "laforge", "-d", "import-error")
+    session.run("pylint", "./laforge", "-d", "import-error")
 
 
 @nox.session()
-def mypy(session):
-    session.install("mypy")
-    session.run("mypy", "--strict", "-p", "laforge", "--ignore-missing-imports")
+def black(session):
+    session.install("black>=19.3b0")
+    session.run("python", "-m", "black", "--target-version", "py36", "./laforge")

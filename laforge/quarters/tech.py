@@ -3,11 +3,10 @@ import re
 from copy import deepcopy
 from pathlib import Path
 
-from typing import Dict, List
 
 INPUTS = [*Path(__file__).parent.glob("*.txt")]
 
-content: Dict[str, List[str]] = {
+content = {
     "statement": [
         "{observation}",
         "{diagnosis}",
@@ -85,7 +84,7 @@ for file in INPUTS:
         content[key] = words
 
 
-def nobabble(n: int = 1, match: str = "") -> None:
+def nobabble(n=1, match=""):
     for _ in range(n):
         if match:
             babble = Technobabbler.find_babble(match)
@@ -95,43 +94,42 @@ def nobabble(n: int = 1, match: str = "") -> None:
 
 
 class ModifiableVerb:
-    def __init__(self, verb_info: List[str]):
+    def __init__(self, verb_info):
         self.root, self.s_present, self.s_past, self.s_gerund, *prefixes = verb_info
         self.prefix = random.choice(prefixes)
 
     @property
-    def present(self) -> str:
+    def present(self):
         return self.prefix + self.root + self.s_present
 
     @property
-    def past(self) -> str:
+    def past(self):
         return self.prefix + self.root + self.s_past
 
     @property
-    def gerund(self) -> str:
+    def gerund(self):
         return self.prefix + self.root + self.s_gerund
 
 
 class Technobabbler:
-    def __init__(self) -> None:
-        self.content: Dict[str, List[str]] = deepcopy(content)
+    def __init__(self):
+        self.content = deepcopy(content)
         for _key in content:
             random.shuffle(self.content[_key])
 
-    def babble(self) -> str:
+    def babble(self):
         completed_babble = self.generate("statement")
         return capitalize_sentences(completed_babble)
 
     @classmethod
-    def find_babble(cls, match: str, tries: int = 1000) -> str:
+    def find_babble(cls, match, tries=1000):
         for _ in range(tries):
             attempt = cls().babble()
             if re.search(match, attempt, flags=re.IGNORECASE):
                 return attempt
         return cls().generate("apology")
 
-    def generate(self, item: str) -> str:
-        result: str
+    def generate(self, item):
         if item.startswith("verb_"):
             verb_info = self.content["verb"].pop().split(",")
             verb = ModifiableVerb(verb_info)
@@ -145,14 +143,14 @@ class Technobabbler:
         result = result.format_map(self)  # type: ignore
         return result
 
-    def __getitem__(self, item: str) -> str:
+    def __getitem__(self, item):
         return self.generate(item)
 
 
-def capitalize_sentences(phrase: str) -> str:
+def capitalize_sentences(phrase):
     return "".join(make_first_upper(x) for x in re.split("([!?.] )", phrase))
 
 
-def make_first_upper(s: str) -> str:
+def make_first_upper(s):
     """Uppercase the first letter of s, leaving the rest alone."""
     return s[:1].upper() + s[1:]

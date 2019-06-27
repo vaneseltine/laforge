@@ -14,7 +14,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.group(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
 @click.version_option(version=LF_VERSION, message=logo.get_clickable())
-def run_cli() -> None:
+def run_cli():
     pass
 
 
@@ -30,9 +30,7 @@ def run_cli() -> None:
     type=click.Path(resolve_path=True, dir_okay=False),
     help="Log build process at LOG.",
 )
-def build(
-    ini: str, log: str = "./laforge.log", debug: bool = False, dry_run: bool = False
-) -> None:
+def build(ini, log="./laforge.log", debug=False, dry_run=False):
     print(repr(ini))
     click.echo(f"Building {ini}")
     from .builder import run_build
@@ -47,7 +45,7 @@ def build(
     default=Path("./build.ini")
     # help="Write build INI to PATH.",
 )
-def create(path: str) -> None:
+def create(path):
     click.echo(f"Creating {path}")
     from .create_ini import create_ini
 
@@ -59,7 +57,7 @@ def create(path: str) -> None:
 @click.option(
     "--match", type=str, default="", help="receive consultation that includes 'MATCH'"
 )
-def consult(n: int, match: str) -> None:
+def consult(n, match):
     from .quarters import tech
 
     tech.nobabble(n=n, match=match)

@@ -11,17 +11,6 @@
 import logging
 import re
 import textwrap
-from typing import (
-    Any,
-    Dict,
-    Hashable,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Sequence,
-    Union,
-)
 
 import pandas as pd
 import pyparsing
@@ -48,21 +37,15 @@ class SQLIdentifierProblem(ValueError):
 class Channel:
     """Abstraction from Engine, other static details."""
 
-    known_engines: Dict[Hashable, sa.engine.Engine] = {}
-    known_channels: Dict[sa.engine.Engine, "Channel"] = {}
+    known_engines = {}
+    known_channels = {}
 
     def __init__(
-        self,
-        distro: str,
-        *,
-        server: Optional[str] = None,
-        database: Optional[str] = None,
-        schema: Optional[str] = None,
-        **engine_kwargs: str,
+        self, distro, *, server=None, database=None, schema=None, **engine_kwargs
     ):
         from .distros import Distro
 
-        self.distro: Distro = Distro.get(distro)
+        self.distro = Distro.get(distro)
         self.server = server
         self.database = database
         self.schema = schema
@@ -80,14 +63,14 @@ class Channel:
             logger.warning("Ignoring pretend table.")
 
     @classmethod
-    def grab(cls) -> "Channel":
+    def grab(cls):
         if not cls.known_channels:
             raise SQLChannelNotFound("No known SQL channels exist.")
         if len(cls.known_channels) == 1:
             return next(iter(cls.known_channels.values()))
         raise SQLChannelNotFound("Cannot select from more than one SQL channel.")
 
-    def _construct_engine(self, **engine_kwargs: str) -> sa.engine.Engine:
+    def _construct_engine(self, **engine_kwargs):
         existing_engine = self.retrieve_engine()
         if existing_engine:
             return existing_engine
@@ -95,26 +78,24 @@ class Channel:
             server=self.server, database=self.database, engine_kwargs=engine_kwargs
         )
 
-    def retrieve_engine(self) -> sa.engine.Engine:
+    def retrieve_engine(self):
         return self._retrieve_engine(repr(self))
 
     @classmethod
-    def _retrieve_engine(cls, key: Hashable) -> sa.engine.Engine:
+    def _retrieve_engine(cls, key):
         return cls.known_engines.get(key)
 
-    def save_engine(self) -> None:
+    def save_engine(self):
         self._save_engine(self, repr(self), self.engine)
 
     @classmethod
-    def _save_engine(
-        cls, channel: "Channel", key: Hashable, engine: sa.engine.Engine
-    ) -> None:
+    def _save_engine(cls, channel, key, engine):
         if key not in cls.known_engines:
             cls.known_engines[key] = engine
         if engine not in cls.known_channels:
             cls.known_channels[engine] = channel
 
-    def execute_statement(self, statement: str, fetch: Union[str, bool] = False) -> Any:
+    def execute_statement(self, statement, fetch=False):
         """Execute SQL (core method)
 
         .. todo::
@@ -146,38 +127,34 @@ class Channel:
         return final_result
 
     @staticmethod
-    def clean_up_statement(s: str) -> str:
+    def clean_up_statement(s):
         s = s.strip()
         for quote_char in ('"', "'"):
             while s.startswith(quote_char) and s.endswith(quote_char):
                 s = s.strip(quote_char)
         return s
 
-    def find(
-        self, object_pattern: str = "%", schema_pattern: str = "%"
-    ) -> List["Table"]:
+    def find(self, object_pattern="%", schema_pattern="%"):
         return self.distro.find(
             channel=self, object_pattern=object_pattern, schema_pattern=schema_pattern
         )
 
-    def __hash__(self) -> int:
+    def __hash__(self):
         return hash(
             str(x) for x in (self.distro, self.server, self.database, self.schema) if x
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other):
         return hash(self) == hash(other)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         pieces = ";".join(
             str(x) for x in (self.distro, self.server, self.database, self.schema) if x
         )
         return f"{self.__class__.__name__}({pieces})"
 
 
-def execute(
-    statement: str, fetch: Union[str, bool] = False, channel: Optional[Channel] = None
-) -> Optional[Any]:
+def execute(statement, fetch=False, channel=None):
     """Convenience method, autofetches Channel if possible"""
     if not channel:
         channel = Channel.grab()
@@ -192,7 +169,7 @@ class Script:
     _terminating_batch_terminator = re.compile(r"(?<=\W)(go\W*)+$", flags=re.IGNORECASE)
     _terminating_semicolon = re.compile(r"[\s;]+$")
 
-    def __init__(self, query: str, channel: Optional[Channel] = None) -> None:
+    def __init__(self, query, channel=None):
         if not channel:
             channel = Channel.grab()
         self.channel = channel
@@ -201,24 +178,22 @@ class Script:
         self.parsed = self._parse(self._query_string)
 
     @classmethod
-    def _remove_comments(cls, input_string: str) -> str:
+    def _remove_comments(cls, input_string):
         lines = cls._remove_multiline_sql_comment(input_string).splitlines()
         new_lines = (cls._remove_double_dash_sql_comment(l) for l in lines)
         return "\n".join(new_lines)
 
-    def _parse(self, query: str) -> List[str]:
-        flattened_group: Iterator[str] = toolbox.flatten(
-            self._construct_statements(query)
-        )
+    def _parse(self, query):
+        flattened_group = toolbox.flatten(self._construct_statements(query))
         return [s for s in flattened_group if self._is_useful_statement(s)]
 
-    def _construct_statements(self, query: str) -> Sequence[str]:
+    def _construct_statements(self, query):
         return [
             self._normalize_batch_end(batch)
             for batch in self._break_into_batches(query)
         ]
 
-    def _break_into_batches(self, query: str) -> Sequence[str]:
+    def _break_into_batches(self, query):
         """.. todo::
 
             Parse multiple go in a row more elegantly, avoid injecting line breaks.
@@ -229,7 +204,7 @@ class Script:
         return [batch.strip() for batch in batches]
 
     @classmethod
-    def _normalize_batch_end(cls, batch: str) -> str:
+    def _normalize_batch_end(cls, batch):
         batch = batch.strip()
         batch = cls._terminating_semicolon.sub("", batch)
         batch = cls._terminating_batch_terminator.sub(r"", batch)
@@ -237,24 +212,24 @@ class Script:
         return batch + ";"
 
     @staticmethod
-    def _is_useful_statement(s: str) -> List[Any]:
+    def _is_useful_statement(s):
         return re.findall("[A-Za-z]", s)
 
     @staticmethod
-    def _remove_multiline_sql_comment(input_string: str) -> str:
-        cleansed: str = (
+    def _remove_multiline_sql_comment(input_string):
+        cleansed = (
             pyparsing.nestedExpr("/*", "*/").suppress().transformString(input_string)
         )
         return cleansed
 
     @staticmethod
-    def _remove_double_dash_sql_comment(single_line: str) -> str:
+    def _remove_double_dash_sql_comment(single_line):
         double_dash_pattern = re.compile(r"\s*?--.*")
         return double_dash_pattern.sub("", single_line)
 
     # Public API
 
-    def execute(self, statements: Optional[Sequence[str]] = None) -> None:
+    def execute(self, statements=None):
         """Execute itsel(f|ves)"""
 
         statements = statements or self.parsed
@@ -268,7 +243,7 @@ class Script:
             )
             self.channel.execute_statement(statement)
 
-    def to_table(self) -> pd.DataFrame:
+    def to_table(self):
         """Executes all and tries to return a DataFrame for the result of the final query.
 
         This is one of two ways that laforge retrieves tables.
@@ -301,16 +276,16 @@ class Script:
         df = fix_bad_columns(df)
         return df
 
-    def read(self) -> pd.DataFrame:
+    def read(self):
         return self.to_table()
 
-    def __len__(self) -> int:
+    def __len__(self):
         return len(self.parsed)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return "Script: " + "\n".join(q for q in self.parsed)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return "<{} of {} statement{}>".format(
             self.__class__.__name__, len(self), ["s", ""][len(self) == 1]
         )
@@ -323,14 +298,12 @@ class Table:
 
     """
 
-    def __init__(
-        self, name: str, channel: Optional[Channel] = None, **kwargs: Any
-    ) -> None:
+    def __init__(self, name, channel=None, **kwargs):
         self.channel = channel if channel else Channel.grab()
         self.metadata = self.channel.metadata
         self.distro = self.channel.distro
 
-        identifiers: Dict[str, Optional[str]] = self._parse_args(name, kwargs)
+        identifiers = self._parse_args(name, kwargs)
         for keyword in self.distro.minimal_keywords:
             if not identifiers.get(keyword):
                 raise SQLIdentifierProblem(
@@ -346,7 +319,7 @@ class Table:
         self.__metal = None
 
     @property
-    def metal(self) -> sa.Table:
+    def metal(self):
         if self.__metal is None:
             self.__metal = sa.Table(
                 self.name,
@@ -358,7 +331,7 @@ class Table:
         return self.__metal
 
     @property
-    def identifiers(self) -> Dict[str, Optional[str]]:
+    def identifiers(self):
         return {
             "server": self.__server,
             "database": self.__database,
@@ -367,26 +340,24 @@ class Table:
         }
 
     @property
-    def server(self) -> Optional[str]:
+    def server(self):
         return self.__server
 
     @property
-    def database(self) -> Optional[str]:
+    def database(self):
         return self.__database
 
     @property
-    def schema(self) -> Optional[str]:
+    def schema(self):
         return self.__schema
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self):
         return self.__name
 
-    def _parse_args(
-        self, name: str, kwargs: Mapping[str, Optional[str]]
-    ) -> Dict[str, Optional[str]]:
+    def _parse_args(self, name, kwargs):
 
-        id_dict: Dict[str, Optional[str]] = {
+        id_dict = {
             "schema": kwargs.get("schema", self.channel.schema),
             "database": kwargs.get("database", self.channel.database),
             "server": kwargs.get("server", self.channel.server),
@@ -408,7 +379,7 @@ class Table:
         return id_dict
 
     @staticmethod
-    def _remove_irrelevant_details(raw: Optional[str]) -> Optional[str]:
+    def _remove_irrelevant_details(raw):
         if not raw:
             return raw
         s = str(raw)
@@ -418,17 +389,17 @@ class Table:
 
     # API
 
-    def exists(self) -> bool:
+    def exists(self):
         insp = sa.inspect(self.channel.engine)
         tables = insp.get_table_names(schema=self.schema or None)
         return self.name in tables
 
-    def resolve(self, strict: bool = False) -> str:
+    def resolve(self, strict=False):
         if strict and not self.exists():
             raise SQLTableNotFound("{} does not exist.".format(self))
         return self.distro.resolver.format(**self.identifiers)
 
-    def write(self, df: pd.DataFrame, if_exists: str = "replace") -> None:
+    def write(self, df, if_exists="replace"):
         """From DataFrame, create a new table and fill it with values"""
         if df.empty:
             raise RuntimeError("DataFrame to write is empty!")
@@ -447,12 +418,12 @@ class Table:
             dtype=dtypes,
         )
 
-    def read(self) -> pd.DataFrame:
+    def read(self):
         """Return the full table as a DataFrame"""
         select_all = sa.select([self.metal])
         return pd.read_sql(select_all, con=self.metadata.bind)
 
-    def drop(self, ignore_existence: bool = False) -> None:
+    def drop(self, ignore_existence=False):
         """Delete the table within SQL"""
 
         if self.exists():
@@ -463,37 +434,37 @@ class Table:
         logger.debug("%s dropped.", self)
 
     @property
-    def columns(self) -> sa.sql.base.ImmutableColumnCollection:
+    def columns(self):
         return self.metal.columns
 
-    def __len__(self) -> int:
+    def __len__(self):
         count_query = sa.select([sa.func.count()]).select_from(self.metal)
         return int(Scalar(self.metadata.bind.execute(count_query)))
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.resolve(strict=False)
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"Table('{self}')"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other):
         return hash(self) == hash(other)
 
-    def __hash__(self) -> int:
+    def __hash__(self):
         return hash(self.metal)
 
 
 class Scalar:
     """Little helper to produce clearly typed single (upper left) ResultProxy result."""
 
-    def __init__(self, prox: sa.engine.result.ResultProxy):
+    def __init__(self, prox):
         self.item = prox.first()[0]
         prox.close()
 
-    def __int__(self) -> int:
+    def __int__(self):
         return int(self.item)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return str(self.item)
 
 
@@ -516,7 +487,7 @@ class Identifier:
     WHITELIST = [":memory:", "tables"]
     BLACKLIST = ["?column?", ""]
 
-    def __init__(self, user_input: Any, extra: Optional[Any] = None) -> None:
+    def __init__(self, user_input, extra=None):
         """
 
         :param user_input: Something that can be converted into a useful string.
@@ -546,7 +517,7 @@ class Identifier:
         else:
             self.normalized = self._normalize(stringed_input)
 
-    def check(self) -> None:
+    def check(self):
         if self.normalized != self.original:
             logger.warning(
                 "Identifier [%s] suggested normalization: [%s].",
@@ -554,7 +525,7 @@ class Identifier:
                 self.normalized,
             )
 
-    def _normalize(self, working: str) -> str:
+    def _normalize(self, working):
         working = self._replace_characters(working)
         working = self._fix(working)
         working = self._stylize(working)
@@ -563,14 +534,14 @@ class Identifier:
         return working
 
     @classmethod
-    def _replace_characters(cls, attempt: str, replacement: str = "_") -> str:
+    def _replace_characters(cls, attempt, replacement="_"):
         # Strip out non-valid characters, replace with replacement
         attempt = replacement.join(
             re.findall(cls.VALID_CHARACTERS_AFTER_FIRST, attempt)
         )
         return attempt
 
-    def _fix(self, s: str) -> str:
+    def _fix(self, s):
         hit = re.search(self.VALID_NAME_PATTERN, s)
         if hit:
             return hit.group(0)
@@ -586,21 +557,21 @@ class Identifier:
         return fixed
 
     @staticmethod
-    def _force_fix(name: str, extra: str) -> str:
+    def _force_fix(name, extra):
         if not name:
             return "column_{}".format(extra)
         if not name[0].isalpha():
             return "column_{}".format(name)
         return name
 
-    def _stylize(self, attempt: str) -> str:
+    def _stylize(self, attempt):
         # Don't add a leading underscore if it wasn't there already (junk replacement)
         if not self._leading_underscore:
             attempt = attempt.lstrip("_")
         return attempt
 
     @staticmethod
-    def _shorten(s: str, max_length: int = 62, warning_length: int = 255) -> str:
+    def _shorten(s, max_length=62, warning_length=255):
         """Cut off lengthy identifiers.
 
         .. note ::
@@ -624,7 +595,7 @@ class Identifier:
         return shortened
 
     @classmethod
-    def _amend(cls, s: str, suffix: str = "_") -> str:
+    def _amend(cls, s, suffix="_"):
         """
 
         :param attempt:
@@ -639,11 +610,11 @@ class Identifier:
             logger.debug("Reserved word '%s' amended to '%s'", initial_attempt, s)
         return s
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.normalized
 
 
-def fix_bad_columns(df: pd.DataFrame) -> pd.DataFrame:
+def fix_bad_columns(df):
     badnames = set(Identifier.BLACKLIST).intersection(df.columns)
     leading_numbers = any(x for x in df.columns if x[:1].isdigit())
     if not badnames and not leading_numbers:

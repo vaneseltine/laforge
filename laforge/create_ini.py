@@ -3,15 +3,12 @@
 import os
 from datetime import datetime as dt
 from pathlib import Path
-from typing import Any, Dict, Mapping
 
 import click
 import PyInquirer as inq
 
 
-def create_ini(path: Path) -> None:
-    # path = Path(path)
-
+def create_ini(path):
     path = receive_path(default=path)
     responses = receive_input(path.parent)
     output = create_output(path, responses)
@@ -31,7 +28,7 @@ INQ_STYLE = inq.style_from_dict(
 )
 
 
-def receive_path(default: Path) -> Path:
+def receive_path(default):
 
     ini_questions = [
         {
@@ -67,7 +64,7 @@ DISTROS = {
 }
 
 
-def receive_input(build_dir: Path) -> Dict[str, Any]:
+def receive_input(build_dir):
 
     questions = [
         {
@@ -115,10 +112,10 @@ def receive_input(build_dir: Path) -> Dict[str, Any]:
         },
     ]
 
-    return inq.prompt(questions, style=INQ_STYLE)  # type: ignore
+    return inq.prompt(questions, style=INQ_STYLE)
 
 
-def create_output(path: Path, answers: Mapping[str, Any]) -> str:
+def create_output(path, answers):
     intro = [
         f"# laforge configuration generated at",
         f"# {path}",

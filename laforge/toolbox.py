@@ -9,13 +9,11 @@ import logging
 import math
 import time
 from keyword import kwlist
-from pathlib import Path
-from typing import Any, Iterator, Sequence, Set, Union
 
 logger = logging.getLogger(__name__)
 
 
-def round_up(n: Union[int, float], nearest: int = 1) -> int:
+def round_up(n, nearest=1):
     """Round up ``n`` to the nearest ``nearest``.
 
     :param n:
@@ -25,7 +23,7 @@ def round_up(n: Union[int, float], nearest: int = 1) -> int:
     return nearest * math.ceil(n / nearest)
 
 
-def prepare_to_access(path: Path) -> None:
+def prepare_to_access(path):
     """Make directory exist and verify that file would be writable"""
     if path.exists():
         verify_file_is_writable(path)
@@ -34,9 +32,7 @@ def prepare_to_access(path: Path) -> None:
             path.parent.mkdir(parents=True)
 
 
-def verify_file_is_writable(
-    path: Path, retry_attempts: int = 3, retry_seconds: int = 5
-) -> None:
+def verify_file_is_writable(path, retry_attempts=3, retry_seconds=5):
     """Check for locked file (e.g. Excel has CSV open)"""
     plural_sec = "" if retry_seconds == 1 else "s"
     for i in range(retry_attempts):
@@ -62,7 +58,7 @@ def verify_file_is_writable(
     raise PermissionError(f"Permission denied to {path}")
 
 
-def flatten(foo: Sequence[Any]) -> Iterator[Any]:
+def flatten(foo):
     """Take any set of nests in an iterator Fquand reduce it into one generator.
 
     'Nests' include any iterable except strings.
@@ -337,10 +333,8 @@ PRESPEC_RESERVED_WORD_DICT = {
     "TRUE FALSE NULL Inf NaN NA NA_integer_ NA_real_ NA_complex_ NA_character_",
 }
 PRESPEC_RESERVED_WORDS = (x.split() for x in PRESPEC_RESERVED_WORD_DICT.values())
-RESERVED_WORDS: Set[str] = {
-    x.lower() for x in flatten((kwlist, PRESPEC_RESERVED_WORDS))
-}
+RESERVED_WORDS = {x.lower() for x in flatten((kwlist, PRESPEC_RESERVED_WORDS))}
 
 
-def is_reserved_word(s: str) -> bool:
+def is_reserved_word(s):
     return s.lower() in RESERVED_WORDS
