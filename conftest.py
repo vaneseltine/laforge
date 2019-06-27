@@ -1,12 +1,13 @@
-import uuid
 import sys
+import uuid
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+import pandas as pd
 import pytest
 
-from pathlib import Path
-from laforge.sql import Channel, Table
 from laforge.builder import Verb
-from tempfile import TemporaryDirectory
-import pandas as pd
+from laforge.sql import Channel, Table
 
 try:
     from test.secret_config import secrets as SECRETS

@@ -166,7 +166,7 @@ def test_initialize_sqlite_channel_file(tmpdir, db):
     c = Channel(distro="sqlite", database=db)
     try:
         c.execute_statement("drop table laforge_finder_test;")
-    except:  # noqa
+    except:
         pass
     c.execute_statement("create table laforge_finder_test (test_int INTEGER);")
     c.execute_statement("insert into laforge_finder_test values (1);")

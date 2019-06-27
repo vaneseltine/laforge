@@ -5,6 +5,7 @@ dist: xenial   # required for Python >= 3.7
 language: python
 matrix:
   allow_failures:
+    - python: "3.8"
     - python: "3.8-dev"
     - python: "nightly"
 python:
@@ -12,6 +13,7 @@ python:
   - "3.6-dev"
   - "3.7"
   - "3.7-dev"
+  - "3.8"
   - "3.8-dev"
   - "nightly"
 install:
