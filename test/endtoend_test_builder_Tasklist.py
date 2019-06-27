@@ -42,9 +42,9 @@ def preempt_tasks(cfg, tasks, secrets):
                 if subtask.content.endswith(";"):
                     # No file needs to be created for query
                     continue
-                subdir = "script_dir"
+                subdir = "execute_dir"
             elif subtask.verb == Verb.READ:
-                subdir = "data_dir"
+                subdir = "read_dir"
             else:
                 continue
             filepath = Path(cfg["build_dir"], cfg[subdir], subtask.content)
@@ -78,7 +78,7 @@ def test_builder_sql_list(secrets, tmpdir, load_toml):
     task_dict["config"]["build_dir"] = tmpdir
     logger.error(str(task_dict))
 
-    t = TaskList(from_dict=task_dict)
+    t = TaskList(from_dict=task_dict, location=tmpdir)
     preempt_tasks(task_dict["config"], t.tasks, secrets)
     logger.error(tmpdir)
     for path in tmpdir.glob("**/*"):
@@ -91,7 +91,7 @@ def test_builder_sql_list(secrets, tmpdir, load_toml):
 #     task_dict = load_toml("test_builder_simple_list.toml")
 #     task_dict["config"] = secrets
 #     task_dict["config"]["build_dir"] = tmpdir
-#     t = TaskList(from_dict=task_dict)
+#     t = TaskList(from_dict=task_dict, location=tmpdir)
 #     preempt_tasks(task_dict["config"], t.tasks, secrets)
 #     t.execute()
 
@@ -102,6 +102,6 @@ def test_builder_sql_list(secrets, tmpdir, load_toml):
 #     task_dict["config"] = secrets
 #     task_dict["config"]["build_dir"] = tmpdir
 
-#     t = TaskList(from_dict=task_dict)
+#     t = TaskList(from_dict=task_dict, location=tmpdir)
 #     preempt_tasks(task_dict["config"], t.tasks, secrets)
 #     t.execute()

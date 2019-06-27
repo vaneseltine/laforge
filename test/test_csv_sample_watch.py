@@ -1,9 +1,10 @@
-from laforge import builder
-from textwrap import dedent
-import pytest
 from pathlib import Path
-from laforge import sql
+from textwrap import dedent
+
 import pandas as pd
+import pytest
+
+from laforge import builder, sql
 
 raw_ini_contents = dedent(
     """\
@@ -13,7 +14,7 @@ raw_ini_contents = dedent(
     database = {0}/sqlite.db
 
     [original_csv_to_sql]
-    exist = {0}/sample_in.csv
+    exist = sample_in.csv
     shell = dir
     read = sample_in.csv
     write = sample_one
@@ -47,15 +48,6 @@ sample = dedent(
 )
 
 
-def test_load_path_or_ini(tmpdir):
-    ini_contents = raw_ini_contents.format(tmpdir)
-    t1 = builder.TaskList(from_string=ini_contents)
-    ini = Path(tmpdir / "sample.ini")
-    ini.write_text(ini_contents)
-    t2 = builder.TaskList(from_file=ini)
-    assert str(t1.tasks) == str(t2.tasks)
-
-
 def test_run(tmpdir):
     ini_contents = raw_ini_contents.format(tmpdir)
     sample_csv = Path(tmpdir / "sample_in.csv")
@@ -64,7 +56,7 @@ def test_run(tmpdir):
     c = sql.Channel("sqlite", database=db)
     # print(c)
 
-    builder.TaskList(from_string=ini_contents).execute()
+    builder.TaskList(from_string=ini_contents, location=tmpdir).execute()
     # print(sql.execute("select * from sqlite_master;", fetch="df", channel=c))
 
     sampin = pd.read_csv(Path(tmpdir / "sample_in.csv"))

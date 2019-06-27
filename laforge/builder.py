@@ -10,15 +10,30 @@ import time
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
+from pprint import pprint
 
 import click
+import dotenv
 import pandas as pd
 
 from . import toolbox
-from .sql import Channel, Script, Table, execute  # typeignoremaybe # wtf
+from .sql import Channel, Script, Table, execute
 
 logger = logging.getLogger(__name__)
 logger.debug(__name__)
+
+
+def show_env(path=None):
+    """Show the calculated generic section environment"""
+    if path:
+        path = Path(path).resolve(strict=True)
+        config_str = path.read_text()
+        location = path.parent
+    else:
+        config_str = ""
+        location = Path(".")
+    task_list = TaskList(from_string=config_str, location=location)
+    pprint(task_list.load_section_config())
 
 
 def run_build(script_path, *, log, debug=False, dry_run=False):
@@ -38,7 +53,7 @@ def run_build(script_path, *, log, debug=False, dry_run=False):
         click.echo("Debug mode is on.")
     logger.debug("Debug mode is on.")
 
-    task_list = TaskList(path)
+    task_list = TaskList(path, location=path.parent)
     if dry_run:
         task_list.dry_run()
     else:
@@ -175,57 +190,33 @@ class TaskList:
     .. todo:: Implement cache_results=False
     """
 
-    _overall_defaults = {
-        "build": None,
-        # "data_dir": r"${build_dir}",
-        # "script_dir": r"${build_dir}",
-        # "output_dir": r"${build_dir}",
-        "read": r"${build}",
-        "write": r"${build}",
-        "execute": r"${build}",
-        "shell": r"${build}",
-        # "cache_results": True,
-    }
+    _SQL_KEYS = ["distro", "server", "database", "schema"]
+    _KNOWN_DIRS = {f"{verb.value}_dir": verb for verb in Verb}
 
-    def __init__(self, from_file=None, from_string=""):
-
-        try:
-            assert bool(from_file) or bool(from_string)
-        except AssertionError:
-            raise TaskConstructionError(
-                "Specify exactly one path or string to create a TaskList."
-            )
+    def __init__(self, from_string, location="."):
 
         self.parser = configparser.ConfigParser(
-            # defaults=self._default_defaults,
-            interpolation=configparser.ExtendedInterpolation(),
-            strict=False,
+            interpolation=configparser.ExtendedInterpolation(), strict=False
         )
 
-        if from_file:
-            self.parser.read(from_file)
-            self.source = Path(from_file).name
-            self.location = Path(from_file).parent.resolve(strict=True)
-        else:
-            self.parser.read_string(from_string)
-            self.source = "str"
-            self.location = Path(".").resolve(strict=True)
+        self.parser.read_string(from_string)
+        self.location = Path(location).resolve(strict=True)
+        self.config = self.load_section_config("DEFAULT")
 
-        self.tasks = list(self.load_tasks(self.parser, self.location))
+        self.tasks = list(self.load_tasks())
         logger.debug("Loaded %s tasks.", len(self.tasks))
         self.prior_results = None
 
-    @classmethod
-    def load_tasks(cls, parser, build_location):
-        skip_to_start = parser.has_section("start")
+    def load_tasks(self):
+        skip_to_start = self.parser.has_section("start")
         if skip_to_start:
             logger.warning("Starting execution at section [start].")
-        for section in parser:
+        for section in self.parser:
             if skip_to_start:
                 if section != "start":
                     continue
                 skip_to_start = False
-            if section == parser.default_section:
+            if section == self.parser.default_section:
                 continue
             logger.debug("Loading section %s", section)
             if section.lower() in ("stop", "halt", "quit", "exit"):
@@ -235,16 +226,16 @@ class TaskList:
                     section,
                 )
                 break
-            section_config = cls.load_section_config(parser[section], build_location)
+            section_config = self.load_section_config(section)
             section_config["section"] = section
             # Each section can have up to 1 of each verb as a key
-            for option in parser[section]:
+            for option in self.parser[section]:
                 if not is_verb(option):
                     continue
-                raw_content = parser[section][option]
+                raw_content = self.parser[section][option]
                 if raw_content is None:
                     continue
-                templated_content = cls.template_content(raw_content, section_config)
+                templated_content = self.template_content(raw_content, section_config)
                 task = Task.from_strings(
                     raw_verb=option,
                     raw_content=templated_content,
@@ -259,36 +250,45 @@ class TaskList:
         # Passing content through a formatter
         # Allows, e.g., read = {write_dir}/output.csv
         if "{" in new_content or "}" in new_content:
+            print(content)
+            print("presto change-o")
             formattable_config = {k: v for k, v in config.items() if isinstance(k, str)}
             new_content = new_content.format(**formattable_config)
+            print(new_content)
         return new_content
 
-    @staticmethod
-    def load_section_config(config, build_location):
-        """Load config from file/string into easy attribute access"""
-        section_config = dict(config)
+    def load_section_config(self, section="DEFAULT"):
+        """Put together config from env, TaskList config, section config"""
 
-        final_build_location = Path(config.get("build_dir") or build_location)
-        section_config["build_dir"] = final_build_location.resolve(strict=True)
+        specified_build = Path(self.parser[section].get("build_dir", "."))
+        build_dir = self.location / specified_build
+        section_config = {}
+        section_config["build_dir"] = build_dir.resolve(strict=True)
 
-        # logger.debug(f"Core build directory is {section_config['build_dir']}")
-        for verb in Verb:
-            dir_name = f"{verb.value}_dir"
-            raw_subdir = config.get(dir_name)
-            if not raw_subdir:
-                # logger.debug(f"No dir specified for {verb}")
-                raw_subdir = "."
-            section_config[verb] = Path(
-                section_config["build_dir"], raw_subdir
-            ).resolve()
-            section_config[dir_name] = section_config[verb]
-            # logger.debug(f"Dir for {verb} is {section_config[verb]}")
-        section_config["sql"] = {
-            sql_detail: config.get(sql_detail)
-            for sql_detail in "distro server database schema".split()
-            if sql_detail
-        }
-        # pprint(section_config)
+        dotenv.load_dotenv(build_dir)
+        env_config = dotenv.dotenv_values()
+        tasklist_config = dict(self.parser["DEFAULT"])
+        raw_section_config = dict(self.parser[section])
+
+        from collections import ChainMap
+
+        chained_dicts = ChainMap(raw_section_config, tasklist_config, env_config)
+        collapsed_dict = dict(chained_dicts)
+
+        # Load in SQL
+        section_config["sql"] = {k: collapsed_dict.get(k) for k in self._SQL_KEYS if k}
+
+        # Load in directories
+        section_config["dir"] = {}
+        for human, robot in self._KNOWN_DIRS.items():
+            section_config["dir"][robot] = build_dir / collapsed_dict.get(human, ".")
+            # section_config[human] = section_config["dir"][robot]
+
+        ignorables = self._SQL_KEYS + list(self._KNOWN_DIRS) + list(section_config)
+
+        section_config.update(
+            {k: v for k, v in collapsed_dict.items() if k not in ignorables}
+        )
         return section_config
 
     def execute(self):
@@ -319,7 +319,7 @@ class TaskList:
 
     def __repr__(self):
         return "<{} - {} - ({} tasks)>".format(
-            self.__class__.__name__, self.source, len(self)
+            self.__class__.__name__, self.location, len(self)
         )
 
 
@@ -428,7 +428,8 @@ class BaseTask:
     @property
     def path(self):
         """For handlers where dir[verb] + content = path"""
-        parent = Path(self.config.get(self.verb, "."))
+        print(self.config)
+        parent = Path(self.config["dir"].get(self.verb, "."))
         return parent / self.content
 
     def validate_results(self, results):
@@ -473,6 +474,7 @@ class FileReader(BaseTask):
     def implement(self, prior_results=None):
         logger.debug("Reading %s", self.path)
         method, kwargs = self.filetypes[self.target]
+        print(self.path)
         df = getattr(pd, method)(self.path, **kwargs)
         logger.info("Read %s", self.path)
         return df
@@ -507,7 +509,7 @@ class ShellExecutor(BaseTask):
         logger.debug("Executing: %s", self.content)
         run_cmd(
             full_command=self.content.split(" "),
-            cwd=self.config[Verb.SHELL],
+            cwd=self.config["dir"][Verb.SHELL],
             shell=True,
         )
         logger.info("Executed: %s", self.content)
@@ -600,7 +602,7 @@ class FileWriter(BaseTask):
     @classmethod
     def write(cls, *, path, target, df):
         logger.debug(
-            f"Preparing to write {len(df):,} rows of {len(df.columns)} columns to {path}"
+            f"Preparing to write {len(df):,} rows, {len(df.columns)} columns to {path}"
         )
         # Weirdly, this affects html output as well
         pd.set_option("display.max_colwidth", 100)
@@ -629,9 +631,8 @@ class ExistenceChecker(BaseTask):
                 self._check_existence_path(line)
             logger.info(f"Verified that {line} exists.")
 
-    @staticmethod
-    def _check_existence_path(line):
-        path = Path(line).absolute()
+    def _check_existence_path(self, line):
+        path = self.config["dir"][Verb.EXIST] / line
         if not path.exists():
             raise FileNotFoundError(path)
 

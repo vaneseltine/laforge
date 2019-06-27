@@ -36,7 +36,6 @@ def cli(session):
 @nox.session(python="python3.7")
 def sphinx(session):
     session.install("-r", "./docs/requirements.txt")
-    # session.install("-e", ".")
     for target in ["coverage", "html"]:
         session.run(
             "python",
@@ -53,7 +52,7 @@ def sphinx(session):
 @nox.session()
 def flake8(session):
     session.install("flake8")
-    session.run("python", "-m", "flake8", "./laforge")
+    session.run("python", "-m", "flake8", "./laforge", "--show-source")
 
 
 @nox.session()
@@ -66,7 +65,7 @@ def slow(session):
 @nox.session()
 def pylint(session):
     session.install("pylint")
-    session.run("pylint", "./laforge", "-d", "import-error")
+    session.run("pylint", "./laforge", "-d", "import-error", "--reports=yes")
 
 
 @nox.session()

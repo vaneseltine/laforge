@@ -100,20 +100,24 @@ def task_config():
         temp_build_dir = Path(temp_build_dir_location)
         working_test_config = {
             "build_dir": temp_build_dir,
-            Verb.EXECUTE: temp_build_dir,
-            "script_dir": temp_build_dir,
-            Verb.SHELL: temp_build_dir,
+            "execute_dir": temp_build_dir,
             "shell_dir": temp_build_dir,
-            Verb.READ: temp_build_dir / "data/",
-            "data_dir": temp_build_dir / "data/",
-            Verb.WRITE: temp_build_dir / "output/",
-            "output_dir": temp_build_dir / "output/",
+            "read_dir": temp_build_dir / "data/",
+            "write_dir": temp_build_dir / "output/",
             "section": "testsection",
+            "dir": {
+                Verb.EXECUTE: temp_build_dir,
+                Verb.SHELL: temp_build_dir,
+                Verb.READ: temp_build_dir / "data/",
+                Verb.WRITE: temp_build_dir / "output/",
+            },
         }
 
         def test_filename_generator(dir, suffix=None):
             return str(
-                working_test_config["dir"][dir] / random_path() / random_filename(suffix)
+                working_test_config["dir"][dir]
+                / random_path()
+                / random_filename(suffix)
             )
 
         working_test_config["test_filename_generator"] = test_filename_generator

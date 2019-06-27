@@ -34,7 +34,10 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 
-autodoc_default_options = {"ignore-module-all": True, "autodoc_member_order": "bysource"}
+autodoc_default_options = {
+    "ignore-module-all": True,
+    "autodoc_member_order": "bysource",
+}
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 

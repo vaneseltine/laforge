@@ -14,7 +14,20 @@ from laforge.sql import Script, Channel, Identifier
 
 @pytest.mark.parametrize(
     "semi",
-    [";", ";;", ";;;", "; ", " ;", " ; ", ";; ", " ;;", " ;; ", " ; ; ", "; ; ", " ; ;"],
+    [
+        ";",
+        ";;",
+        ";;;",
+        "; ",
+        " ;",
+        " ; ",
+        ";; ",
+        " ;;",
+        " ;; ",
+        " ; ; ",
+        "; ; ",
+        " ; ;",
+    ],
 )
 @pytest.mark.parametrize("gogo", ["", " ", " go", "go ", " go "])
 def test_strip_semis(semi, gogo):

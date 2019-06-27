@@ -8,7 +8,9 @@ from textwrap import dedent
 @pytest.mark.win32
 def test_shell():
     task = Task.from_strings(
-        raw_verb="shell", raw_content="dir", config={Verb.SHELL: Path(".").absolute()}
+        raw_verb="shell",
+        raw_content="dir",
+        config={"dir": {Verb.SHELL: Path(".").absolute()}},
     )
     print(task)
     task.implement()
@@ -45,7 +47,7 @@ def test_csv_do_not_parse_null_values(give_me_path, task_config):
         )
     )
     reader = Task.from_strings(
-        raw_verb="read", raw_content=str(arbitrarycsvfile)  # , config=task_config
+        raw_verb="read", raw_content=str(arbitrarycsvfile), config=task_config
     )
     df = reader.implement()
     assert (
@@ -61,7 +63,7 @@ def test_write_creates_specified_file(
 ):
     # the random_filename fixture automagically receives suffix
     # it's pretty cool
-    final_path = Path(task_config["output_dir"], random_filename)
+    final_path = Path(task_config["write_dir"], random_filename)
     assert suffix.value in str(final_path)
     writer = Task.from_strings(
         raw_verb="write", raw_content=str(random_filename), config=task_config

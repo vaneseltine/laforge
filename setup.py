@@ -3,6 +3,7 @@ import setuptools
 
 basics = [
     "Click>=7.0",
+    "python-dotenv>=0.10.3",
     "pandas>=0.22",
     "PyInquirer>=1.0",
     "pyparsing>=2.3",

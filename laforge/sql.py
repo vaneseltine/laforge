@@ -519,7 +519,7 @@ class Identifier:
 
     def check(self):
         if self.normalized != self.original:
-            logger.warning(
+            logger.debug(
                 "Identifier [%s] suggested normalization: [%s].",
                 self.original,
                 self.normalized,

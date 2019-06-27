@@ -3,6 +3,7 @@ __*/
 __test*
 .*/
 secret*
+
 # But keep sr.ht builds folder
 !.builds/
 
@@ -26,6 +27,7 @@ var/
 *.coverage
 *.egg
 *.egg-info
+*.env
 *.log
 *.patch
 *.py[cod]

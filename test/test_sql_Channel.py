@@ -46,7 +46,9 @@ def test_initialize_mssql_channel(secrets):
     c = Channel(**secrets["mssql"])
     # assert bool(channel.execute("select 1 from information_schema.tables;").fetchall())
     assert (
-        not Script("select 1 from information_schema.tables;", channel=c).to_table().empty
+        not Script("select 1 from information_schema.tables;", channel=c)
+        .to_table()
+        .empty
     )
 
 
@@ -84,7 +86,9 @@ def test_mssql_finder_does_not_find_dropped_tables(secrets, unimportant_df):
 def test_initialize_mysql_channel(secrets):
     c = Channel(**secrets["mysql"])
     assert (
-        not Script("select 1 from information_schema.tables;", channel=c).to_table().empty
+        not Script("select 1 from information_schema.tables;", channel=c)
+        .to_table()
+        .empty
     )
 
 
@@ -116,7 +120,9 @@ def test_mysql_finder_can_drop_and_confirm(secrets, unimportant_df):
 def test_initialize_postgresql_channel(secrets):
     c = Channel(**secrets["postgresql"])
     assert (
-        not Script("select 1 from information_schema.tables;", channel=c).to_table().empty
+        not Script("select 1 from information_schema.tables;", channel=c)
+        .to_table()
+        .empty
     )
 
 

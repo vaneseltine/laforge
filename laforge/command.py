@@ -38,6 +38,20 @@ def build(ini, log="./laforge.log", debug=False, dry_run=False):
     run_build(script_path=Path(ini), log=Path(log), debug=debug, dry_run=dry_run)
 
 
+@click.command(hidden=True, help="Receive a quick engineering consultation.")
+@click.option("-n", type=int, default=1, help="Receive N consultations.")
+@click.option(
+    "--match",
+    type=str,
+    default="",
+    help="Try to receive consultation(s) including MATCH.",
+)
+def consult(n, match):
+    from .quarters import tech
+
+    tech.nobabble(n=n, match=match)
+
+
 @click.command(help="Interactively create a new laforge build INI.")
 @click.argument(
     "path",
@@ -52,20 +66,50 @@ def create(path):
     create_ini(Path(path))
 
 
-@click.command(hidden=True, help="Receive a quick engineering consultation.")
-@click.option("-n", type=int, default=1, help="receive N consultations")
+@click.command(help="Describe the build environment known to laforge.")
+@click.argument("path", type=click.Path(), nargs=-1)
 @click.option(
-    "--match", type=str, default="", help="receive consultation that includes 'MATCH'"
+    "--no-warning",
+    help="Do not display clear text warning.",
+    default=False,
+    is_flag=True,
 )
-def consult(n, match):
-    from .quarters import tech
+def env(path=None, no_warning=False):
+    from .builder import show_env
+    import PyInquirer as inq
 
-    tech.nobabble(n=n, match=match)
+    if not no_warning:
+        answers = inq.prompt(
+            {
+                "type": "confirm",
+                "name": "continuing",
+                "message": (
+                    "Clear text output may include passwords or keys "
+                    + "as stored in laforge build INIs, configs, or .envs. Continue?"
+                ),
+                "default": False,
+                "qmark": "WARNING:",
+            },
+            style=inq.style_from_dict(
+                {
+                    inq.Token.QuestionMark: "#cd422d bold",
+                    # inq.Token.Answer: "#66ccff bold",
+                    inq.Token.Question: "#cd422d",
+                }
+            ),
+        )
+        confirmed = answers.get("continuing", False)
+        if not confirmed:
+            exit()
+
+    path = Path(" ".join(path)) if path else None
+    show_env(path=path)
 
 
 run_cli.add_command(build)
-run_cli.add_command(create)
 run_cli.add_command(consult)
+run_cli.add_command(create)
+run_cli.add_command(env)
 
 if __name__ == "__main__":
     run_cli()

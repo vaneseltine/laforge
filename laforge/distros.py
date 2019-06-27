@@ -225,7 +225,12 @@ class MySQL(Distro):
     def create_spec(self, *, server, database, engine_kwargs):
         username = engine_kwargs.pop("username")
         password = engine_kwargs.pop("password")
-        url = f"{self.name}+{self.driver}://{username}:{password}@{server}/{database}?charset=utf8mb4"
+        url = (
+            f"{self.name}+{self.driver}:"
+            + f"//{username}:{password}@"
+            + f"{server}/{database}"
+            + f"?charset=utf8mb4"
+        )
         return (url, engine_kwargs)
 
 

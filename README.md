@@ -1,7 +1,8 @@
 <h2>laforge is a low-key build system for working with data.</h2>
 
  [![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0)
- [![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge) ![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)
+ [![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge) 
+ [![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)](https://git.sr.ht/~matvan/laforge)
  [![Cat: Onigiri](https://img.shields.io/badge/cat-Onigiri-333.svg?style=flat-square)](https://raw.githubusercontent.com/vaneseltine/vaneseltine.github.io/master/Oni.jpg)
 
 ---
@@ -95,7 +96,7 @@ https://laforge.readthedocs.io/en/latest/
 
 [![Designed with Diet Coke.](https://img.shields.io/badge/designed_with-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)]()
 
-### 🤖 Automation
+### 🤖 Automated Checks
 
 [![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/vaneseltine/laforge.svg?style=for-the-badge)](https://lgtm.com/projects/g/vaneseltine/laforge/)
 
@@ -105,11 +106,11 @@ https://laforge.readthedocs.io/en/latest/
 
 [![Travis (.com)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis)](https://travis-ci.com/vaneseltine/laforge)
 
-### 🚀 Derivative Releases
-
-[![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge)](https://pypi.python.org/pypi/laforge)
+### 🚀 Descendant Releases
 
 [![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/vaneseltine/laforge.svg?label=github&style=for-the-badge)](https://github.com/vaneseltine/laforge)
+
+[![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge)](https://pypi.python.org/pypi/laforge)
 
 ### 🧙‍ Author: Matt VanEseltine
 
