@@ -10,7 +10,7 @@ import pytest
 from laforge.sql import Identifier
 from laforge import toolbox
 
-from hypothesis import given, reproduce_failure, settings, strategies
+from hypothesis import given, strategies
 
 
 @pytest.mark.parametrize(
