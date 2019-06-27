@@ -31,8 +31,6 @@ def run_cli():
     help="Log build process at LOG.",
 )
 def build(ini, log="./laforge.log", debug=False, dry_run=False):
-    print(repr(ini))
-    click.echo(f"Building {ini}")
     from .builder import run_build
 
     run_build(script_path=Path(ini), log=Path(log), debug=debug, dry_run=dry_run)
@@ -56,11 +54,9 @@ def consult(n, match):
 @click.argument(
     "path",
     type=click.Path(writable=True, resolve_path=True, dir_okay=False),
-    default=Path("./build.ini")
-    # help="Write build INI to PATH.",
+    default=Path("./build.ini"),
 )
 def create(path):
-    click.echo(f"Creating {path}")
     from .create_ini import create_ini
 
     create_ini(Path(path))
@@ -70,40 +66,42 @@ def create(path):
 @click.argument("path", type=click.Path(), nargs=-1)
 @click.option(
     "--no-warning",
-    help="Do not display clear text warning.",
+    help="Do not display cleartext warning.",
     default=False,
     is_flag=True,
 )
 def env(path=None, no_warning=False):
     from .builder import show_env
-    import PyInquirer as inq
 
-    if not no_warning:
-        answers = inq.prompt(
-            {
-                "type": "confirm",
-                "name": "continuing",
-                "message": (
-                    "Clear text output may include passwords or keys "
-                    + "as stored in laforge build INIs, configs, or .envs. Continue?"
-                ),
-                "default": False,
-                "qmark": "WARNING:",
-            },
-            style=inq.style_from_dict(
-                {
-                    inq.Token.QuestionMark: "#cd422d bold",
-                    # inq.Token.Answer: "#66ccff bold",
-                    inq.Token.Question: "#cd422d",
-                }
-            ),
-        )
-        confirmed = answers.get("continuing", False)
-        if not confirmed:
-            exit()
+    if not user_confirms_cleartext(no_warning):
+        return None
 
     path = Path(" ".join(path)) if path else None
     show_env(path=path)
+
+
+def user_confirms_cleartext(no_warning):
+    import PyInquirer as inq
+
+    if no_warning:
+        return True
+
+    answers = inq.prompt(
+        {
+            "type": "confirm",
+            "name": "continuing",
+            "message": (
+                "Output may include passwords or keys stored as cleartext "
+                + "in laforge build INIs, configs, or .envs. Continue?"
+            ),
+            "default": False,
+            "qmark": "WARNING:",
+        },
+        style=inq.style_from_dict(
+            {inq.Token.QuestionMark: "#cd422d bold", inq.Token.Question: "#cd422d"}
+        ),
+    )
+    return answers.get("continuing", False)
 
 
 run_cli.add_command(build)

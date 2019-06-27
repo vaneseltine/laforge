@@ -34,7 +34,7 @@ tasks:
   - pylint: |
         cd laforge
         python -m pylint --version
-        python -m pylint --reports=yes ./laforge
+        python -m pylint --disable=R,C --reports=yes ./laforge
   - cli: |
         python -m laforge --version
         laforge --version
