@@ -17,8 +17,8 @@ tasks:
         python -m pip install --user --upgrade pip
         python -m pip -V
         python -m pip install --user --upgrade setuptools
-        python -m pip install --user -q -r dev-requirements.txt
-        python -m pip install --user -q -e .[excel]
+        python -m pip install --user -q -r requirements.txt
+        python -m pip install --user -q -e .[sans_ms]
   - pytest: |
         cd laforge
         python -m pytest --version

@@ -17,8 +17,8 @@ tasks:
         python3 -m pip install --user --upgrade pip
         python3 -m pip -V
         python3 -m pip install --user --upgrade setuptools
-        python3 -m pip install --user -q -r dev-requirements.txt
-        python3 -m pip install --user -q -e .[excel]
+        python3 -m pip install --user -q -r requirements.txt
+        python3 -m pip install --user -q -e .[sans_ms]
   - pytest: |
         cd laforge
         python3 -c "import sys; print(sys.stdout.encoding); import pandas; print(pandas.get_option('display.encoding'))"

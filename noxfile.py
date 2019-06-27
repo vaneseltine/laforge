@@ -10,12 +10,12 @@ def pytest(session):
     """
 
     Note: tox required passenv = WINDIR
-          See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
+    See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
 
     """
 
-    session.install("-r", "dev-requirements.txt")
-    session.install("-e", ".[all]")
+    session.install("-r", "requirements.txt")
+    session.install("-e", ".[sans_ms]")
     session.run(
         "pytest",
         "--cov",
@@ -36,7 +36,7 @@ def cli(session):
 @nox.session(python="python3.7")
 def sphinx(session):
     session.install("-r", "./docs/requirements.txt")
-    session.install("-e", ".")
+    # session.install("-e", ".")
     for target in ["coverage", "html"]:
         session.run(
             "python",
@@ -58,8 +58,8 @@ def flake8(session):
 
 @nox.session()
 def slow(session):
-    session.install("-r", "dev-requirements.txt")
-    session.install("-e", ".[all]")
+    session.install("-r", "requirements.txt")
+    session.install("-e", ".[sans_ms]")
     session.run("pytest", "-k", "slow")
 
 

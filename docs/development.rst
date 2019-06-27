@@ -33,13 +33,10 @@ Recommended Environment
     # .venv\Scripts\Activate.bat        # cmd
 
     # Install packages
-    python -m pip install -r dev-requirements.txt
-
-    # Install working version of laforge
-    python -m pip install -e .
+    python -m pip install -r requirements.txt
 
     # Run the gauntlet
-    python -m tox
+    python -m nox
 
 Linux Note
 ===========
