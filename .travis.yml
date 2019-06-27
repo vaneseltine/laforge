@@ -16,7 +16,7 @@ python:
   - "3.8-dev"
   - "nightly"
 install:
-  - pip install -e .[sans_ms]
+  - pip install -e .[ci]
   - pip install -r requirements.txt
 script:
   - python -m pytest

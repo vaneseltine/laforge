@@ -1,4 +1,4 @@
--e .[sans_ms]
+-e .[ci]
 black>=19.3b0
 flake8==3.7.7
 hypothesis[pandas]==4.24.3
