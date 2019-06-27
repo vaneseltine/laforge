@@ -3,85 +3,7 @@ import re
 from copy import deepcopy
 from pathlib import Path
 
-
-INPUTS = [*Path(__file__).parent.glob("*.txt")]
-
-content = {
-    "statement": [
-        "{observation}",
-        "{diagnosis}",
-        "{diagnosis}",
-        "{diagnosis}",
-        "{suggestion}",
-        "{suggestion}",
-        "{suggestion}",
-    ],
-    "apology": [
-        "I'm not too sure about that.",
-        "I'm stumped.",
-        "Sorry, but I'm not sure.",
-        "I can't figure out a good next step.",
-        "This is a tough one.",
-        "I wish I could be of more help.",
-        "I wish I could be of further assistance.",
-    ],
-    "observation": [
-        "I am detecting {observation_phrase}.",
-        "We're picking up {observation_phrase}.",
-        "I'm picking up {observation_phrase}.",
-        "I'm seeing {observation_phrase}.",
-        "Are you also seeing {observation_phrase}?",
-        "Are you seeing {noun_phrase} {preposition} {noun_phrase}?",
-    ],
-    "observation_phrase": [
-        "{problem_adjective} levels from {noun_phrase}",
-        "{problem_adjective} readings from {noun_phrase}",
-        "{problem_adjective} signals from {noun_phrase}",
-    ],
-    "diagnosis": [
-        "I think we have {diagnosis_phrase}.",
-        "I'd bet the problem is {diagnosis_phrase}.",
-        "I'm not sure, but it might be {diagnosis_phrase}.",
-        "If it's not {diagnosis_phrase}, it has to be {noun_phrase}.",
-        "It might be {diagnosis_phrase}.",
-        "It must be either {diagnosis_phrase} or {diagnosis_phrase}.",
-        "My guess is that we have {diagnosis_phrase}.",
-        "Perhaps there's an infestation of {lifeform} in {noun_phrase}.",
-    ],
-    "diagnosis_phrase": ["{diagnosis_core} {preposition} {noun_phrase}"],
-    "diagnosis_core": [
-        "{prenoun} anomalies",
-        "{prenoun} fluctuations",
-        "{prenoun} interference",
-        "{prenoun} malfunctions",
-        "{prenoun} distortions",
-        "{prenoun} problems",
-        "a rupture",
-        "an anomaly",
-        "an over-{verb_gerund} {noun}",
-        "an under-{verb_gerund} {noun}",
-        "an over-{verb_past} {noun}",
-        "an under-{verb_past} {noun}",
-        "a critical error",
-        "a severe malfunction",
-        "some kind of {prenoun} problem",
-    ],
-    "noun_phrase": [
-        "the {prenoun} {noun}",
-        "the {prenoun} {noun}",
-        "the {prenoun} {noun} {postnoun}",
-        "the {noun} {postnoun}",
-    ],
-    "number": ["1", "2", "3", "4"],
-}
-
-for file in INPUTS:
-    key = file.stem
-    words = [line for line in file.read_text().splitlines() if line.strip()]
-    if key in content:
-        content[key].extend(words)
-    else:
-        content[key] = words
+INPUTS = "./inputs.dat"
 
 
 def nobabble(n=1, match=""):
@@ -112,10 +34,23 @@ class ModifiableVerb:
 
 
 class Technobabbler:
+
+    raw_inputs = (Path(__file__).parent / INPUTS).read_text()
+    _content = {}
+    for line in raw_inputs.splitlines():
+        if not line:
+            continue
+        line = line.strip()
+        if line.startswith("[") and line.endswith("]"):
+            key = line[1:-1]
+            _content[key] = []
+            continue
+        _content[key].append(line)
+
     def __init__(self):
-        self.content = deepcopy(content)
-        for _key in content:
-            random.shuffle(self.content[_key])
+        self.content = deepcopy(self._content)
+        for key in self.content:
+            random.shuffle(self.content[key])
 
     def babble(self):
         completed_babble = self.generate("statement")
@@ -140,7 +75,7 @@ class Technobabbler:
                 if len(self.content[item]) > 1
                 else self.content[item][0]
             )
-        result = result.format_map(self)  # type: ignore
+        result = result.format_map(self)
         return result
 
     def __getitem__(self, item):

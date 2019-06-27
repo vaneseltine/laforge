@@ -1,0 +1,506 @@
+
+[statement]
+{observation}
+{diagnosis}
+{diagnosis}
+{diagnosis}
+{suggestion}
+{suggestion}
+{suggestion}
+
+[apology]
+I'm not too sure about that.
+I'm stumped.
+Sorry, but I'm not sure.
+I can't figure out a good next step.
+This is a tough one.
+I wish I could be of more help.
+I wish I could be of further assistance.
+
+[observation]
+I am detecting {observation_phrase}.
+We're picking up {observation_phrase}.
+I'm picking up {observation_phrase}.
+I'm seeing {observation_phrase}.
+Are you also seeing {observation_phrase}?
+Are you seeing {noun_phrase} {preposition} {noun_phrase}?
+
+[observation_phrase]
+{problem_adjective} levels from {noun_phrase}
+{problem_adjective} readings from {noun_phrase}
+{problem_adjective} signals from {noun_phrase}
+
+[diagnosis]
+I think we have {diagnosis_phrase}.
+I'd bet the problem is {diagnosis_phrase}.
+I'm not sure, but it might be {diagnosis_phrase}.
+If it's not {diagnosis_phrase}, it has to be {noun_phrase}.
+It might be {diagnosis_phrase}.
+It must be either {diagnosis_phrase} or {diagnosis_phrase}.
+My guess is that we have {diagnosis_phrase}.
+Perhaps there's an infestation of {lifeform} in {noun_phrase}.
+
+[diagnosis_phrase]
+{diagnosis_core} {preposition} {noun_phrase}
+
+[diagnosis_core]
+{prenoun} anomalies
+{prenoun} fluctuations
+{prenoun} interference
+{prenoun} malfunctions
+{prenoun} distortions
+{prenoun} problems
+a rupture
+an anomaly
+an over-{verb_gerund} {noun}
+an under-{verb_gerund} {noun}
+an over-{verb_past} {noun}
+an under-{verb_past} {noun}
+a critical error
+a severe malfunction
+some kind of {prenoun} problem
+
+[noun_phrase]
+the {prenoun} {noun}
+the {prenoun} {noun}
+the {prenoun} {noun} {postnoun}
+the {noun} {postnoun}
+
+[number]
+1
+2
+3
+4
+
+[lifeform]
+Aldebaran mud leeches
+Aldebaran shellmouths
+Alvanian bees
+Alvanian spine mites
+Alverian dung beetles
+Andorian redbats
+Arboreal needle snakes
+Bajoran bats
+Belzoidian fleas
+Bulgallian sludge rat
+Caldorian eels
+Calrissian chameleons
+Cardassian voles
+Bajoran rastipods
+Centaurian slugs
+Ceti eels
+Cytraxian crickets
+Dalvin hissing beetles
+Denebian slime devils
+Draxxan cloud vipers
+Edosian slugs
+Ferengi blood fleas
+Filian pythons
+Garanian bolites
+Gorokian midwife toads
+Hupyrian beetles
+Kavarian tiger-bats
+Klabnian eels
+Klingon bok-rats
+Krallinian eels
+Loracus devil mites
+Lycosa tarantulas
+Lyssarian desert larvae
+Mellanoid slime worms
+Melvaran mud fleas
+Mordian butterflies
+Ocampan spawn beetles
+Orillian lung maggots
+Orion wing-slugs
+Osmotic eels
+photonic fleas
+Pycan space moths
+Pyrithian bats
+Rafalian mice
+Rakonian swamp rats
+Rectyne monopods
+Regalian fleaspiders
+Regellian blood worms
+Regulan bloodworms
+Romulan mollusks
+subspace mesomorphs
+Talarian hook spiders
+Talaxian furflys
+Tarkanian field mice
+Teirenian ants
+Teneebian skunks
+Tiberian bats
+tube grubs
+Vayan horn flys
+Vulcan marsupials
+Vulcan mollusks
+Vulcan sandworms
+Wentlian condor snakes
+Xanthan marmots
+Zyznian church mice
+
+[noun]
+{prenoun} {noun}
+anti-{noun}
+bio-{noun}
+holo-{noun}
+hyper-{noun}
+proto-{noun}
+micro-{noun}
+macro-{noun}
+nano-{noun}
+accretor
+algorithm
+analysis
+beacon
+beam
+buffer
+burst
+capacitor
+carrier
+circuit
+coil
+compensator
+compositor
+compressor
+conduit
+containment
+converter
+coupler
+database
+deflector
+diode
+downlink
+emission
+emitter
+engine
+enhancer
+equilibrium
+ferromagnetic
+field
+filter
+function
+inducer
+inhibitor
+initiator
+injector
+interface
+intermatrix
+inverter
+ionization
+iterator
+materializer
+nacelle
+network
+parameter
+pathway
+probe
+pulse
+pylon
+reaction
+receiver
+receptor
+resistor
+resonator
+scanner
+scrambler
+shielding
+signal
+signature
+spectrum
+stream
+subsystem
+system
+trace
+tracer
+trajectory
+transducer
+transitor
+transmitter
+uplink
+variance
+wave
+
+[postnoun]
+array
+core
+device
+diagnostic
+interlock
+loop
+manifold
+matrix
+panel
+pattern
+procedure
+protocol
+prototype
+relay
+routine
+storage
+subroutine
+unit
+
+[prenoun]
+active
+advanced
+aft
+aggregate
+alpha
+annular
+antimatter
+artificial
+auxiliary
+avadyne
+axionic
+Bayseian
+beta
+bimorphic
+biogenic
+capacitance
+carbonaceous
+central
+circumferential
+confinement
+console
+control
+converse
+core
+cross-frequency
+cybernetic
+cyclic
+cyclical
+delta
+dendritic
+diagnostic
+diamagnetic
+dimensional
+dimorphic
+discrete
+duotronic
+dynamic
+electromagnetic
+emergency
+energy
+engrammatic
+enhanced
+environmental
+epsilon
+field
+flux
+forward
+Fourier
+fusion
+gamma
+genetronic
+geomagnetic
+gravimetric
+graviton
+gyrodyne
+Heglenian
+high-frequency
+hyper-{prenoun}
+impulse
+inactive
+indirect
+inductive
+inert
+inorganic
+interpreter
+inverse
+inverted
+isolinear
+isomorphic
+iterative
+linear
+localized
+long-range
+low-frequency
+magnetic
+midrange
+mobile
+morphic
+morphogenic
+multi-{prenoun}
+multiplex
+multitronic
+neutral
+neutronic
+nucleonic
+offline
+omicron
+optical
+orbital
+particle
+peripheral
+phase
+phasic
+photon
+plasma
+plasmonic
+polaric
+polarity
+polarized
+polaron
+positronic
+power
+primary
+psuedo-{prenoun}
+quantum
+radiated
+relative
+remote
+reserve
+secondary
+semi-{prenoun}
+sentient
+short-range
+simulated
+sonic
+spacetime
+spacial
+spectral
+static
+subnucleonic
+subparticle
+subpower
+subspace
+substitute
+supplemental
+supplementary
+synaptic
+tachyon
+target
+temporal
+temporary
+tertiary
+thermal
+theta
+topological
+trans-{prenoun}
+transductive
+transient
+transverse
+variable
+virtual
+voltage
+
+[preposition]
+above
+across
+against
+along
+alongside
+around
+before
+down
+following
+inside
+off
+on
+outside
+over
+past
+through
+throughout
+under
+via
+with
+without
+
+[preverb]
+artificially
+completely
+dynamically
+fully
+holographically
+intermittently
+iteratively
+partially
+preemptively
+retroactively
+sequentially
+systematically
+temporarily
+
+[problem_adjective]
+anomalous
+bizarre
+dangerous
+impossible
+improbable
+inconsistent
+odd
+paradoxical
+strange
+unstable
+unusual
+
+[suggestion]
+{verb_gerund} {noun_phrase} just might be enough to {verb_present} {noun_phrase}.
+{verb_gerund} {noun_phrase} should {verb_present} {noun_phrase}.
+By {verb_gerund} {noun_phrase}, we might be able to {verb_present} {noun_phrase}.
+Could we {verb_present} {noun_phrase} to {verb_present} {noun_phrase}?
+Have you tried {verb_gerund} {noun_phrase}?
+How about {noun_phrase}? We could {verb_present} {noun_phrase} {preposition} {noun_phrase}.
+How about {verb_gerund} {noun_phrase} which we've {verb_past} {preposition} {noun_phrase}?
+I think if we {verb_present} {noun_phrase}, that should be enough to {verb_present} {noun_phrase}.
+I think we can rule out {verb_gerund} {noun_phrase}.
+I think we should {verb_present} {noun_phrase} {preposition} {noun_phrase}.
+If we {verb_present} {noun_phrase} {preposition} {noun_phrase}, that could {verb_present} {noun_phrase}.
+It might be possible to {preverb} {verb_present} {noun_phrase}.
+Let's {verb_present} {noun_phrase} {preposition} {noun_phrase}.
+Maybe {noun_phrase} could be {verb_past} {preposition} {noun_phrase}.
+Try {preverb} {verb_gerund} {noun_phrase}.
+Try running a level {number} diagnostic on {noun_phrase}.
+We need to {verb_present} {noun_phrase} before we lose {noun_phrase}!
+We should consider {verb_gerund} {noun_phrase} and {verb_gerund} {noun_phrase}.
+What if {verb_gerund} {noun_phrase} could {verb_present} {noun_phrase}?
+What if we {verb_present} {noun_phrase} {preposition} {noun_phrase}?
+
+[verb]
+activat,e,ed,ing,,de,retro,
+adjust,,ed,ing,,re,
+amplif,y,ied,ying,,
+analyz,e,ed,ing,,re,
+bypass,,ed,ing,,
+calibrat,e,ed,ing,,re,retro,
+concentrat,e,ed,ing,,re,
+configur,e,ed,ing,,re,
+connect,,ed,ing,,re,dis,
+contract,,ed,ing,,
+coupl,e,ed,ing,,re,de,cross,
+direct,,ed,ing,,re,
+divert,,ed,ing,,
+energiz,e,ed,ing,,de,re,
+engag,e,ed,ing,,dis,re,
+enhanc,e,ed,ing,,
+equaliz,e,ed,ing,,
+expand,,ed,ing,,re,
+generat,e,ed,ing,,re,
+grad,e,ed,ing,,up,
+imag,e,ed,ing,,re,retro,
+implement,,ed,ing,,
+integrat,e,ed,ing,,re,
+intercept,,ed,ing,,
+interplex,,ed,ing,,
+invers,e,ed,ing,,
+isolat,e,ed,ing,,re,
+launch,,ed,ing,,re,
+link,,ed,ing,re,de,un,up,down,
+materializ,e,ed,ing,,re,de
+modif,y,ied,ying,,
+plac,e,ed,ing,,re,dis,
+polariz,e,ed,ing,,re,de,cross,
+polat,e,ed,ing,,inter,extra,
+pressuriz,e,ed,ing,,re,de,
+revers,e,ed,ing,,
+overr,ide,ode,iding,,
+rout,e,ed,ing,,re,
+sequenc,e,ed,ing,,re,retro,
+stabiliz,e,ed,ing,,re,de,
+sync,,ed,ing,,re,
+separat,e,ed,ing,,re,
+simulat,e,ed,ing,,cross,
+transfer,,red,ring,,re,
+utiliz,e,ed,ing,,
