@@ -8,7 +8,7 @@ see: py.test --fixtures
 import pytest
 from hypothesis import given, strategies, settings
 
-from laforge.sql import Channel, SQLTableNotFound, Table, SQLIdentifierProblem
+from laforge.sql import SQLTableNotFound, Table, SQLIdentifierProblem
 
 
 CANONICAL_DISTROS = ["mssql", "mysql", "postgresql", "sqlite"]
