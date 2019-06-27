@@ -102,7 +102,7 @@ https://laforge.readthedocs.io/en/latest/
 
 [![Dependencies analysis](https://img.shields.io/librariesio/release/pypi/laforge.svg?style=for-the-badge&label=libraries.io)](https://libraries.io/pypi/laforge)
 
-[![Latest version of documentation on Read the Docs](https://img.shields.io/readthedocs/laforge.svg?style=for-the-badge&label=Read%20the%20Docs)](https://readthedocs.org/projects/laforge/)
+[![Latest version of documentation on Read the Docs](https://img.shields.io/readthedocs/laforge.svg?style=for-the-badge&label=Read%20the%20Docs)](https://readthedocs.org/projects/laforge/builds/)
 
 [![Travis (.com)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis)](https://travis-ci.com/vaneseltine/laforge)
 
