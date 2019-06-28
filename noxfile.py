@@ -1,6 +1,7 @@
 import nox
 
-nox.options.reuse_existing_virtualenvs = True
+# -r to ovveride and reuse them instead
+nox.options.reuse_existing_virtualenvs = False
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 
@@ -31,6 +32,7 @@ def cli(session):
     session.chdir("/")
     session.run("python", "-m", "laforge", "--version", silent=True)
     session.run("laforge", "--version", silent=True)
+    session.run("laforge", "env", "--no-warning", silent=True)
 
 
 @nox.session()
