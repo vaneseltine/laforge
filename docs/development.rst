@@ -46,10 +46,11 @@ Suggested Environment
     python -m nox
 
 
-Documented TODOs
+Embedded TODOs
 ================================
 
 .. todolist::
+
 
 Test Coverage
 ================================
@@ -59,5 +60,5 @@ Test Coverage
 Docs Coverage
 ================================
 
-.. include:: _build/coverage/python.txt
+.. include:: _static/python.txt
     :literal:

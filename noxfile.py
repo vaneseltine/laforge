@@ -44,8 +44,9 @@ def slow(session):
 def sphinx(session):
     session.install("-e", ".")
     session.install("-r", "./docs/requirements.txt")
-    for target in ("coverage", "html"):
-        session.run("python", "setup.py", "build_sphinx", "-b", target, "-W")
+    session.run("rm", "-rf", "./build/sphinx", external=True)
+    session.run("python", "-m", "sphinx", "-b", "coverage", "./docs", "./docs/_static")
+    session.run("python", "setup.py", "build_sphinx", "-b", "html", "-W")
 
 
 @nox.session()
