@@ -250,11 +250,11 @@ class TaskList:
         # Passing content through a formatter
         # Allows, e.g., read = {write_dir}/output.csv
         if "{" in new_content or "}" in new_content:
-            print(content)
-            print("presto change-o")
+            # print(content)
+            # print("presto change-o")
             formattable_config = {k: v for k, v in config.items() if isinstance(k, str)}
             new_content = new_content.format(**formattable_config)
-            print(new_content)
+            # print(new_content)
         return new_content
 
     def load_section_config(self, section="DEFAULT"):

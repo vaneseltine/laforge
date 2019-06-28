@@ -38,6 +38,8 @@ autodoc_default_options = {
     "ignore-module-all": True,
     "autodoc_member_order": "bysource",
 }
+# Does not appear to be working
+autodoc_member_order = "bysource"
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 

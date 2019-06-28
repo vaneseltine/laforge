@@ -12,7 +12,7 @@ def test_shell():
         raw_content="dir",
         config={"dir": {Verb.SHELL: Path(".").absolute()}},
     )
-    print(task)
+    # print(task)
     task.implement()
 
 
