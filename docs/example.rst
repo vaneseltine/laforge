@@ -9,58 +9,36 @@ Because *laforge* needs to find the scripts, and because
 scripts will likely interact with output from other scripts,
 I tend to keep related project/sub-project files together::
 
-    project_nemesis
+    project
     ├───input
-    │   ├───adjustments.csv
-    │   ├───evil_lair_data.xlsx
-    │   └───overrides.csv
+    │   ├───a.csv
+    │   ├───b.xlsx
+    │   └───c.csv
     ├───output
-    │   ├───results_general.csv
-    │   ├───results_employee.csv
-    │   └───results_troll.csv
-    ├───build.toml
-    ├───get_material_costs.py
-    ├───create_oubliette.sql
-    ├───calc_assess_timeline.py
-    └───cover_all_tracks.py
+    │   ├───results_d.csv
+    │   ├───results_e.csv
+    │   └───results_f.csv
+    ├───.env
+    ├───build.ini
+    ├───g.py
+    ├───h.sql
+    ├───i.py
+    └───j.py
 
-build.toml
+.env
 ================================
 
 ::
 
-    [[config.dir]]
-    output = 'N:/output/'
+    distro = mssql
+    server = MSSQL
+    database = testdb
+    schema = laforge
 
-    [[config.sql]]
-    load = './sqlecrets.py'
 
-    [[task]]
-    description = 'Assess project timeline'
-    read = ''
-    execute = 'calc_assess_timeline.py'
-    write = ''
+build.ini
+================================
 
-    [[task]]
-    description = 'Gather cost estimates'
-    execute = [
-        'get_material_costs.py',
-        'query_goblin_salaries.py',
-    ]
-    write = ''
+::
 
-    [[task]]
-    description = 'Crunch numbers'
-
-    [[task]]
-    description = 'Contingency plans'
-    read = ''
-    execute = 'create_oubliette.sql'
-    write = ''
-
-    [[task]]
-    description = 'Teardown and cleanup'
-    execute = [
-        'remove_evidence',
-        'cover_tracks.py',
-    ]
+    [DEFAULT]
