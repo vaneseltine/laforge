@@ -3,7 +3,6 @@ __*/
 __test*
 .*/
 secret*
-*.txt
 *.pickle
 
 # But keep sr.ht builds folder

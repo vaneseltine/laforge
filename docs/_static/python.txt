@@ -1,0 +1,104 @@
+Undocumented Python objects
+===========================
+laforge.builder
+---------------
+Functions:
+ * find_build_config_in_directory
+ * get_package_logger
+ * get_verb
+ * is_verb
+ * run_cmd
+ * seconds_since
+
+Classes:
+ * BaseTask -- missing methods:
+
+   - implement
+   - validate_results
+ * ExistenceChecker -- missing methods:
+
+   - implement
+ * FileReader -- missing methods:
+
+   - implement
+ * FileWriter -- missing methods:
+
+   - implement
+   - write
+ * InternalPythonExecutor -- missing methods:
+
+   - implement
+ * SQLExecutor -- missing methods:
+
+   - implement
+ * SQLQueryReader -- missing methods:
+
+   - implement
+ * SQLReaderWriter -- missing methods:
+
+   - implement
+ * ShellExecutor -- missing methods:
+
+   - implement
+ * StataExecutor -- missing methods:
+
+   - implement
+ * Task
+ * TaskList -- missing methods:
+
+   - load_tasks
+   - template_content
+
+laforge.command
+---------------
+Functions:
+ * user_confirms_cleartext
+
+laforge.distros
+---------------
+Classes:
+ * Distro
+ * MSSQL
+ * MySQL
+ * PostgresQL
+ * SQLite
+
+laforge.sql
+-----------
+Functions:
+ * fix_bad_columns
+
+Classes:
+ * Channel -- missing methods:
+
+   - clean_up_statement
+   - find
+   - grab
+   - retrieve_engine
+   - save_engine
+ * Identifier -- missing methods:
+
+   - check
+ * Script -- missing methods:
+
+   - read
+ * Table -- missing methods:
+
+   - exists
+   - resolve
+
+laforge.tech
+------------
+Functions:
+ * capitalize_sentences
+ * nobabble
+
+Classes:
+ * ModifiableVerb
+ * Technobabbler
+
+laforge.toolbox
+---------------
+Functions:
+ * is_reserved_word
+
