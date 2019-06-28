@@ -15,7 +15,7 @@ LOGO = LOGO[1:]
 
 RESET = "\033[0m"
 
-COLOR_THINGS = not sys.platform.startswith("win")
+MONOCHROME = sys.platform.startswith("win")
 
 Color = namedtuple("Color", "red green blue")
 
@@ -31,7 +31,7 @@ def truecolor(red, green, blue, background):
 
 def colorize(s, fore=None, back=None):
     """ Add foreground and/or background color to a string. """
-    if not COLOR_THINGS:
+    if MONOCHROME:
         return s
     forestring = truecolor(*fore, background=False) if fore else ""
     backstring = truecolor(*back, background=True) if back else ""
