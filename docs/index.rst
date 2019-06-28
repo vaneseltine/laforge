@@ -17,7 +17,6 @@ Contents
     example
     module
     development
-    todo
     license
 
 * :ref:`genindex`

@@ -44,3 +44,20 @@ Suggested Environment
 
     # Run the gauntlet
     python -m nox
+
+
+Documented TODOs
+================================
+
+.. todolist::
+
+Test Coverage
+================================
+
+`Latest Pytest Coverage Report <_static/htmlcov/index.html>`_
+
+Docs Coverage
+================================
+
+.. include:: _build/coverage/python.txt
+    :literal:
