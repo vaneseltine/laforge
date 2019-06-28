@@ -13,127 +13,127 @@ at the `University of Michigan's Institute for Social Research
 Features:
 
 * Interoperable: Read, write, and execute Python, SQL, and Stata scripts/data.
-* Straightforward: Simple build config files designed for a one-click build.
-* No lock-in: Easy to keep scripts remain independent from *laforge*.
+* Straightforward: Simple build INI files designed for a one-click build.
+* No lock-in: Maintain scripts independent from *laforge*.
 
-.. todo::
+.. .. todo::
 
-    This gets too deep for an overview.
+..     This gets too deep for an overview.
 
-Executing a build
-================================
+.. Executing a build
+.. ================================
 
-Provide a path to a TOML build configuration file::
+.. Provide a path to a TOML build configuration file::
 
-    > laforge build build/final_build.toml
+..     > laforge build build/final_build.toml
 
-Or let *laforge* figure it out::
+.. Or let *laforge* figure it out::
 
-    > ls
-    laforge.toml
-    > laforge build
+..     > ls
+..     laforge.toml
+..     > laforge build
 
-Starting a new build
-================================
+.. Starting a new build
+.. ================================
 
-Before trying to execute one, you'll probably want to start a build config.
-An example is included `LINKY LINK LINK`
+.. Before trying to execute one, you'll probably want to start a build config.
+.. An example is included `LINKY LINK LINK`
 
-**laforge init**
-    moo
-
-
-Recording build tasks
-================================
-
-The most important bits are the actual build tasks.
-Each specifies one of the following supported operations:
-
-**description**
-    Optional human description for logging output.
-
-**read**
-    Runs a Python script by importing it directly.
-    Nothing within the Python file is altered or adjusted,
-    and no parameters are passed.
-
-    .. note::
-
-        The import process makes the script more accessible for the build
-        process, but it might be helpful to be able to adjust the script
-        depending on whether it is being directly run or imported.
-        (E.g., import paths may need to be tweaked.)
-        Here is one way to determine its status:
-
-            .. code-block:: Python
-
-                try:
-                    assert __file__
-                    RUNNING_STANDALONE = True
-                except NameError:
-                    RUNNING_STANDALONE = False
+.. **laforge init**
+..     moo
 
 
-**execute**
-    Execute any number of queries written as a saved ``.sql`` script.
-    No changes are made to the SQL queries in the file,
-    and no parameters are passed.
+.. Recording build tasks
+.. ================================
 
-    .. note::
+.. The most important bits are the actual build tasks.
+.. Each specifies one of the following supported operations:
 
-        Following Microsoft SQL Server, the word **go** is used
-        as a batch separator across all distributions.
+.. **description**
+..     Optional human description for logging output.
+
+.. **read**
+..     Runs a Python script by importing it directly.
+..     Nothing within the Python file is altered or adjusted,
+..     and no parameters are passed.
+
+..     .. note::
+
+..         The import process makes the script more accessible for the build
+..         process, but it might be helpful to be able to adjust the script
+..         depending on whether it is being directly run or imported.
+..         (E.g., import paths may need to be tweaked.)
+..         Here is one way to determine its status:
+
+..             .. code-block:: Python
+
+..                 try:
+..                     assert __file__
+..                     RUNNING_STANDALONE = True
+..                 except NameError:
+..                     RUNNING_STANDALONE = False
 
 
-**write**
-    balh blah (relative to SCRIPT_DIR) that yields data from its final query
-    (i.e, a SELECT)
+.. **execute**
+..     Execute any number of queries written as a saved ``.sql`` script.
+..     No changes are made to the SQL queries in the file,
+..     and no parameters are passed.
+
+..     .. note::
+
+..         Following Microsoft SQL Server, the word **go** is used
+..         as a batch separator across all distributions.
 
 
-Build configuration
-================================
+.. **write**
+..     balh blah (relative to SCRIPT_DIR) that yields data from its final query
+..     (i.e, a SELECT)
 
-The config section of the TOML establishes core directories
-and references for SQL connectivity.
 
-**config.dir**
-    Paths can be absolute or relative to the build configuration TOML.
+.. Build configuration
+.. ================================
 
-    **config.dir.build**
-        Default: the directory of the build configuration TOML.
+.. The config section of the TOML establishes core directories
+.. and references for SQL connectivity.
 
-        .. note::
+.. **config.dir**
+..     Paths can be absolute or relative to the build configuration TOML.
 
-            To work from directories relative to where *laforge* is run,
-            use change the build directory to `./`.
+..     **config.dir.build**
+..         Default: the directory of the build configuration TOML.
 
-    **config.dir.read**
-        Default: `{dir.build}/data/`
+..         .. note::
 
-    **config.dir.execute**
-        Default: `{dir.build}/script/`
+..             To work from directories relative to where *laforge* is run,
+..             use change the build directory to `./`.
 
-    **config.dir.write**
-        Default: `{dir.build}/output/`
+..     **config.dir.read**
+..         Default: `{dir.build}/data/`
 
-**config.sql**
+..     **config.dir.execute**
+..         Default: `{dir.build}/script/`
 
-    The distribution and server are required. Default database and/or schema
-    are optional and dependent on distribution.
+..     **config.dir.write**
+..         Default: `{dir.build}/output/`
 
-    Alternatively, an OBDC SQL URL can be specified to pass to SQLAlchemy.
-    See https://www.connectionstrings.com/.
+.. **config.sql**
 
-    **config.sql.distro**
-        ...
+..     The distribution and server are required. Default database and/or schema
+..     are optional and dependent on distribution.
 
-    **config.sql.server**
-        ...
+..     Alternatively, an OBDC SQL URL can be specified to pass to SQLAlchemy.
+..     See https://www.connectionstrings.com/.
 
-    **config.sql.database**
-        ...
+..     **config.sql.distro**
+..         ...
 
-    **config.sql.schema**
-        ...
+..     **config.sql.server**
+..         ...
 
-    **config.sql.url**
+..     **config.sql.database**
+..         ...
+
+..     **config.sql.schema**
+..         ...
+
+..     **config.sql.url**
