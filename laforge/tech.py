@@ -3,7 +3,7 @@ import re
 from copy import deepcopy
 from pathlib import Path
 
-INPUTS = "./inputs.dat"
+INPUTS_FILENAME = "tech_inputs.dat"
 
 
 def nobabble(n=1, match=""):
@@ -35,7 +35,7 @@ class ModifiableVerb:
 
 class Technobabbler:
 
-    raw_inputs = (Path(__file__).parent / INPUTS).read_text()
+    raw_inputs = (Path(__file__).parent / INPUTS_FILENAME).read_text()
     _content = {}
     for line in raw_inputs.splitlines():
         if not line:

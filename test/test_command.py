@@ -1,6 +1,6 @@
 # import pytest
 
-from laforge.quarters.tech import nobabble
+from laforge.tech import nobabble
 from time import time
 
 

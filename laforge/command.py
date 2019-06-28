@@ -45,7 +45,7 @@ def build(ini, log="./laforge.log", debug=False, dry_run=False):
     help="Try to receive consultation(s) including MATCH.",
 )
 def consult(n, match):
-    from .quarters import tech
+    from . import tech
 
     tech.nobabble(n=n, match=match)
 

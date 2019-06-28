@@ -1,6 +1,6 @@
 import nox
 
-nox.options.reuse_existing_virtualenvs = False
+nox.options.reuse_existing_virtualenvs = True
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 
