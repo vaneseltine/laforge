@@ -73,11 +73,9 @@ def create(path):
 def env(path=None, no_warning=False):
     from .builder import show_env
 
-    if not user_confirms_cleartext(no_warning):
-        return None
-
-    path = Path(" ".join(path)) if path else None
-    show_env(path=path)
+    if user_confirms_cleartext(no_warning):
+        path = Path(" ".join(path)) if path else None
+        show_env(path=path)
 
 
 def user_confirms_cleartext(no_warning):

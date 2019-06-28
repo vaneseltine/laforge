@@ -33,20 +33,19 @@ def cli(session):
     session.run("laforge", "--version", silent=True)
 
 
+@nox.session()
+def slow(session):
+    session.install("-r", "requirements.txt")
+    session.install("-e", ".[all]")
+    session.run("pytest", "-k", "slow")
+
+
 @nox.session(python="python3.7")
 def sphinx(session):
+    session.install("-e", ".")
     session.install("-r", "./docs/requirements.txt")
-    for target in ["coverage", "html"]:
-        session.run(
-            "python",
-            "-m",
-            "sphinx",
-            "-E",
-            "-b",
-            target,
-            "./docs",
-            f"./docs/_build/{target}",
-        )
+    for target in ("coverage", "html"):
+        session.run("python", "setup.py", "build_sphinx", "-b", target, "-W")
 
 
 @nox.session()
@@ -56,19 +55,12 @@ def flake8(session):
 
 
 @nox.session()
-def slow(session):
-    session.install("-r", "requirements.txt")
-    session.install("-e", ".[all]")
-    session.run("pytest", "-k", "slow")
-
-
-@nox.session()
 def pylint(session):
     session.install("pylint")
-    session.run("pylint", "./laforge", "-d", "import-error", "--reports=yes")
+    session.run("pylint", "./laforge", "-d", "import-error")
 
 
 @nox.session()
 def black(session):
     session.install("black>=19.3b0")
-    session.run("python", "-m", "black", "--target-version", "py36", "./laforge")
+    session.run("python", "-m", "black", "--target-version", "py36", ".")
