@@ -3,7 +3,7 @@ import re
 from copy import deepcopy
 from pathlib import Path
 
-INPUTS_FILENAME = "tech_inputs.dat"
+INPUTS_FILENAME = "tech_inputs.txt"
 
 
 def nobabble(n=1, match=""):

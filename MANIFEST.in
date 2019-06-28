@@ -1,3 +1,4 @@
-include *.md LICENSE
-global-exclude *.py[co]
+include LICENSE
+include *.md
+include laforge/*.txt
 prune test
