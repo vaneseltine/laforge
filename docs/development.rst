@@ -2,21 +2,22 @@
 Contributing to Development
 ********************************
 
-*laforge* supports Python 3.6 through, currently, `the 3.8.0 alpha <https://docs.python.org/dev/>`_.
+*laforge* supports Python 3.6+.
 
-==================  =========== =========================================
+==================  =========== ==============================================
 Process             Tool         Documentation
-==================  =========== =========================================
-**Automation**      tox          `<https://tox.readthedocs.io/>`_
+==================  =========== ==============================================
+**Automation**      Nox          `<https://nox.readthedocs.io/>`_
 **Test**            pytest       `<https://docs.pytest.org/>`_
 **Test coverage**   pytest-cov   `<https://pytest-cov.readthedocs.io/>`_
 **Format**          Black        `<https://black.readthedocs.io/>`_
 **Lint**            Flake8       `<http://flake8.pycqa.org/>`_
+**List more**       Pylint       `<https://pylint.readthedocs.io/en/latest/>`_
 **Document**        Sphinx       `<https://www.sphinx-doc.org/>`_
-==================  =========== =========================================
+==================  =========== ==============================================
 
 
-Recommended Environment
+Suggested Environment
 ================================
 
 .. code-block:: shell
@@ -35,18 +36,11 @@ Recommended Environment
     # Install packages
     python -m pip install -r requirements.txt
 
+    # Optional [packages] to include Excel and/or non-SQLite databases
+    python -m pip install -e .[mysql]
+
+    # Run tests
+    python -m pytest
+
     # Run the gauntlet
     python -m nox
-
-Linux Note
-===========
-
-Debian and friends, such as Ubuntu, require several packages to function.
-I've installed the following (and their dependencies) for each version:
-
-    - python3.X
-    - python3.X-dev
-    - python3.X-venv
-
-For older versions of Python in Ubuntu, see:
-https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa

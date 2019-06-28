@@ -14,7 +14,6 @@ LOGO = r"""
 LOGO = LOGO[1:]
 
 RESET = "\033[0m"
-
 MONOCHROME = sys.platform.startswith("win")
 
 Color = namedtuple("Color", "red green blue")
