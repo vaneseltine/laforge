@@ -3,9 +3,8 @@ from shutil import rmtree
 
 import nox
 
-# -r to ovveride and reuse them instead
+# -r at the command line to ovveride and reuse all instead
 nox.options.reuse_existing_virtualenvs = False
-
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 
 
@@ -27,11 +26,7 @@ def pytest(session):
     session.install("-e", ".[all]")
     clean_dir("./build/coverage")
     session.run(
-        "pytest",
-        "--cov",
-        "--cov-config=setup.cfg",
-        "--cov-report=html:build/coverage",
-        "-k-slow",
+        "pytest", "--cov", "--cov-config=setup.cfg", "--cov-report=html:build/coverage"
     )
 
 
@@ -42,13 +37,6 @@ def cli(session):
     session.run("python", "-m", "laforge", "--version", silent=True)
     session.run("laforge", "--version", silent=True)
     session.run("laforge", "env", "--no-warning", silent=True)
-
-
-@nox.session()
-def slow(session):
-    session.install("-r", "requirements.txt")
-    session.install("-e", ".[all]")
-    session.run("pytest", "-k", "slow")
 
 
 @nox.session(reuse_venv=True)
