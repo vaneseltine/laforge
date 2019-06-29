@@ -19,7 +19,7 @@ install:
   - pip install --no-cache-dir -r requirements.txt
   - pip install --no-cache-dir -e .[ci]
 script:
-  - python -m coverage run -m pytest
+  - python -m coverage run -m pytest -v
 after_success:
   - python -m coveralls
 notifications:
