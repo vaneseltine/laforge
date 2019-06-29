@@ -22,3 +22,5 @@ script:
   - python -m coverage run -m pytest
 after_success:
   - python -m coveralls
+notifications:
+  webhooks: https://coveralls.io/webhook
