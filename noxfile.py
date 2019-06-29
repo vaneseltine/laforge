@@ -25,9 +25,8 @@ def pytest(session):
     session.install("-r", "requirements.txt")
     session.install("-e", ".[all]")
     clean_dir("./build/coverage")
-    session.run(
-        "pytest", "--cov", "--cov-config=setup.cfg", "--cov-report=html:build/coverage"
-    )
+    session.run("coverage", "run", "-m", "pytest")
+    session.run("coverage", "html")
 
 
 @nox.session(python=SUPPORTED_PYTHONS)

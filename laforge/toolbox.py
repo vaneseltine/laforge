@@ -59,7 +59,7 @@ def verify_file_is_writable(path, retry_attempts=3, retry_seconds=5):
 
 
 def flatten(foo):
-    """Take any set of nests in an iterator Fquand reduce it into one generator.
+    """Take any set of nests in an iterator and reduce it into one generator.
 
     'Nests' include any iterable except strings.
 
