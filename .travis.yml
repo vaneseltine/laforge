@@ -13,11 +13,14 @@ python:
   - "3.6-dev"
   - "3.7"
   - "3.7-dev"
-  - "3.8"
+  # - "3.8"
   - "3.8-dev"
   - "nightly"
 install:
   - pip install --no-cache-dir -r requirements.txt
   - pip install --no-cache-dir -e .[ci]
 script:
-  - python -m pytest
+  # - python -m pytest
+  - coverage run --source laforge -m pytest
+after_success:
+  - coveralls
