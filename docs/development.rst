@@ -52,12 +52,7 @@ Embedded TODOs
 .. todolist::
 
 
-Test Coverage
-================================
-
-`Latest Pytest Coverage Report <_static/htmlcov/index.html>`_
-
-Docs Coverage
+Docstring Gaps
 ================================
 
 .. include:: _static/python.txt

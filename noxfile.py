@@ -20,8 +20,10 @@ def pytest(session):
     session.run(
         "pytest",
         "--cov",
-        "--cov-config=setup.cfg",
-        "--cov-report=html:docs/_static/htmlcov",
+        "--cov-config setup.cfg",
+        "--cov-report xml:build/coverage/coverage.xml",
+        "--cov-report html:build/coverage/html",
+        "--cov-report annotate:build/coverage/annotate",
         "-k-slow",
     )
 
