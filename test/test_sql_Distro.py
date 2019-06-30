@@ -16,27 +16,30 @@ def test_get_exactly_one_distro_canonically(test_distro):
 @pytest.mark.parametrize(
     "canonical, incoming",
     [
-        ("mssql", "microsoft sql server 15.0"),
+        ("mssql", "mssql"),
         ("mssql", "microsoft sql server"),
         ("mssql", "microsoft sql"),
         ("mssql", "ms sql"),
-        ("mssql", "mssql"),
-        ("mssql", "sql server 14.0"),
         ("mssql", "sql server"),
+        ("mssql", "sql server 14.0"),
+        ("mssql", "microsoft sql server 15.0"),
+        ("mysql", "mysql"),
+        ("mysql", "my sql"),
         ("mysql", "maria"),
         ("mysql", "mariadb"),
-        ("mysql", "mysql"),
+        ("mysql", "maria db"),
+        ("postgresql", "postgresql"),
         ("postgresql", "post gre"),
         ("postgresql", "postgre"),
         ("sqlite", "sqlite3"),
+        ("sqlite", "sqlite"),
     ],
 )
-def test_get_exactly_one_distro_variants(canonical, incoming):
-    try:
-        assert Distro.get(incoming).name == canonical
-        assert Distro.get(incoming.upper()).name == canonical
-    except ModuleNotFoundError:
-        pytest.skip(f"Missing {canonical} module.")
+def test_get_exactly_one_distro_variants(canonical, incoming, test_distro):
+    if canonical != test_distro:
+        pytest.skip("")
+    assert Distro.get(incoming).name == canonical
+    assert Distro.get(incoming.upper()).name == canonical
 
 
 @pytest.mark.parametrize("badname", ["", 293, "asdf"])
