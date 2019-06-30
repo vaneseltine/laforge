@@ -4,16 +4,13 @@ import sqlalchemy as sa
 
 from laforge.distros import Distro, SQLDistroNotFound
 
-CANONICAL_NAMES = ["mssql", "mysql", "postgresql", "sqlite"]
 
-
-@pytest.mark.parametrize("name", CANONICAL_NAMES)
-def test_get_exactly_one_distro_canonically(name):
+def test_get_exactly_one_distro_canonically(test_distro):
     try:
-        result = Distro.get(name)
-        assert name.lower() == result.name.lower()
+        result = Distro.get(test_distro)
+        assert test_distro.lower() == result.name.lower()
     except ModuleNotFoundError:
-        pytest.skip(f"Missing {name} module.")
+        pytest.skip(f"Missing {test_distro} module.")
 
 
 @pytest.mark.parametrize(
@@ -71,42 +68,15 @@ def test_prepare_for_sqlite_engine(db, tmp_path):
     assert str(db or ":memory:") in url
 
 
-@pytest.mark.parametrize("name", ["mssql", "mysql", "postgresql"])
-def test_prepare_for_other_engines(name):
+def test_prepare_for_other_engines(test_distro):
+    if test_distro == "sqlite":
+        pytest.skip("sqlite handled elsewhere")
     try:
-        result = Distro.get(name)
+        result = Distro.get(test_distro)
     except ModuleNotFoundError:
-        pytest.skip(f"Missing {name} module.")
+        pytest.skip(f"Missing {test_distro} module.")
     url, _ = result.create_spec(server="srvr", database="db", engine_kwargs=FakeKwargs)
-    assert name in url
-
-
-@pytest.mark.parametrize("name", CANONICAL_NAMES)
-def test_dunder_hash(name):
-    try:
-        d = Distro.get(name)
-        assert isinstance(hash(d), int)
-    except ModuleNotFoundError:
-        pytest.skip(f"Missing {name} module.")
-
-
-@pytest.mark.parametrize("name", CANONICAL_NAMES)
-def test_dunder_str(name):
-    try:
-        d = Distro.get(name)
-        assert isinstance(str(d), str)
-    except ModuleNotFoundError:
-        pytest.skip(f"Missing {name} module.")
-
-
-@pytest.mark.parametrize("name", CANONICAL_NAMES)
-def test_dunder_repr(name):
-    try:
-        d = Distro.get(name)
-        assert isinstance(repr(d), str)
-        assert " object at 0x" not in repr(d)
-    except ModuleNotFoundError:
-        pytest.skip(f"Missing {name} module.")
+    assert test_distro in url
 
 
 @pytest.mark.parametrize("dtype", [int, pd.np.int64, pd.np.float64])
@@ -124,54 +94,3 @@ def test_no_integer_overflow_from_numpy(dtype, factor, i):
             return None
         Distro._well_within_range(sequence, sa.types.INT)
     assert len(record) == 0
-
-
-@pytest.mark.parametrize("distro", ["mysql", "postgresql"])
-@pytest.mark.parametrize(
-    "n, expectation",
-    [
-        (2 ** 4, "SMALLINT"),
-        (2 ** 12, "SMALLINT"),
-        (2 ** 16, "INT"),
-        (2 ** 24, "INT"),
-        (2 ** 48, "BIGINT"),
-        (2 ** 64, "DOUBLE"),
-    ],
-)
-def test_numeric_data_types_myorpost(n, expectation, distro, make_temp_table):
-
-    Distro.NUMERIC_PADDING_FACTOR = 1
-    distrocol = {"postgresql": "data_type", "mysql": "COLUMN_TYPE"}[distro]
-    t = make_temp_table(distro)
-    t.write(pd.DataFrame([n], columns=["mrcolumnface"]))
-    for c in t.columns:
-        assert str(c.type).startswith(expectation)
-    t.drop()
-
-
-@pytest.mark.mysql
-@pytest.mark.parametrize(
-    "n, expectation",
-    [
-        (2, sa.types.VARCHAR(length=50)),
-        (49, sa.types.VARCHAR(length=50)),
-        (50, sa.types.VARCHAR(length=50)),
-        (51, sa.types.VARCHAR(length=100)),
-        (99, sa.types.VARCHAR(length=100)),
-        (100, sa.types.VARCHAR(length=100)),
-        (101, sa.types.VARCHAR(length=150)),
-        (2 ** 15, sa.types.VARCHAR(length=32800)),
-        (2 ** 16 - 150, sa.types.VARCHAR(length=65400)),
-        # (2 ** 16 - 100, sa.types.LONGTEXT),
-        # (2 ** 16 - 50, sa.types.LONGTEXT),
-        # (2 ** 16, sa.types.LONGTEXT),
-    ],
-)
-def test_varchar_border_with_picky_sql_alchemy_types(n, expectation, make_temp_table):
-    t = make_temp_table("mysql")
-    df = pd.DataFrame(["x" * n], columns=["mscolumnface"])
-    t.write(df)
-    for c in t.columns:
-        assert str(c.type) == str(expectation)
-    # assert t.columns[0].type.lower() == expectation
-    t.drop()

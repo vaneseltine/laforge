@@ -1,4 +1,7 @@
-from laforge.sql import *
+import pytest
+from laforge.sql import Channel, Table, Script, execute
+from laforge.distros import Distro
+
 import pandas as pd
 
 df = pd.DataFrame([1, 2, 3, 4, 5], columns=["a"])

@@ -64,11 +64,11 @@ class Channel:
 
     @classmethod
     def grab(cls):
-        if not cls.known_channels:
+        try:
+            *_, last_channel = iter(cls.known_channels.values())
+        except ValueError:
             raise SQLChannelNotFound("No known SQL channels exist.")
-        if len(cls.known_channels) == 1:
-            return next(iter(cls.known_channels.values()))
-        raise SQLChannelNotFound("Cannot select from more than one SQL channel.")
+        return last_channel
 
     def _construct_engine(self, **engine_kwargs):
         existing_engine = self.retrieve_engine()
@@ -140,9 +140,7 @@ class Channel:
         )
 
     def __hash__(self):
-        return hash(
-            str(x) for x in (self.distro, self.server, self.database, self.schema) if x
-        )
+        return hash(repr(self))
 
     def __eq__(self, other):
         return hash(self) == hash(other)

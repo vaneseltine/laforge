@@ -1,22 +1,28 @@
+import os
 import sys
 import uuid
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+import dotenv
 import pandas as pd
 import pytest
-
 from laforge.builder import Verb
 from laforge.sql import Channel, Table
 
-try:
-    from test.secret_config import secrets as SECRETS
-except (ImportError, ModuleNotFoundError):
-    SECRETS = {"sqlite": {"distro": "sqlite", "database": ":memory:"}}
-    SECRETS["sql"] = SECRETS["sqlite"]
+# Pull variables, especially LFTEST_*, into os.environ
+dotenv.load_dotenv(dotenv.find_dotenv())
 
-TEST_DIR = Path(__file__).parent / "test"
-TEST_SAMPLES = TEST_DIR / "samples"
+DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
+SUPPORTED = [d for d in DISTROS if os.environ.get(f"LFTEST_{d.upper()}") == "1"]
+
+
+@pytest.fixture(scope="session")
+def supported_sqls():
+    return SUPPORTED or ["sqlite"]
+
+
+# Hooks and skips
 
 
 def pytest_runtest_teardown(item, nextitem):
@@ -54,7 +60,7 @@ def skip_by_markers(markers):
 def stata_is_required_but_missing(markers):
     if "stata" not in markers:
         return 0
-    if SECRETS.get("stata_executable"):
+    if os.environ.get("stata_executable"):
         return 0
     return "Path to Stata executable not available."
 
@@ -75,23 +81,75 @@ def sql_availability_violates_mark(markers):
     )
     if not sql_whitelist:
         return 0
-    current_sql_types = set(SECRETS)
-    if current_sql_types:
-        current_sql_types.add("sql")
-    else:
-        return "Requires SQL."
-    if current_sql_types.intersection(markers):
+    if set(supported_sqls).intersection(markers):
         return 0
     return "Requires specific SQL distribution: {}.".format(";".join(sql_whitelist))
 
 
-# fixtures
+# Session-scope fixtures
 
 
 @pytest.fixture(scope="session")
-def secrets():
-    yield SECRETS
-    return 0
+def unimportant_df():
+    return pd.DataFrame(
+        [(2, "o"), (0, "n"), (0, "i"), (8, "!")], columns=["alpha", "beta"]
+    )
+
+
+@pytest.fixture(scope="session")
+def test_distro():
+    return os.environ.get("LFTEST_DISTRO", "sqlite")
+
+
+# Function-scope fixtures
+
+
+@pytest.fixture(scope="function")
+def test_channel():
+    """
+    e.g.
+    LFTEST_MYSQL = 1
+    LFTEST_MYSQL_SERVER = localhost
+    LFTEST_MYSQL_DATABASE = test_mason
+    LFTEST_MYSQL_SCHEMA = test_mason
+    LFTEST_MYSQL_USERNAME = test_mason
+    LFTEST_MYSQL_PASSWORD = test_mason
+    """
+
+    distro = os.environ.get("LFTEST_DISTRO", "sqlite")
+    prefix = f"LFTEST_{distro}_".upper()
+    crop = len(prefix)
+    kwargs = {
+        k[crop:].lower(): v for k, v in os.environ.items() if k.startswith(prefix)
+    }
+    return Channel(distro=distro, **kwargs)
+
+
+@pytest.fixture(scope="function")
+def arbitrary_table(test_channel):
+    return Table(f"X{uuid.uuid1().hex}", channel=test_channel)
+
+
+@pytest.fixture(scope="function")
+def random_filename(suffix):
+    suffix = suffix.name or "." + random_path(3)
+    if suffix[0] != ".":
+        suffix = "." + suffix
+    return ("__TEST_" + random_path() + suffix).lower()
+
+
+def random_path(crop=None):
+    return str(uuid.uuid4())[:crop]
+
+
+@pytest.fixture(scope="function")
+def give_me_path(tmpdir, random_filename):
+    def _give_me_path(suffix=None):
+        if suffix and not suffix.startswith("."):
+            suffix = "." + suffix
+        return Path(tmpdir, random_filename).with_suffix(suffix)
+
+    return _give_me_path
 
 
 @pytest.fixture(scope="module")
@@ -124,80 +182,3 @@ def task_config():
         working_test_config["test_filename_generator"] = test_filename_generator
         yield working_test_config
     return 0
-
-
-@pytest.fixture(scope="session")
-def unimportant_df():
-    return pd.DataFrame(
-        [(2, "o"), (0, "n"), (0, "i"), (8, "!")], columns=["alpha", "beta"]
-    )
-
-
-@pytest.fixture()
-def minimal_df():
-    return pd.DataFrame([0])
-
-
-@pytest.fixture(scope="session")
-def prior_results(unimportant_df):
-    return unimportant_df
-
-
-@pytest.fixture()
-def random_filename(suffix):
-    suffix = suffix.name or "." + random_path()[:3]
-    if suffix[0] != ".":
-        suffix = "." + suffix
-    return ("__TEST_" + random_path() + suffix).lower()
-
-
-def random_path():
-    return str(uuid.uuid4())[:13]
-
-
-@pytest.fixture()
-def make_temp_table(request, secrets):
-    created_tables = []
-
-    def _make_temp_table(category="sql"):
-        if hasattr(category, "name"):
-            category = category.name
-        skip_by_markers([category])
-        c = Channel(**secrets[category])
-        t = Table(request.function.__name__, channel=c)
-        created_tables.append(t)
-        return t
-
-    yield _make_temp_table
-
-    for t in created_tables:
-        t.drop(ignore_existence=True)
-
-
-@pytest.fixture(scope="module")
-def make_channel(secrets):
-    def _make_channel(category="sql"):
-        if hasattr(category, "name"):
-            category = category.name
-        skip_by_markers([category])
-        return Channel(**secrets[category])
-
-    return _make_channel
-
-
-@pytest.fixture()
-def temp_config():
-    with TemporaryDirectory() as temp_build_dir:
-        cfg = {"build_dir": Path(temp_build_dir)}
-        cfg.update(SECRETS)
-        yield cfg
-
-
-@pytest.fixture()
-def give_me_path(tmpdir, random_filename):
-    def _give_me_path(suffix=None):
-        if suffix and not suffix.startswith("."):
-            suffix = "." + suffix
-        return Path(tmpdir, random_filename).with_suffix(suffix)
-
-    return _give_me_path

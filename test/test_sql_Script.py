@@ -8,8 +8,7 @@ see: py.test --fixtures
 import re
 
 import pytest
-
-from laforge.sql import Script, Channel, Identifier
+from laforge.sql import Channel, Identifier, Script
 
 
 @pytest.mark.parametrize(
@@ -42,15 +41,15 @@ def test_do_not_get_too_angry_at_go(s):
     assert "go" in Script._normalize_batch_end(s)
 
 
-def test_real_query_with_bad_columns(secrets, caplog):
+def test_real_query_with_bad_columns(test_channel, test_distro, caplog):
     stmt = {
         "mssql": "select top 5 1 from information_schema.tables;",
         "postgresql": "select 1, 2 from information_schema.tables limit 5;",
         "mysql": "select 1, 2 from information_schema.tables limit 5;",
         "sqlite": "select 1, 2 from sqlite_master;",
-    }[secrets["sql"]["distro"]]
+    }[test_distro]
 
-    df = Script(stmt, channel=Channel(**secrets["sql"])).to_table()
+    df = Script(stmt, channel=test_channel).to_table()
     # Builtin SQL drivers return bad column names (blank or '?column?')
     assert "WARNING" in caplog.text
     assert len(df.columns) > 0
@@ -73,8 +72,8 @@ def collapse_whitespace_TEST(s):
     return result
 
 
-def test_q_parsing(secrets):
-    q = Script("select * from hi.there;", channel=Channel(**secrets["sql"]))
+def test_q_parsing(test_channel):
+    q = Script("select * from hi.there;", channel=test_channel)
     assert q.parsed == ["select * from hi.there;"]
 
 
@@ -102,8 +101,8 @@ def test_q_parsing(secrets):
         ),
     ],
 )
-def test_query_parsing_go(inputs, cleaned_expected, secrets):
-    s = Script(inputs, channel=Channel(**secrets["sql"]))
+def test_query_parsing_go(inputs, cleaned_expected, test_channel):
+    s = Script(inputs, channel=test_channel)
     assert cleanup_whitespace(s.parsed) == cleaned_expected
 
 
@@ -128,8 +127,8 @@ def test_query_parsing_go(inputs, cleaned_expected, secrets):
         ),
     ],
 )
-def test_query_parsing_ignoring_comments(inputs, cleaned_expected, secrets):
-    s = Script(inputs, channel=Channel(**secrets["sql"]))
+def test_query_parsing_ignoring_comments(inputs, cleaned_expected, test_channel):
+    s = Script(inputs, channel=test_channel)
     assert cleanup_whitespace(s.parsed) == cleaned_expected
 
 
@@ -150,8 +149,8 @@ def test_query_parsing_ignoring_comments(inputs, cleaned_expected, secrets):
         ("    spam; --regular ham", ["spam;"]),
     ],
 )
-def test_comments_proper_double_dash(inputs, outputs, secrets):
-    s = Script(inputs, channel=Channel(**secrets["sql"]))
+def test_comments_proper_double_dash(inputs, outputs, test_channel):
+    s = Script(inputs, channel=test_channel)
     assert s.parsed == outputs
 
 
@@ -162,8 +161,8 @@ def test_comments_proper_double_dash(inputs, outputs, secrets):
         ("spam and eggs - - sausage", ["spam and eggs - - sausage;"]),
     ],
 )
-def test_parsing_ignore_non_double_dash(inputs, outputs, secrets):
-    s = Script(inputs, channel=Channel(**secrets["sql"]))
+def test_parsing_ignore_non_double_dash(inputs, outputs, test_channel):
+    s = Script(inputs, channel=test_channel)
     assert s.parsed == outputs
 
 
@@ -181,8 +180,8 @@ def test_parsing_ignore_non_double_dash(inputs, outputs, secrets):
         ("spam /* eggs */ ham", "spam  ham;"),
     ],
 )
-def test_parsing_remove_multilines(inputs, outputs, secrets):
-    s = Script(inputs, channel=Channel(**secrets["sql"]))
+def test_parsing_remove_multilines(inputs, outputs, test_channel):
+    s = Script(inputs, channel=test_channel)
     assert s.parsed[0] == outputs
 
 
@@ -197,12 +196,12 @@ def test_parsing_remove_multilines(inputs, outputs, secrets):
         ("spam /*/*/* eggs */*/ ham", "spam /* ham;"),
     ],
 )
-def test_parsing_nested_multilines(inputs, outputs, secrets):
-    s = Script(inputs, channel=Channel(**secrets["sql"]))
+def test_parsing_nested_multilines(inputs, outputs, test_channel):
+    s = Script(inputs, channel=test_channel)
     assert s.parsed[0] == outputs
 
 
-def test_large_query(secrets):
+def test_large_query(test_channel):
     query = """
             select spam from /*vikings.breakfast;
             -- eat all the spam before the vikings
@@ -221,38 +220,5 @@ def test_large_query(secrets):
         "and on;",
         "and on;",
     ]
-    q = Script(query, channel=Channel(**secrets["sql"]))
+    q = Script(query, channel=test_channel)
     assert cleanup_whitespace(q.parsed) == cleaned_expected
-
-
-@pytest.mark.mssql
-@pytest.mark.xfail
-def test_errors_being_swallowed(secrets):
-    raw = """
-    use IRISpii;
-
-    select * from linkage.sodifjsd;
-
-    if object_id('IRISpii.linkage.setup_for_reparsing') is not null drop table IRISpii.linkage.setup_for_reparsing;
-
-    CREATE TABLE [linkage].[setup_for_reparsing](
-        [display_id] [int] NULL,
-        [new_emp_number] [varchar](200) NULL,
-        [last_name] [varchar](50) NULL,
-        [first_name] [varchar](50) NULL,
-        [middle_name] [varchar](50) NULL,
-        [full_name] [varchar](200) NOT NULL
-    ) ON [PRIMARY];
-
-    with fulled as (
-        select
-            *,
-            concat(rtrim(replace(emp_last_name, ',', '')), ', ', rtrim(emp_first_name), ' '+rtrim(middle_name)) as full_name
-        from linkage.sdaoifjs
-    )
-    insert into linkage.setup_for_reparsing (display_id, new_emp_number, last_name, first_name, middle_name, full_name)
-    select * from fulled;
-
-    go """
-    with pytest.raises(Exception):
-        Script(raw, channel=Channel(**secrets["sql"])).execute()

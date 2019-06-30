@@ -10,7 +10,7 @@ def test_writable(tmpdir):
 
 @pytest.mark.xfail(reason="Need to sort out how to run this.")
 def test_unwritable(tmpdir):
-    writable_file = tmpdir / "troll's_head_tavern.txt"
+    writable_file = tmpdir / "technical_journals.txt"
     with writable_file.open("a") as write_that:
         write_that.write("blah")
         with pytest.raises(PermissionError):
