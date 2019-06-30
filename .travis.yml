@@ -17,12 +17,9 @@ python:
   # - "nightly"
 install:
   - pip install --no-cache-dir -r requirements.txt
-  - pip install --no-cache-dir -e .[ci]
+  - pip install --no-cache-dir -e .[excel]
 script:
-  - python -m coverage --parallel-mode run -m pytest -v
-after_success:
-  - coverage combine
-  - coverage report
-#   - python -m coveralls
-# notifications:
-#   webhooks: https://coveralls.io/webhook
+  - python -m pytest -v
+  - laforge --version
+  - laforge env
+  - laforge consult

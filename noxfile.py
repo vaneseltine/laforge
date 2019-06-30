@@ -97,6 +97,7 @@ def cli(session):
     session.run("python", "-m", "laforge", "--version", silent=True)
     session.run("laforge", "--version", silent=True)
     session.run("laforge", "env", "--no-warning", silent=True)
+    session.run("laforge", "consult", "--match", "diagnostic", silent=True)
 
 
 @nox.session(reuse_venv=True)

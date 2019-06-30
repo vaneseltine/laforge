@@ -412,9 +412,6 @@ class BaseTask:
     """
 
     def __init__(self, *, identifier, verb, target, content, config):
-        """
-        Initialize Task.
-        """
         self.identifier = identifier
         self.verb = verb
         self.target = target
@@ -484,7 +481,7 @@ class FileReader(BaseTask):
 class InternalPythonExecutor(BaseTask):
     """Execute (without importing) Python script by path
 
-    This will set `__main__ = 'laforge'`
+    Allows script adjustment via setting the run name: `__main__ = 'laforge'`
 
     ..todo ::
 

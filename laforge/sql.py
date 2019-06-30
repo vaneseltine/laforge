@@ -472,7 +472,6 @@ class Identifier:
     .. todo::
         class InvalidIdentifierError
         relay_id_problem(identifier, action, reason=None, replacement=None)
-
     """
 
     # A-Z, a-z, 0-9, @ # $ _ mostly okay for table name following first letter

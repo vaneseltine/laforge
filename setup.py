@@ -16,12 +16,11 @@ extras = {
     "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server -- travis can't build
     "excel": ["xlrd==1.2.0", "openpyxl==2.6.2"],  # Pandas backends
 }
-extras["ci"] = extras["mariadb"] + extras["excel"]
 extras["all"] = list(set(x for y in extras.values() for x in y))
 
 setuptools.setup(
     packages=setuptools.find_packages(),
-    data_files=glob(f"laforge/**/*.txt"),
+    data_files=glob(f"laforge/*.txt"),
     entry_points={"console_scripts": [f"laforge = laforge:run_laforge"]},
     install_requires=basics,
     extras_require=extras,

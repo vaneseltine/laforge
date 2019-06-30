@@ -9,7 +9,7 @@ INPUTS_FILENAME = "tech_inputs.txt"
 def nobabble(n=1, match=""):
     for _ in range(n):
         if match:
-            babble = Technobabbler.find_babble(match)
+            babble = Technobabbler.find(match)
         else:
             babble = Technobabbler().babble()
         print(babble)
@@ -57,7 +57,7 @@ class Technobabbler:
         return capitalize_sentences(completed_babble)
 
     @classmethod
-    def find_babble(cls, match, tries=1000):
+    def find(cls, match, tries=1000):
         for _ in range(tries):
             attempt = cls().babble()
             if re.search(match, attempt, flags=re.IGNORECASE):

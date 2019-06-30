@@ -1,4 +1,4 @@
--e .[ci]
+-e .[excel]
 black>=19.3b0
 coverage==4.5.3
 coveralls==1.8.1

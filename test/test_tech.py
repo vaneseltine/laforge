@@ -1,6 +1,6 @@
 # import pytest
 
-from laforge.tech import nobabble
+from laforge.tech import nobabble, Technobabbler
 from time import time
 
 
@@ -14,3 +14,7 @@ def test_technobabble_takes_less_than_ten_milliseconds():
         start = time()
         nobabble()
         assert (time() - start) < 0.01
+
+
+def test_technobabble_finds_match():
+    assert "iter" in Technobabbler().find(match="iter")
