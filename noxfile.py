@@ -1,4 +1,7 @@
 """
+cf. https://github.com/saltstack/salt/blob
+    /328989d6cc8f81fc100c9aa900a4e3613dc7c19d/noxfile.py
+
 example selection from .env:
 
     LFTEST_MSSQL = 0
@@ -22,9 +25,10 @@ example selection from .env:
 
 """
 
+import os
+import sys
 from pathlib import Path
 from shutil import rmtree
-import os
 
 import dotenv
 import nox
@@ -51,27 +55,38 @@ def clean_dir(s):
 
 
 @nox.session(python=SUPPORTED_PYTHONS)
-def pytest(session):
+def pytest_pyv(session):
     """
     Note: tox required passenv = WINDIR
     See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
     """
     session.install("-r", "requirements.txt")
     session.install("-e", ".[all]")
-    clean_dir("./build/coverage")
-    session.run("coverage", "run", "-m", "pytest")
-    session.run("coverage", "html")
+    session.run("coverage", "run", "--parallel-mode", "-m", "pytest")
 
 
 @nox.session()
 @nox.parametrize("distro", get_machine_distros(DISTROS))
-def new_pytest(session, distro):
+def pytest_db(session, distro):
     session.install("-r", "requirements.txt")
     session.install("-e", f".[{distro}]")
+    session.run(
+        "coverage",
+        "run",
+        "--parallel-mode",
+        "-m",
+        "pytest",
+        env={"LFTEST_DISTRO": distro},
+    )
+
+
+@nox.session()
+def coverage_combine(session):
     clean_dir("./build/coverage")
-    session.run("python", "-m", "pytest", env={"LFTEST_DISTRO": distro})
-    # session.run("coverage", "run", "-m", "pytest", env={"LFTEST_DISTRO": distro})
+    session.install("coverage")
+    session.run("coverage", "combine")
     session.run("coverage", "report")
+    session.run("coverage", "html")
 
 
 @nox.session(python=SUPPORTED_PYTHONS)
@@ -116,3 +131,8 @@ def pylint(session):
 def black(session):
     session.install("-U", "black")
     session.run("python", "-m", "black", "--target-version", "py36", ".")
+
+
+if __name__ == "__main__":
+    sys.stderr.write(f"Invoke {__file__} by running Nox.")
+    exit(1)
