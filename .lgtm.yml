@@ -1,3 +1,2 @@
 queries:
-  - exclude: py/missing-equals
   - exclude: py/non-iterable-in-for-loop
