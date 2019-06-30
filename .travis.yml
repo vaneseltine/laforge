@@ -19,8 +19,10 @@ install:
   - pip install --no-cache-dir -r requirements.txt
   - pip install --no-cache-dir -e .[ci]
 script:
-  - python -m coverage run -m pytest -v
+  - python -m coverage --parallel-mode run -m pytest -v
 after_success:
-  - python -m coveralls
-notifications:
-  webhooks: https://coveralls.io/webhook
+  - coverage combine
+  - coverage report
+#   - python -m coveralls
+# notifications:
+#   webhooks: https://coveralls.io/webhook

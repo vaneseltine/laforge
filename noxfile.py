@@ -81,12 +81,13 @@ def pytest_db(session, distro):
 
 
 @nox.session()
-def coverage_combine(session):
+def coverage(session):
     clean_dir("./build/coverage")
-    session.install("coverage")
+    session.install("coverage", "coveralls")
     session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
+    session.run("coveralls")
 
 
 @nox.session(python=SUPPORTED_PYTHONS)
