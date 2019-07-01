@@ -157,6 +157,11 @@ def give_me_path(tmpdir, random_filename):
     return _give_me_path
 
 
+@pytest.fixture(scope="function")
+def better_tmp_path(tmpdir):
+    return Path(tmpdir, str(uuid.uuid4())).with_suffix(".rnd")
+
+
 @pytest.fixture(scope="module")
 def task_config():
 

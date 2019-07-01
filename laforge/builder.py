@@ -513,18 +513,41 @@ class FileWriter(BaseTask):
         logger.info("Wrote %s", self.path)
 
     @classmethod
-    def write(cls, *, path, target, df):
+    def write(cls, *, path, target, df, retry_attempts=3, retry_seconds=5):
         logger.debug(
             f"Preparing to write {len(df):,} rows, {len(df.columns)} columns to {path}"
         )
-        # Weirdly, this affects html output as well
-        pd.set_option("display.max_colwidth", 100)
+
+        pd.set_option("display.max_colwidth", 100)  # Weirdly affects html output
 
         if df.empty:
             logger.warning(f"Writing an empty dataset to {path}")
-        toolbox.prepare_to_access(path)
+        if not path.parent.exists():
+            path.parent.mkdir(parents=True)
+
         method, kwargs = cls.filetypes[target]
-        getattr(df, method)(path, **kwargs)
+
+        for i in range(retry_attempts):
+            try:
+                getattr(df, method)(path, **kwargs)
+                return None
+            except PermissionError:
+                error_message = (
+                    f"Permission denied to {path}. Is it open in another program?"
+                )
+                logger.error(error_message)
+            remaining = retry_attempts - i
+            plural_rem = "" if remaining == 1 else "s"
+            logger.error(
+                "%s attempt%s remaining. Trying %s again in %s second%s...",
+                remaining,
+                plural_rem,
+                path,
+                retry_seconds,
+                plural_sec,
+            )
+            time.sleep(retry_seconds)
+        raise PermissionError(f"Permission denied to {path}")
 
 
 @Task.register(Verb.EXIST)

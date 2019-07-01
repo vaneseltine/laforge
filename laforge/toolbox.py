@@ -23,41 +23,6 @@ def round_up(n, nearest=1):
     return nearest * math.ceil(n / nearest)
 
 
-def prepare_to_access(path):
-    """Make directory exist and verify that file would be writable"""
-    if path.exists():
-        verify_file_is_writable(path)
-    else:
-        if not path.parent.exists():
-            path.parent.mkdir(parents=True)
-
-
-def verify_file_is_writable(path, retry_attempts=3, retry_seconds=5):
-    """Check for locked file (e.g. Excel has CSV open)"""
-    plural_sec = "" if retry_seconds == 1 else "s"
-    for i in range(retry_attempts):
-        try:
-            with path.open("a"):
-                return None
-        except PermissionError:
-            error_message = (
-                f"Permission denied to {path}. Is it open in another program?"
-            )
-            logger.error(error_message)
-        remaining = retry_attempts - i
-        plural_rem = "" if remaining == 1 else "s"
-        logger.error(
-            "%s attempt%s remaining. Trying %s again in %s second%s...",
-            remaining,
-            plural_rem,
-            path,
-            retry_seconds,
-            plural_sec,
-        )
-        time.sleep(retry_seconds)
-    raise PermissionError(f"Permission denied to {path}")
-
-
 def flatten(foo):
     """Take any set of nests in an iterator and reduce it into one generator.
 
