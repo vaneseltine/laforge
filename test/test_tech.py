@@ -10,11 +10,12 @@ def test_technobabble_does_not_just_break():
         technobabble(Technobabbler)
 
 
-def test_technobabble_takes_less_than_ten_milliseconds():
+def test_technobabble_no_longer_than_twenty_milliseconds():
     for _ in range(10):
         start = time()
         technobabble(Technobabbler)
-        assert (time() - start) < 0.01
+        elapsed = time() - start
+        assert elapsed <= 0.02
 
 
 def test_technobabble_prints_match(capsys):  # or use "capfd" for fd-level

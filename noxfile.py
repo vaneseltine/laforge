@@ -86,11 +86,14 @@ def pytest_db(session, distro):
 @nox.session()
 def coverage(session):
     clean_dir("./build/coverage")
-    session.install("coverage", "coveralls")
-    session.run("coverage", "combine")
+    session.install("coverage")
+    if len([Path(".").glob(".coverage*")]) > 1:
+        session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
-    session.run("coveralls")
+    if not WINDOWS:
+        session.install("coveralls")
+        session.run("coveralls")
 
 
 @nox.session(python=SUPPORTED_PYTHONS)
