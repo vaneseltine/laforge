@@ -118,7 +118,7 @@ Features:
 
 .. **config.sql**
 
-..     The distribution and server are required. Default database and/or 
+..     The distribution and server are required. Default database and/or
 ..     schema are optional and dependent on distribution.
 
 ..     Alternatively, an OBDC SQL URL can be specified to pass to SQLAlchemy.
