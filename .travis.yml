@@ -21,5 +21,4 @@ install:
 script:
   - python -m pytest -v
   - laforge --version
-  - laforge env --no-warning
   - laforge consult
