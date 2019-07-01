@@ -28,29 +28,37 @@ def truecolor(red, green, blue, background):
     return f"\033[{48 if background else 38};2;{red};{green};{blue}m"
 
 
-def colorize(s, fore=None, back=None):
+def colorize(s, fore=None, back=None, monochrome=False):
     """ Add foreground and/or background color to a string. """
-    if MONOCHROME:
+    if monochrome:
         return s
     forestring = truecolor(*fore, background=False) if fore else ""
     backstring = truecolor(*back, background=True) if back else ""
-    return f"{RESET}{forestring}{backstring}{s}{RESET}"
+    colored = f"{RESET}{forestring}{backstring}{s}{RESET}"
+    return colored
 
 
-def get_clickable():
+def get_version_display(monochrome=MONOCHROME):
     from . import __version__
 
-    logo = colorize(LOGO + " %(version)s\n", fore=Color(102, 204, 255))
-    lfline = colorize(
-        f"laforge {__version__} at {Path(__file__).parent.absolute()}",
-        fore=Color(127, 127, 127),
+    items_to_combine = [
+        (LOGO + " %(version)s\n", Color(102, 204, 255)),
+        (
+            f"laforge {__version__} at {Path(__file__).parent.absolute()}",
+            Color(127, 127, 127),
+        ),
+        (
+            f"Python {sys.version.split(' ')[0]} at {sys.executable}",
+            Color(127, 127, 127),
+        ),
+    ]
+    combined = "\n".join(
+        (
+            colorize(s, fore=color, monochrome=monochrome)
+            for s, color in items_to_combine
+        )
     )
-    pyline = colorize(
-        f"Python {sys.version.split(' ')[0]} at {sys.executable}",
-        fore=Color(127, 127, 127),
-    )
-
-    return "\n".join((logo, lfline, pyline))
+    return combined
 
 
 """

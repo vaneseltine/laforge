@@ -17,7 +17,7 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
-@click.version_option(version=LF_VERSION, message=logo.get_clickable())
+@click.version_option(version=LF_VERSION, message=logo.get_version_display())
 def run_cli():
     pass
 

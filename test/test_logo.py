@@ -1,9 +1,20 @@
-# import pytest
+from laforge.logo import get_version_display
 
-from laforge.logo import get_clickable
+COLOR_SYNTAX_PREFIX = "\033["
 
 
-def test_logo_creation():
-    clickable = get_clickable()
-    for thing in ("laforge", "python"):
-        assert thing in clickable.lower()
+def test_version_display_includes_laforge_and_python_versions():
+    clickable = get_version_display().lower()
+    assert "laforge" in clickable
+    assert "python" in clickable
+
+
+def test_colored_display_includes_color_tags():
+    clickable = get_version_display(monochrome=False).lower()
+    assert COLOR_SYNTAX_PREFIX in clickable
+
+
+def test_monochrome_display_excludes_color_tags():
+    clickable = get_version_display(monochrome=True).lower()
+    assert COLOR_SYNTAX_PREFIX not in clickable
+
