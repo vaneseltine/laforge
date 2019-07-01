@@ -58,9 +58,7 @@ def test_csv_do_not_parse_null_values(give_me_path, task_config):
 
 
 @pytest.mark.parametrize("suffix", [Target.CSV, Target.DTA, Target.HTML, Target.XLSX])
-def test_write_creates_specified_file(
-    task_config, unimportant_df, random_filename, suffix
-):
+def test_write_creates_specified_file(task_config, minimal_df, random_filename, suffix):
     # the random_filename fixture automagically receives suffix
     # it's pretty cool
     final_path = Path(task_config["write_dir"], random_filename)
@@ -69,7 +67,7 @@ def test_write_creates_specified_file(
         raw_verb="write", raw_content=str(random_filename), config=task_config
     )
     try:
-        writer.implement(unimportant_df)
+        writer.implement(minimal_df)
     except UnicodeEncodeError:
         pytest.skip("Broken on sr.ht...")
     else:

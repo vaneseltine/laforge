@@ -57,7 +57,7 @@ class Technobabbler:
         return capitalize_sentences(completed_babble)
 
     @classmethod
-    def find(cls, match, tries=1000):
+    def find(cls, match, tries=100):
         for _ in range(tries):
             attempt = cls().babble()
             if re.search(match, attempt, flags=re.IGNORECASE):

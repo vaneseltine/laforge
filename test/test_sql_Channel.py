@@ -40,12 +40,12 @@ def test_create_objects_via_shared_channel(test_channel):
     assert t.channel == test_channel
 
 
-def test_finder_finds_created_tables(test_channel, unimportant_df):
+def test_finder_finds_created_tables(test_channel, medium_df):
     c = test_channel
     t = Table("laforge_test_tester", channel=test_channel)
     schema = test_channel.schema
     t.drop(ignore_existence=True)
-    t.write(unimportant_df)
+    t.write(medium_df)
     assert t.exists()
     assert c.find("laforge_test_tester")
     assert c.find("laforge_%_tester")
@@ -55,11 +55,11 @@ def test_finder_finds_created_tables(test_channel, unimportant_df):
     t.drop()
 
 
-def test_finder_does_not_find_dropped_tables(test_channel, unimportant_df):
+def test_finder_does_not_find_dropped_tables(test_channel, medium_df):
     c = test_channel
     t = Table("laforge_test_tester", channel=test_channel)
     schema = test_channel.schema
-    t.write(unimportant_df)
+    t.write(medium_df)
     assert t.exists()
     t.drop()
     assert not t.exists()

@@ -16,6 +16,8 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
 SUPPORTED = [d for d in DISTROS if os.environ.get(f"LFTEST_{d.upper()}") == "1"]
 
+SAMPLES = {f.stem: pd.read_csv(f.resolve()) for f in Path(".").glob("**/*.csv")}
+
 
 @pytest.fixture(scope="session")
 def supported_sqls():
@@ -90,10 +92,13 @@ def sql_availability_violates_mark(markers):
 
 
 @pytest.fixture(scope="session")
-def unimportant_df():
-    return pd.DataFrame(
-        [(2, "o"), (0, "n"), (0, "i"), (8, "!")], columns=["alpha", "beta"]
-    )
+def minimal_df():
+    return SAMPLES["small"]
+
+
+@pytest.fixture(scope="session")
+def medium_df():
+    return SAMPLES["medium"]
 
 
 @pytest.fixture(scope="session")

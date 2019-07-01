@@ -10,31 +10,31 @@ iso_table_name_generation = strategies.from_regex(
 @pytest.mark.slow
 @given(incoming=iso_table_name_generation)
 @settings(max_examples=50, deadline=None)
-def test_sql_iso_standard_table_name(incoming, unimportant_df, test_channel):
+def test_sql_iso_standard_table_name(incoming, minimal_df, test_channel):
     t = Table(f"{incoming}", channel=test_channel)
     if t.exists():
         return None
     try:
-        t.write(unimportant_df)
+        t.write(minimal_df)
     finally:
         t.drop(ignore_existence=True)
 
 
-def test_drop_mechanics(unimportant_df, arbitrary_table):
+def test_drop_mechanics(minimal_df, arbitrary_table):
     t = arbitrary_table
-    t.write(unimportant_df)
+    t.write(minimal_df)
     t.drop(ignore_existence=True)
     with pytest.raises(SQLTableNotFound):
         t.drop(ignore_existence=False)
-    t.write(unimportant_df)
+    t.write(minimal_df)
     t.drop(ignore_existence=False)
     t.drop(ignore_existence=True)
 
 
-def test_row_count(arbitrary_table, unimportant_df):
+def test_row_count(arbitrary_table, minimal_df):
     t = arbitrary_table
-    t.write(unimportant_df)
-    assert len(t) == len(unimportant_df) > 0
+    t.write(minimal_df)
+    assert len(t) == len(minimal_df) > 0
 
 
 def test_insufficient_identifiers(test_channel):
