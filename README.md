@@ -93,7 +93,10 @@ https://laforge.readthedocs.io/en/latest/
 
 [![Core build service at builds.sr.ht.](https://img.shields.io/badge/build_service-builds.sr.ht-green.svg?style=for-the-badge&logoWidth=0)](https://builds.sr.ht/~matvan/laforge)
 
-[![Designed with Diet Coke.](https://img.shields.io/badge/designed_with-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)]()
+[![Powered by Python.](https://img.shields.io/badge/powered_by-python-3776ab.svg?style=for-the-badge&logoWidth=5)](https://www.python.org/)
+
+
+[![Designed with Diet Coke.](https://img.shields.io/badge/and_also_by-diet_coke-5C4033.svg?style=for-the-badge&logoWidth=5)]()
 
 ### 🤖 Automation
 
@@ -103,19 +106,19 @@ https://laforge.readthedocs.io/en/latest/
 
 [![Documentation hosted on Read the Docs](https://img.shields.io/readthedocs/laforge.svg?style=for-the-badge&label=Read%20the%20Docs)](https://readthedocs.org/projects/laforge/builds/)
 
-[![Travis testing with coverage)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis)](https://travis-ci.com/vaneseltine/laforge)
+[![Travis testing with coverage)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis&logo=travis-ci&logoColor=fff)](https://travis-ci.com/vaneseltine/laforge)
 
-[![Coveralls coverage reporting](https://img.shields.io/coveralls/github/vaneseltine/laforge.svg?style=for-the-badge)](https://coveralls.io/github/vaneseltine/laforge)
+[![Coveralls coverage reporting](https://img.shields.io/coveralls/github/vaneseltine/laforge.svg?style=for-the-badge&logo=coveralls)](https://coveralls.io/github/vaneseltine/laforge)
 
 ### 🚀 Downstream
 
-[![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/vaneseltine/laforge.svg?label=github&style=for-the-badge)](https://github.com/vaneseltine/laforge)
+[![GitHub tag (latest by date)](https://img.shields.io/github/tag-date/vaneseltine/laforge.svg?label=github&style=for-the-badge&logo=github&logoColor=fff)](https://github.com/vaneseltine/laforge)
 
-[![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge)](https://pypi.python.org/pypi/laforge)
+[![PyPI](https://img.shields.io/pypi/v/laforge.svg?style=for-the-badge&logo=python&logoColor=fff)](https://pypi.python.org/pypi/laforge)
 
 ### 🧙‍ Author
 
-[![Matt VanEseltine](https://img.shields.io/badge/matt-vaneseltine-888.svg?style=for-the-badge&logo=linux&logoColor=fff&color=violet)](https://vaneseltine.github.io)
+[![Matt VanEseltine](https://img.shields.io/badge/name-matt_vaneseltine-888.svg?style=for-the-badge&logo=linux&logoColor=fff&color=violet)](https://vaneseltine.github.io)
 
 [![matvan@umich.edu](https://img.shields.io/badge/email-matvan@umich.edu-888.svg?style=for-the-badge&logo=gmail&logoColor=fff&color=00274c)](matvan@umich.edu)
 
@@ -126,4 +129,4 @@ https://laforge.readthedocs.io/en/latest/
 
 [![https://twitter.com/vaneseltine](https://img.shields.io/badge/twitter-@vaneseltine-blue.svg?style=for-the-badge&logo=twitter&logoColor=fff&color=1da1f2)](https://twitter.com/vaneseltine)
 
-<img style="float: right;" src="docs/_static/PythonPoweredSmall.gif">
+[![Matt VanEseltine at Stack Overflow.](https://img.shields.io/badge/stack_overflow-matt_vaneseltine-888.svg?style=for-the-badge&logo=stack-overflow&logoColor=fff&color=f48024)](https://stackoverflow.com/users/7846185/matt-vaneseltine)
