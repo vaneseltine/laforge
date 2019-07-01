@@ -4,15 +4,11 @@ import configparser
 import logging
 import runpy
 import subprocess
-import sys
 import textwrap
-import time
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-from pprint import pprint
 
-import click
 import dotenv
 import pandas as pd
 
@@ -24,7 +20,9 @@ logger.debug(__name__)
 
 
 def show_env(path=None):
-    """Show the calculated generic section environment"""
+    """Show the calculated generic section environment
+
+    ..todo: TODO: move interactive portion to command.py"""
     if path:
         path = Path(path).resolve(strict=True)
         config_str = path.read_text()
@@ -33,87 +31,7 @@ def show_env(path=None):
         config_str = ""
         location = Path(".")
     task_list = TaskList(from_string=config_str, location=location)
-    pprint(task_list.load_section_config())
-
-
-def run_build(script_path, *, log, debug=False, dry_run=False):
-    """laforge's core build command"""
-    path = Path(script_path)
-    if path.is_dir():
-        path = find_build_config_in_directory(path)
-
-    start_time = time.time()
-    global logger  # pylint: disable=global-statement
-    logger = get_package_logger(log, debug)
-
-    # THEN set logging -- helps avoid importing pandas at debug level
-
-    logger.info("%s launched.", path)
-    if debug:
-        click.echo("Debug mode is on.")
-    logger.debug("Debug mode is on.")
-
-    task_list = TaskList(path.read_text(), location=path.parent)
-    if dry_run:
-        task_list.dry_run()
-    else:
-        task_list.execute()
-        elapsed = seconds_since(start_time)
-        logger.info("%s completed in %s seconds.", path, elapsed)
-
-
-def find_build_config_in_directory(path):
-    _acceptable_globs = ["build*.ini", "*laforge*.ini"]
-    build_files = None
-    for fileglob in _acceptable_globs:
-        build_files = list(path.glob(fileglob))
-        if build_files:
-            break
-    if not build_files:
-        print(
-            "ERROR: No laforge INI (e.g., {eg}) "
-            "found in {dir}. ".format(dir=path, eg=(" or ".join(_acceptable_globs)))
-        )
-        exit(1)
-    if len(build_files) > 1:
-        print("ERROR: Must specify a laforge INI: {}".format(build_files))
-        exit(1)
-    return build_files[0]
-
-
-def seconds_since(previous_time, round_to=2):
-    elapsed_raw = time.time() - previous_time
-    if round_to:
-        return round(elapsed_raw, round_to)
-    return elapsed_raw
-
-
-def get_package_logger(log_file, debug):
-
-    noisiness = logging.DEBUG if debug else logging.INFO
-
-    if noisiness == logging.DEBUG:
-        formatter = logging.Formatter(
-            fmt="{asctime} {name:<20} {lineno:>3}:{levelname:<7} | {message}",
-            style="{",
-            datefmt=r"%Y%m%d-%H%M%S",
-        )
-    else:
-        formatter = logging.Formatter(
-            fmt="{asctime} {levelname:>7} | {message}", style="{", datefmt=r"%H:%M:%S"
-        )
-    file_handler = logging.FileHandler(filename=log_file)
-    file_handler.setFormatter(formatter)
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(formatter)
-    handlers = [file_handler, stream_handler]
-    logging.basicConfig(level=logging.INFO, handlers=handlers)
-
-    logging.getLogger().setLevel(noisiness)
-
-    new_logger = logging.getLogger(__name__)
-    new_logger.debug(f"Logging: {log_file}")
-    return new_logger
+    return task_list.load_section_config()
 
 
 class Verb(Enum):
@@ -425,7 +343,6 @@ class BaseTask:
     @property
     def path(self):
         """For handlers where dir[verb] + content = path"""
-        print(self.config)
         parent = Path(self.config["dir"].get(self.verb, "."))
         return parent / self.content
 
@@ -471,7 +388,6 @@ class FileReader(BaseTask):
     def implement(self, prior_results=None):
         logger.debug("Reading %s", self.path)
         method, kwargs = self.filetypes[self.target]
-        print(self.path)
         df = getattr(pd, method)(self.path, **kwargs)
         logger.info("Read %s", self.path)
         return df

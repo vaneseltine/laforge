@@ -3,12 +3,9 @@ Undocumented Python objects
 laforge.builder
 ---------------
 Functions:
- * find_build_config_in_directory
- * get_package_logger
  * get_verb
  * is_verb
  * run_cmd
- * seconds_since
 
 Classes:
  * BaseTask -- missing methods:
@@ -52,6 +49,7 @@ Classes:
 laforge.command
 ---------------
 Functions:
+ * technobabble
  * user_confirms_cleartext
 
 laforge.distros
@@ -91,7 +89,6 @@ laforge.tech
 ------------
 Functions:
  * capitalize_sentences
- * nobabble
 
 Classes:
  * ModifiableVerb

@@ -2,23 +2,23 @@ import pytest
 from laforge.sql import Channel, Script, SQLChannelNotFound, Table, execute
 
 
-def test_blind_execute_fails(tmpdir):
+def test_empty_blind_execute_fails(tmpdir):
     with pytest.raises(SQLChannelNotFound):
         _ = Channel.grab()
+    with pytest.raises(SQLChannelNotFound):
+        execute("select 1;")
 
 
 def test_blind_execute_with_one_channel(tmpdir):
     c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
     assert Channel.grab() == c1
+    execute("select 1;")
 
 
-def test_blind_execute(tmpdir):
+def test_blind_grab_the_latest(tmpdir):
     c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
-    print(hash(c1))
     c2 = Channel(distro="sqlite", database=tmpdir / "c2.db")
-    print(hash(c2))
     c3 = Channel(distro="sqlite", database=tmpdir / "c3.db")
-    print(hash(c3))
     assert c1 != c2
     assert c1 != c3
     assert c2 != c3
@@ -36,8 +36,7 @@ def test_bad_statements(test_channel, fetch):
 def test_create_objects_via_shared_channel(test_channel):
     s = Script("select * from spam;", channel=test_channel)
     t = Table("spam", channel=test_channel)
-    assert s.channel == test_channel
-    assert t.channel == test_channel
+    assert s.channel == t.channel == test_channel
 
 
 def test_finder_finds_created_tables(test_channel, medium_df):
