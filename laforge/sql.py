@@ -369,21 +369,9 @@ class Table:
             if v
         }
         id_dict.update(parts_dict)
-        for key in id_dict:
-            if not key or key in self.distro.untouchable_identifiers:
-                continue
-            id_dict[key] = self._remove_irrelevant_details(id_dict[key])
-            Identifier(id_dict[key]).check()
+        if "name" in id_dict:
+            Identifier(id_dict["name"]).check()
         return id_dict
-
-    @staticmethod
-    def _remove_irrelevant_details(raw):
-        if not raw:
-            return raw
-        s = str(raw)
-        if s.startswith("[") and s.endswith("]"):
-            return s.lstrip("[").rstrip("]")
-        return s
 
     # API
 
@@ -500,7 +488,10 @@ class Identifier:
         self.original = user_input
         self.extra = extra
 
-        stringed_input = str(self.original)
+        print(f"id from {user_input!r}; {extra!r}")
+
+        stringed_input = "" if self.original is None else str(self.original)
+
         try:
             self._leading_underscore = stringed_input.strip().startswith("_")
         except AttributeError:

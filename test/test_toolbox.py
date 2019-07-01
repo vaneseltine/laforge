@@ -23,7 +23,7 @@ class TestFlatten:
             ([[], [[]], [[[]]], [[[[]]]]]),
         ],
     )
-    def test_nothing_from_nothing_leaves_nothing(self, incoming):
+    def t_nothing_from_nothing_leaves_nothing(self, incoming):
         assert list(flatten(incoming)) == []
 
     @pytest.mark.parametrize(
@@ -35,7 +35,7 @@ class TestFlatten:
             ([4, [4], 4, [4], 4, [[4]], [[]]], [4, 4, 4, 4, 4, 4]),
         ],
     )
-    def test_flattens(self, incoming, output):
+    def t_flattens(self, incoming, output):
         assert list(flatten(incoming)) == output
 
     @pytest.mark.parametrize(
@@ -50,7 +50,7 @@ class TestFlatten:
             ),
         ],
     )
-    def test_leaves_strings(self, incoming, output):
+    def t_leaves_strings(self, incoming, output):
         assert list(flatten(incoming)) == output
 
 
@@ -69,23 +69,23 @@ class TestReservedWords:
             "close",
         ],
     )
-    def test_reserved(self, kw):
+    def t_reserved(self, kw):
         assert is_reserved_word(kw)
 
     @pytest.mark.parametrize(
         "kw", ["moomoo", "meowmeow", "woofwoof", "barkbark", "squeaksqueak", None]
     )
-    def test_non_reserved(self, kw):
+    def t_non_reserved(self, kw):
         assert not is_reserved_word(kw)
 
 
 class TestVerifyFileIsWritable:
-    def test_writable(self, tmpdir):
+    def t_writable(self, tmpdir):
         writable_file = tmpdir / "harga's_house_of_ribs.txt"
         verify_file_is_writable(writable_file)
 
     @pytest.mark.xfail(reason="Need to sort out how to run this.")
-    def test_unwritable(self, tmpdir):
+    def t_unwritable(self, tmpdir):
         writable_file = tmpdir / "technical_journals.txt"
         with writable_file.open("a") as write_that:
             write_that.write("blah")
