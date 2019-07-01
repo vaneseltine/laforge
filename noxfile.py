@@ -33,11 +33,14 @@ from shutil import rmtree
 import dotenv
 import nox
 
-# -r at the command line to ovveride and reuse all instead
+# -r on CLI to override and reuse all instead
 nox.options.reuse_existing_virtualenvs = False
+# --no-stop-on-first-error on CLI to override
+nox.options.stop_on_first_error = False
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
+WINDOWS = sys.platform.startswith("win")
 
 # Pull variables, especially LFTEST_*, into os.environ
 dotenv.load_dotenv(dotenv.find_dotenv())
@@ -103,10 +106,13 @@ def cli(session):
 @nox.session(reuse_venv=True)
 def doc8(session):
     session.install("-U", "doc8", "Pygments")
-    session.run("doc8", "./docs", "-q")
+    if WINDOWS:
+        session.run("doc8", "./docs", "-q", "--ignore=D002", "--ignore=D004")
+    else:
+        session.run("doc8", "./docs", "-q")
 
 
-@nox.session()
+@nox.session(reuse_venv=True)
 def sphinx(session):
     # Treat warnings as errors.
     session.env["SPHINXOPTS"] = "-W"

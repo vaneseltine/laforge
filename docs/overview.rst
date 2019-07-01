@@ -86,7 +86,7 @@ Features:
 
 
 .. **write**
-..     balh blah (relative to SCRIPT_DIR) that yields data from its final query
+..     balh (relative to SCRIPT_DIR) that yields data from its final query
 ..     (i.e, a SELECT)
 
 
@@ -118,8 +118,8 @@ Features:
 
 .. **config.sql**
 
-..     The distribution and server are required. Default database and/or schema
-..     are optional and dependent on distribution.
+..     The distribution and server are required. Default database and/or 
+..     schema are optional and dependent on distribution.
 
 ..     Alternatively, an OBDC SQL URL can be specified to pass to SQLAlchemy.
 ..     See https://www.connectionstrings.com/.
