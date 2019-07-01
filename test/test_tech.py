@@ -19,7 +19,7 @@ def test_technobabble_takes_less_than_ten_milliseconds():
 def test_technobabble_prints_match(capsys):  # or use "capfd" for fd-level
     nobabble(match="x")
     captured = capsys.readouterr()
-    assert "x" in captured.out
+    assert "x" in captured.out.lower()
     assert not captured.err
 
 

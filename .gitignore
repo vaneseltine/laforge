@@ -1,9 +1,7 @@
 # Some substantial exclusions here:
 __*/
-__test*
 .*/
-secret*
-*.pickle
+__test*
 
 # But keep sr.ht builds folder
 !.builds/
@@ -26,11 +24,13 @@ var/
 # Standardish extensions
 *.code-workspace
 *.coverage
+.coverage.*
 *.egg
 *.egg-info
 *.env
 *.log
 *.patch
+*.pickle
 *.py[cod]
 *.so
 *.swp
