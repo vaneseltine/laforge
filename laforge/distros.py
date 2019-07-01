@@ -29,26 +29,23 @@ class Distro:
         sa.types.BIGINT: 2 ** 63 - 101,
     }
     NUMERIC_PADDING_FACTOR = 10
-
-    large_number_fallback = None
     minimal_keywords = ["server", "schema", "name"]
-    untouchable_identifiers = []
-    varchar_fallback = None
-    varchar_max_specs = -1
-    varchar_override = None
 
-    templates = {
-        "find": """--Distro.find()
-            select table_schema, table_name
-            from information_schema.tables
-            where table_schema like '{schema_pattern}'
-                and table_name like '{object_pattern}';
-            """
-    }
+    find_template = """--Distro.find()
+        select table_schema, table_name
+        from information_schema.tables
+        where table_schema like '{schema_pattern}'
+            and table_name like '{object_pattern}';
+        """
 
     _registered_distros = []
 
     def __init__(self):
+        self.large_number_fallback = None
+        self.untouchable_identifiers = []
+        self.varchar_fallback = None
+        self.varchar_max_specs = -1
+        self.varchar_override = None
         import_module(self.driver)
         self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
 
@@ -158,7 +155,7 @@ class Distro:
         # Lone % causes ValueError on unsupported format character 0x27
         object_pattern = object_pattern.replace(r"%", r"%%")
         schema_pattern = schema_pattern.replace(r"%", r"%%")
-        object_query = self.templates["find"].format(
+        object_query = self.find_template.format(
             schema_pattern=schema_pattern, object_pattern=object_pattern
         )
         object_script = Script(object_query, channel=channel)
@@ -259,27 +256,22 @@ class MSSQL(Distro):
     driver = "pyodbc"
     minimal_keywords = ["server", "database", "schema", "name"]
     resolver = "[{database}].[{schema}].[{name}]"
-    templates = Distro.templates.copy()
-    __mssql_specific = {
-        "find": """
-            --MSSQL.find()
-            select
-                sch.name as [schema],
-                obj.name as [name],
-                type_desc,
-                obj.create_date,
-                obj.modify_date,
-                object_id
-            from {server}.{database}.sys.schemas sch
-            left join {server}.{database}.sys.objects obj
-            on sch.schema_id = obj.schema_id
-            where sch.name like '{schema_pattern}'
-            and obj.name like '{object_pattern}'
-            and type_desc not like '%constraint%'
-            and type_desc not in ('sql_stored_procedure');
-            """
-    }
-    templates.update(__mssql_specific)
+    find_template = """--MSSQL.find()
+        select
+            sch.name as [schema],
+            obj.name as [name],
+            type_desc,
+            obj.create_date,
+            obj.modify_date,
+            object_id
+        from {server}.{database}.sys.schemas sch
+        left join {server}.{database}.sys.objects obj
+        on sch.schema_id = obj.schema_id
+        where sch.name like '{schema_pattern}'
+        and obj.name like '{object_pattern}'
+        and type_desc not like '%constraint%'
+        and type_desc not in ('sql_stored_procedure');
+        """
 
     def __init__(self):
         super().__init__()
@@ -333,7 +325,7 @@ class MSSQL(Distro):
 
     def find(self, channel, object_pattern="%", schema_pattern="%"):
 
-        object_query = self.templates["find"].format(
+        object_query = self.find_template.format(
             schema_pattern=schema_pattern,
             object_pattern=object_pattern,
             server=channel.server,
@@ -358,14 +350,10 @@ class SQLite(Distro):
     # Filenames have wholly different semantics from other SQL identifiers
     untouchable_identifiers = ["database"]
 
-    templates = Distro.templates.copy()
-    __sqlite_specific = {
-        "find": """--SQLite.find()
-                select name as table_name from sqlite_master
-                where type = 'table' and name like '{object_pattern}';
-                """
-    }
-    templates.update(__sqlite_specific)
+    find_template = """--SQLite.find()
+        select name as table_name from sqlite_master
+        where type = 'table' and name like '{object_pattern}';
+        """
 
     def __init__(self):
         super().__init__()
@@ -384,7 +372,7 @@ class SQLite(Distro):
 
     def find(self, channel, object_pattern="%", schema_pattern="%"):
 
-        object_query = self.templates["find"].format(object_pattern=object_pattern)
+        object_query = self.find_template.format(object_pattern=object_pattern)
         object_script = Script(object_query, channel=channel)
         df = object_script.to_table()[["table_name"]]
         result_list = [

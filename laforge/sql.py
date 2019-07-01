@@ -305,7 +305,7 @@ class Table:
         for keyword in self.distro.minimal_keywords:
             if not identifiers.get(keyword):
                 raise SQLIdentifierProblem(
-                    f"Valid {keyword} required from %s", identifiers
+                    f"Valid {keyword} required from {identifiers}"
                 )
         self.__server = self.channel.server
         self.__database = identifiers.get("database", self.channel.database)
