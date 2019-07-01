@@ -38,7 +38,7 @@ tasks:
   - cli: |
         python -m laforge --version
         laforge --version
-        laforge env
+        laforge env --no-warning
         laforge consult
   - deploy: |
         cd ./laforge
