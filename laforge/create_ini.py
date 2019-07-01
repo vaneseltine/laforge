@@ -4,17 +4,15 @@ import os
 from datetime import datetime as dt
 from pathlib import Path
 
-import click
 import PyInquirer as inq
 
 
-def create_ini(path):
-    path = receive_path(default=path)
-    responses = receive_input(path.parent)
-    output = create_output(path, responses)
-    path.write_text(output)
-    click.echo(f"\nNew laforge INI written at: {path}\nEnjoy!")
-    exit(0)
+DISTROS = {
+    "Microsoft SQL Server": "mssql",
+    "MySQL/MariaDB": "mysql",
+    "PostgreSQL": "postgresql",
+    "SQLite": "sqlite",
+}
 
 
 INQ_STYLE = inq.style_from_dict(
@@ -26,6 +24,18 @@ INQ_STYLE = inq.style_from_dict(
         inq.Token.Question: "",
     }
 )
+
+
+def create_ini(path):
+    path = receive_path(default=path)
+    if not path:
+        return 125
+    responses = receive_input(path.parent)
+    if not responses:
+        return 125
+    output = create_output(path, responses)
+    path.write_text(output)
+    return 0
 
 
 def receive_path(default):
@@ -42,26 +52,33 @@ def receive_path(default):
             "name": "confirmed",
             "message": "This file exists. Okay to overwrite?",
             "default": False,
-            "when": lambda a: Path(a["ini"]).exists(),
+            "when": lambda responses: Path(responses["ini"]).exists(),
         },
     ]
 
-    build_path = None
-    while not build_path:
-        ini_answers = inq.prompt(ini_questions, style=INQ_STYLE)
-        confirmed = ini_answers.get("confirmed", True)
-        if confirmed:
-            build_path = ini_answers["ini"]
-    click.echo(f"\nCreating {build_path}\n")
+    while True:
+        responses = inq.prompt(ini_questions, style=INQ_STYLE)
+        # PyInquirer doesn't handle this quite how I'd prefer.
+        # I can't simply distinguish between an unneeded confirmation
+        # and a ctrl+c'd confirmation.
+        #                       ini exists
+        #                       yes     no
+        # confirmed    yes      True   n/a
+        #               no     False   n/a
+        #           ctrl+c     False   n/a
+        # So we have to walk through this.
+        if not responses:  # ctrl+c from the filename prompt
+            return False
+        proposed_path = Path(responses["ini"])
+        if not proposed_path.exists():  # doesn't exist: confirmation was unnecessary
+            build_path = proposed_path
+            break
+        if "confirmed" not in responses:  # exists but ctrl+c from conf
+            return False
+        if responses["confirmed"]:
+            build_path = responses["ini"]
+            break
     return Path(build_path).resolve()
-
-
-DISTROS = {
-    "Microsoft SQL Server": "mssql",
-    "MySQL/MariaDB": "mysql",
-    "PostgreSQL": "postgresql",
-    "SQLite": "sqlite",
-}
 
 
 def receive_input(build_dir):
@@ -116,10 +133,11 @@ def receive_input(build_dir):
 
 
 def create_output(path, answers):
+    nowish = dt.now().strftime(r"%Y-%m-%d %H:%M:%S")
     intro = [
         f"# laforge configuration generated at",
         f"# {path}",
-        f"# {dt.now().strftime(r'%Y-%m-%d %H:%M:%S')}",
+        f"# {nowish}",
         "",
         "[DEFAULT]",
     ]

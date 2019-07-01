@@ -86,10 +86,10 @@ def find_build_config_in_directory(path):
             "ERROR: No laforge INI (e.g., {eg}) "
             "found in {dir}. ".format(dir=path, eg=(" or ".join(_acceptable_globs)))
         )
-        exit(1)
+        sys.exit(2)
     if len(build_files) > 1:
         print("ERROR: Must specify a laforge INI: {}".format(build_files))
-        exit(1)
+        sys.exit(17)
     return build_files[0]
 
 
@@ -161,7 +161,10 @@ def technobabble(babbler, n=1, match=None):
 def create(path):
     from .create_ini import create_ini
 
-    create_ini(Path(path))
+    return_code = create_ini(Path(path))
+    if return_code == 0:
+        click.echo(f"\nNew laforge INI written at: {path}\nEnjoy!")
+    sys.exit(return_code)
 
 
 @click.command(help="Describe the build environment known to laforge.")

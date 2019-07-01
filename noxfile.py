@@ -146,4 +146,4 @@ def black(session):
 
 if __name__ == "__main__":
     sys.stderr.write(f"Invoke {__file__} by running Nox.")
-    exit(1)
+    sys.exit(1)
