@@ -1,94 +1,94 @@
 import pytest
 
-from laforge.toolbox import verify_file_is_writable
+from laforge.toolbox import flatten, is_reserved_word, verify_file_is_writable
 
 
-def test_writable(tmpdir):
-    writable_file = tmpdir / "harga's_house_of_ribs.txt"
-    verify_file_is_writable(writable_file)
+class TestFlatten:
+    @pytest.mark.parametrize(
+        "incoming",
+        [
+            [],
+            (),
+            [[]],
+            (()),
+            [()],
+            ([]),
+            [[[]]],
+            ((())),
+            [[[]], [[]]],
+            ([[]], [[]]),
+            [([], [])],
+            ((()), [[[]]]),
+            ([[], []], [[[((((((([[]])))))))]]]),
+            ([[], [[]], [[[]]], [[[[]]]]]),
+        ],
+    )
+    def test_nothing_from_nothing_leaves_nothing(self, incoming):
+        assert list(flatten(incoming)) == []
+
+    @pytest.mark.parametrize(
+        "incoming, output",
+        [
+            ([2], [2]),
+            ([[2], [3]], [2, 3]),
+            ([[3, [4]], 6], [3, 4, 6]),
+            ([4, [4], 4, [4], 4, [[4]], [[]]], [4, 4, 4, 4, 4, 4]),
+        ],
+    )
+    def test_flattens(self, incoming, output):
+        assert list(flatten(incoming)) == output
+
+    @pytest.mark.parametrize(
+        "incoming, output",
+        [
+            (["spam"], ["spam"]),
+            ([["spam"], ["eggs"]], ["spam", "eggs"]),
+            ([["spam", ["eggs"]], "spam"], ["spam", "eggs", "spam"]),
+            (
+                ["spam", ["spam"], "spam", ["spam"], "spam", [["spam"]], [[]]],
+                ["spam", "spam", "spam", "spam", "spam", "spam"],
+            ),
+        ],
+    )
+    def test_leaves_strings(self, incoming, output):
+        assert list(flatten(incoming)) == output
 
 
-@pytest.mark.xfail(reason="Need to sort out how to run this.")
-def test_unwritable(tmpdir):
-    writable_file = tmpdir / "technical_journals.txt"
-    with writable_file.open("a") as write_that:
-        write_that.write("blah")
-        with pytest.raises(PermissionError):
-            verify_file_is_writable(writable_file)
+class TestReservedWords:
+    @pytest.mark.parametrize(
+        "kw",
+        [
+            "else",
+            "table",
+            "row",
+            "privileges",
+            "view",
+            "string",
+            "time",
+            "numeric",
+            "close",
+        ],
+    )
+    def test_reserved(self, kw):
+        assert is_reserved_word(kw)
+
+    @pytest.mark.parametrize(
+        "kw", ["moomoo", "meowmeow", "woofwoof", "barkbark", "squeaksqueak", None]
+    )
+    def test_non_reserved(self, kw):
+        assert not is_reserved_word(kw)
 
 
-from laforge.toolbox import flatten
+class TestVerifyFileIsWritable:
+    def test_writable(self, tmpdir):
+        writable_file = tmpdir / "harga's_house_of_ribs.txt"
+        verify_file_is_writable(writable_file)
 
+    @pytest.mark.xfail(reason="Need to sort out how to run this.")
+    def test_unwritable(self, tmpdir):
+        writable_file = tmpdir / "technical_journals.txt"
+        with writable_file.open("a") as write_that:
+            write_that.write("blah")
+            with pytest.raises(PermissionError):
+                verify_file_is_writable(writable_file)
 
-@pytest.mark.parametrize(
-    "incoming",
-    [
-        [()],
-        ([]),
-        [[[]]],
-        ((())),
-        [[[]], [[]]],
-        ([[]], [[]]),
-        ((()), [[[]]]),
-        ([[], []], [[[((((((([[]])))))))]]]),
-        ([[], [[]], [[[]]], [[[[]]]]]),
-        (()),
-    ],
-)
-def test_nothing_from_nothing_leaves_nothing(incoming):
-    assert list(flatten(incoming)) == []
-
-
-@pytest.mark.parametrize(
-    "incoming, output",
-    [
-        ([2], [2]),
-        ([[2], [3]], [2, 3]),
-        ([[3, [4]], 6], [3, 4, 6]),
-        ([4, [4], 4, [4], 4, [[4]], [[]]], [4, 4, 4, 4, 4, 4]),
-    ],
-)
-def test_flatten_flattens(incoming, output):
-    assert list(flatten(incoming)) == output
-
-
-@pytest.mark.parametrize(
-    "incoming, output",
-    [
-        (["spam"], ["spam"]),
-        ([["spam"], ["eggs"]], ["spam", "eggs"]),
-        ([["spam", ["eggs"]], "spam"], ["spam", "eggs", "spam"]),
-        (
-            ["spam", ["spam"], "spam", ["spam"], "spam", [["spam"]], [[]]],
-            ["spam", "spam", "spam", "spam", "spam", "spam"],
-        ),
-    ],
-)
-def test_flatten_leaves_strings(incoming, output):
-    assert list(flatten(incoming)) == output
-
-
-from laforge.toolbox import is_reserved_word
-
-
-@pytest.mark.parametrize(
-    "kw",
-    [
-        "else",
-        "table",
-        "row",
-        "privileges",
-        "view",
-        "string",
-        "time",
-        "numeric",
-        "close",
-    ],
-)
-def test_reserved_words(kw):
-    assert is_reserved_word(kw)
-
-
-@pytest.mark.parametrize("kw", ["moomoo", "meowmeow", "woofwoof", "barkbark", "bowwow"])
-def test_non_reserved_words(kw):
-    assert not is_reserved_word(kw)

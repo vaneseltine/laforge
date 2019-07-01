@@ -338,7 +338,10 @@ RESERVED_WORDS = {x.lower() for x in flatten((kwlist, PRESPEC_RESERVED_WORDS))}
 
 
 def is_reserved_word(s):
-    return s.lower() in RESERVED_WORDS
+    try:
+        return s.lower() in RESERVED_WORDS
+    except AttributeError:
+        return False
 
 
 """
