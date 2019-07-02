@@ -7,7 +7,7 @@ basics = [
     "pandas>=0.22",
     "PyInquirer>=1.0",
     "pyparsing>=2.3",
-    "PyYAML>=3.10",
+    "PyYAML>=3.10",  # tested 3.10, 5.1.1
     "SQLAlchemy>=1.3",
 ]
 extras = {

@@ -35,6 +35,12 @@ class TestChannel:
         assert (c1 != c2) and (c1 != c3) and (c2 != c3)
         assert Channel.grab() == c3
 
+    def t_same_spec_yields_same_channel(self, tmpdir):
+        assert len(Channel.known_channels) == 0
+        c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
+        c2 = Channel(distro="sqlite", database=tmpdir / "c1.db")
+        assert len(Channel.known_channels) == 1
+
     @pytest.mark.parametrize("fetch", ["df", "tuples", False])
     def t_bad_statements(self, test_channel, fetch):
         with pytest.raises(Exception):
@@ -435,23 +441,28 @@ class TestReservedWords:
     )
     def t_reserved(self, keyword):
         assert is_reserved_word(keyword)
-        assert is_reserved_word(keyword.upper())
+        assert is_reserved_word(keyword.lower())
         assert is_reserved_word(keyword.title())
+        assert is_reserved_word(keyword.upper())
 
     @pytest.mark.parametrize(
         "keyword",
         [
             "Darmok",
             "Jalad",
-            "Tanagra",
             "Shaka",
+            "Sokath",
+            "Tanagra",
+            "Temarc",
             "Temba",
             "Uzani",
-            "Sokath",
-            "Temarc",
             1701,
             None,
         ],
     )
     def t_non_reserved(self, keyword):
         assert not is_reserved_word(keyword)
+        if isinstance(keyword, str):
+            assert not is_reserved_word(keyword.lower())
+            assert not is_reserved_word(keyword.title())
+            assert not is_reserved_word(keyword.upper())
