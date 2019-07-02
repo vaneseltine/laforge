@@ -20,17 +20,16 @@ install:
   - pip install --no-cache-dir -q -e .['postgresql,mysql,excel']
   - pip freeze
 script:
+  - python -m laforge --version
   - laforge --version
   - laforge consult
   - coverage run -m pytest -v
   - coverage report
-after_success:
   - pip uninstall laforge -y
-  - python -m pip freeze
+  - pip freeze
   - python setup.py build bdist_wheel
-  - cd ..
-  - python -m pip install -q --no-index --find-links=laforge/dist laforge
-  - python -c "import laforge;print(laforge.__version__)"
+  - pip install -q --no-index --find-links=dist laforge
+  - python -c "import laforge;print(laforge.__file__);print(laforge.__version__)"
   - python -m laforge --version
   - laforge --version
   - laforge consult

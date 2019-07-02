@@ -11,24 +11,26 @@ packages:
 sources:
   - https://git.sr.ht/~matvan/laforge
 tasks:
-  - build: |
-        cat ~/.buildenv
+  - build_prep: |
         cd laforge
+        cat ~/.buildenv
         python -m pip install --user -q --upgrade pip wheel setuptools
         python -m pip freeze
-        python setup.py bdist_wheel
-  - prep: |
+  - build: |
         cd laforge
-        python -m pip install --user -e .
+        python setup.py bdist_wheel
+  - install_prep: |
+        cd laforge
+        python -m pip install --user -q -e .
         python -m laforge --version
         python -m pip uninstall laforge -y
   - install: |
+        cd ~
         python -m pip install --user --no-index --find-links=laforge/dist laforge
         python -m pip freeze
-  - invoke: |
-        cd /
-        python -m pip freeze
-        python -c "import laforge;print(laforge.__version__)"
+  - import: |
+        python -c "import laforge;print(laforge.__file__);print(laforge.__version__)"
+  - invoke_module: |
         python -m laforge --version
+  - invoke_cli: |
         laforge --version
-        laforge consult
