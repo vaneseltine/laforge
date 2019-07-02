@@ -19,33 +19,35 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - dependencies-v1-{{ checksum "requirements.txt" }}
-            - dependencies-v1-
+            - dependencies-v2-{{ checksum "requirements.txt" }}
+            - dependencies-v2-
       - run:
-          name: Python dependencies
+          name: Install Python dependencies
           command: |
             python3 -m venv .venv
             . .venv/bin/activate
             pip install -U pip
             pip install -r requirements.txt
-            pip install -e .[mysql,postgresql]
+            pip install psycopg2 pymysql
             pip --version
       - save_cache:
           paths:
             - ./.venv
-          key: dependencies-v1-{{ checksum "requirements.txt" }}
+          key: dependencies-v2-{{ checksum "requirements.txt" }}
       - run:
-          name: Misc
+          name: Install laforge, updated environment
           command: |
-            pwd
-            ls -lah ~
+            . .venv/bin/activate
+            pip --version
             cp .circleci/env ./.env
+            pip install -e .
       - run:
           name: Nox
           command: |
+            . .venv/bin/activate
+            pip --version
             cat .env
             pip --version
-            laforge --version
             pip freeze
             nox
 workflows:
