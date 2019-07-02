@@ -415,10 +415,11 @@ class TestTable:
 
 class TestReservedWords:
     @pytest.mark.parametrize(
-        "kw",
+        "keyword",
         [
-            "async",
             "close",
+            "del",
+            "elif",
             "else",
             "lambda",
             "nonlocal",
@@ -429,13 +430,28 @@ class TestReservedWords:
             "table",
             "time",
             "view",
+            "yield",
         ],
     )
-    def t_reserved(self, kw):
-        assert is_reserved_word(kw)
+    def t_reserved(self, keyword):
+        assert is_reserved_word(keyword)
+        assert is_reserved_word(keyword.upper())
+        assert is_reserved_word(keyword.title())
 
     @pytest.mark.parametrize(
-        "kw", ["moomoo", "meowmeow", "woofwoof", "barkbark", "squeaksqueak", None]
+        "keyword",
+        [
+            "Darmok",
+            "Jalad",
+            "Tanagra",
+            "Shaka",
+            "Temba",
+            "Uzani",
+            "Sokath",
+            "Temarc",
+            1701,
+            None,
+        ],
     )
-    def t_non_reserved(self, kw):
-        assert not is_reserved_word(kw)
+    def t_non_reserved(self, keyword):
+        assert not is_reserved_word(keyword)
