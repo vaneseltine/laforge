@@ -22,7 +22,7 @@ install:
 script:
   - laforge --version
   - laforge consult
-  - coverage run -m pytest -vv
+  - coverage run -m pytest -v
   - coverage report
 after_success:
   - pip uninstall laforge -y
