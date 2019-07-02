@@ -1,14 +1,14 @@
 from glob import glob
 import setuptools
 
-basics = [
+basics = [  # For maximums tested, see requirements.txt
     "Click>=7.0",
     "python-dotenv>=0.10.3",
     "pandas>=0.22",
     "PyInquirer>=1.0",
-    "pyparsing>=2.3",
-    "PyYAML>=3.10",  # tested 3.10, 5.1.1
-    "SQLAlchemy>=1.3",
+    "pyparsing>=2.0",
+    "PyYAML>=3.10",
+    "SQLAlchemy>=1.1",
 ]
 extras = {
     "postgresql": ["psycopg2>=2.8"],  # PostgreSQL -- sr.ht can't build

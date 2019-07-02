@@ -284,7 +284,7 @@ class MSSQL(Distro):
             "driver": "SQL Server",
             "trusted_connection": "yes",
             "autocommit": "yes",
-            "executemany": "yes",
+            "fast_executemany": "yes",
         }
         spec_string = ";".join(f"{k}={{{v}}}" for k, v in spec_dict.items())
         engine_inputs = parse.quote_plus(spec_string)
