@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import sqlalchemy as sa
 
-from laforge.distros import Distro, SQLDistroNotFound
+from laforge.distros import Distro, SQLDistroNotFound, round_up
 
 
 class TestDistroGet:
@@ -98,3 +98,21 @@ class TestDistroFunctionality:
                 return None
             Distro._well_within_range(sequence, sa.types.INT)
         assert len(record) == 0
+
+
+class TestRoundUp:
+    @pytest.mark.parametrize(
+        "n, expected",
+        [
+            (0, 0),
+            (1, 50),
+            (49, 50),
+            (50, 50),
+            (51, 100),
+            (99, 100),
+            (100, 100),
+            (101, 150),
+        ],
+    )
+    def t_rounds_up_fifties(self, n, expected):
+        assert round_up(n, nearest=50) == expected

@@ -12,8 +12,8 @@ from laforge.sql import (
     SQLTableNotFound,
     Table,
     execute,
+    is_reserved_word,
 )
-from laforge.toolbox import is_reserved_word
 
 
 class TestChannel:
@@ -411,3 +411,31 @@ class TestTable:
     def t_insufficient_identifiers(self, test_channel):
         with pytest.raises(SQLIdentifierProblem):
             _ = Table("", channel=test_channel)
+
+
+class TestReservedWords:
+    @pytest.mark.parametrize(
+        "kw",
+        [
+            "async",
+            "close",
+            "else",
+            "lambda",
+            "nonlocal",
+            "numeric",
+            "privileges",
+            "row",
+            "string",
+            "table",
+            "time",
+            "view",
+        ],
+    )
+    def t_reserved(self, kw):
+        assert is_reserved_word(kw)
+
+    @pytest.mark.parametrize(
+        "kw", ["moomoo", "meowmeow", "woofwoof", "barkbark", "squeaksqueak", None]
+    )
+    def t_non_reserved(self, kw):
+        assert not is_reserved_word(kw)

@@ -3,7 +3,10 @@ import re
 from copy import deepcopy
 from pathlib import Path
 
-INPUTS_FILENAME = "tech_inputs.txt"
+import yaml
+
+STATEMENTS_FILE = Path(__file__).parent / "data" / "tech_inputs.yaml"
+STATEMENTS_CONTENT = yaml.safe_load(STATEMENTS_FILE.read_text())
 
 
 class ModifiableVerb:
@@ -26,17 +29,7 @@ class ModifiableVerb:
 
 class Technobabbler:
 
-    raw_inputs = (Path(__file__).parent / INPUTS_FILENAME).read_text()
-    _content = {}
-    for line in raw_inputs.splitlines():
-        if not line:
-            continue
-        line = line.strip()
-        if line.startswith("[") and line.endswith("]"):
-            key = line[1:-1]
-            _content[key] = []
-            continue
-        _content[key].append(line)
+    _content = {**STATEMENTS_CONTENT}
 
     def __init__(self):
         self.content = deepcopy(self._content)

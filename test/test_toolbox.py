@@ -1,6 +1,6 @@
 import pytest
 
-from laforge.toolbox import flatten, is_reserved_word
+from laforge.toolbox import flatten
 
 
 class TestFlatten:
@@ -52,28 +52,3 @@ class TestFlatten:
     )
     def t_leaves_strings(self, incoming, output):
         assert list(flatten(incoming)) == output
-
-
-class TestReservedWords:
-    @pytest.mark.parametrize(
-        "kw",
-        [
-            "else",
-            "table",
-            "row",
-            "privileges",
-            "view",
-            "string",
-            "time",
-            "numeric",
-            "close",
-        ],
-    )
-    def t_reserved(self, kw):
-        assert is_reserved_word(kw)
-
-    @pytest.mark.parametrize(
-        "kw", ["moomoo", "meowmeow", "woofwoof", "barkbark", "squeaksqueak", None]
-    )
-    def t_non_reserved(self, kw):
-        assert not is_reserved_word(kw)

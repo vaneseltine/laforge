@@ -1,4 +1,4 @@
 include LICENSE
 include *.md
-include laforge/*.txt
+include laforge/data/*
 prune test

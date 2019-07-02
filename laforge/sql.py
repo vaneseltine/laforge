@@ -11,15 +11,29 @@
 import logging
 import re
 import textwrap
+from keyword import kwlist
+from pathlib import Path
 
 import pandas as pd
 import pyparsing
 import sqlalchemy as sa
+import yaml
 
-from . import toolbox
+from .toolbox import flatten
 
 logger = logging.getLogger(__name__)
 logger.debug(__name__)
+
+RESERVED_WORD_FILE = Path(__file__).parent / "data" / "reserved_words.yaml"
+RESERVED_WORDS = {x.lower() for x in yaml.safe_load(RESERVED_WORD_FILE.read_text())}
+RESERVED_WORDS.update(kwlist)
+
+
+def is_reserved_word(s):
+    try:
+        return s.lower() in RESERVED_WORDS
+    except AttributeError:
+        return False
 
 
 class SQLTableNotFound(Exception):
@@ -182,7 +196,7 @@ class Script:
         return "\n".join(new_lines)
 
     def _parse(self, query):
-        flattened_group = toolbox.flatten(self._construct_statements(query))
+        flattened_group = flatten(self._construct_statements(query))
         return [s for s in flattened_group if self._is_useful_statement(s)]
 
     def _construct_statements(self, query):
@@ -591,7 +605,7 @@ class Identifier:
 
         """
         initial_attempt = s
-        while toolbox.is_reserved_word(s):
+        while is_reserved_word(s):
             s = s + suffix
             assert len(s) > len(initial_attempt)
         if initial_attempt != s:

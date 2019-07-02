@@ -5,6 +5,7 @@ import logging
 import runpy
 import subprocess
 import textwrap
+import time
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
@@ -12,7 +13,6 @@ from pathlib import Path
 import dotenv
 import pandas as pd
 
-from . import toolbox
 from .sql import Channel, Script, Table, execute
 
 logger = logging.getLogger(__name__)
@@ -537,14 +537,11 @@ class FileWriter(BaseTask):
                 )
                 logger.error(error_message)
             remaining = retry_attempts - i
-            plural_rem = "" if remaining == 1 else "s"
             logger.error(
-                "%s attempt%s remaining. Trying %s again in %s second%s...",
+                "%s attempt(s) remaining. Trying %s again in %s second(s)...",
                 remaining,
-                plural_rem,
                 path,
                 retry_seconds,
-                plural_sec,
             )
             time.sleep(retry_seconds)
         raise PermissionError(f"Permission denied to {path}")
