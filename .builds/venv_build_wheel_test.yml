@@ -15,12 +15,14 @@ tasks:
         cat ~/.buildenv
         cd laforge
         python -m venv .venv
+        python -m pip --version
         source ./.venv/bin/activate
+        python -m pip --version
         python -m pip install -q --upgrade pip wheel setuptools
         python -m pip freeze
         python setup.py bdist_wheel
   - install: |
-        deactivate
+        python -m pip --version
         python -m pip install --find-links=laforge/dist laforge>0.1.6
         python -m pip freeze
   - invoke: |
