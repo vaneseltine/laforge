@@ -13,16 +13,6 @@ from keyword import kwlist
 logger = logging.getLogger(__name__)
 
 
-def round_up(n, nearest=1):
-    """Round up ``n`` to the nearest ``nearest``.
-
-    :param n:
-    :param nearest:  (Default value = 1)
-
-    """
-    return nearest * math.ceil(n / nearest)
-
-
 def flatten(foo):
     """Take any set of nests in an iterator and reduce it into one generator.
 

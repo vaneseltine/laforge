@@ -1,14 +1,8 @@
 <h2>laforge is a low-key build system for working with data.</h2>
 
-<<<<<<< HEAD
-[![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0)
-[![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge)
-[![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)](https://git.sr.ht/~matvan/laforge)
-=======
 [![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0) 
 [![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge) 
 [![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)](https://git.sr.ht/~matvan/laforge) 
->>>>>>> [refactor] Pull verify/retry into actual write op
 [![Cat: Onigiri](https://img.shields.io/badge/cat-Onigiri-333.svg?style=flat-square)](https://raw.githubusercontent.com/vaneseltine/vaneseltine.github.io/master/Oni.jpg)
 
 ---

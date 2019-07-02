@@ -1,6 +1,6 @@
 import pytest
 
-from laforge.toolbox import flatten, is_reserved_word, verify_file_is_writable
+from laforge.toolbox import flatten, is_reserved_word
 
 
 class TestFlatten:

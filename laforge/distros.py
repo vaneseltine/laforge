@@ -8,7 +8,6 @@ from urllib import parse
 import sqlalchemy as sa
 
 from .sql import Script, Table
-from .toolbox import round_up
 
 logger = logging.getLogger(__name__)
 logger.debug(__name__)
@@ -383,6 +382,16 @@ class SQLite(Distro):
     def determine_dtypes(self, df):
         """SQlite does not make gradations in integers or text, so don't try."""
         return None
+
+
+def round_up(n, nearest=1):
+    """Round up ``n`` to the nearest ``nearest``.
+
+    :param n:
+    :param nearest:  (Default value = 1)
+
+    """
+    return nearest * math.ceil(n / nearest)
 
 
 """
