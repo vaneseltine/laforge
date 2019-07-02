@@ -1,0 +1,47 @@
+# https://circleci.com/docs/2.0/language-python/
+# https://circleci.com/docs/2.0/postgres-config/
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.7
+      - image: circleci/postgres:latest-ram
+        environment:
+          POSTGRES_DB: lf_postg
+          POSTGRES_USER: geordi
+          POSTGRES_PASSWORD: watson
+      - image: circleci/mysql:8.0.4
+        environment:
+          MYSQL_DATABASE: lf_mysql
+          MYSQL_USER: geordi
+          MYSQL_PASSWORD: watson
+    steps:
+      - checkout
+      - run:
+          name: Python dependencies
+          command: |
+            python3 -m venv .venv
+            . .venv/bin/activate
+            pip install -r requirements.txt
+            pip install -e .[mysql,postgresql]
+            pip --version
+      - run:
+          name: MYSQL setup
+          command: |
+            sudo apt-get install mysql-client
+            mysql -h 127.0.0.1 -u geordi -p watson --execute="SELECT 1;"
+            pip --version
+      - run:
+          name: PostgreSQL setup
+          command: |
+            sudo apt-get install postgresql-client
+            mysql -h 127.0.0.1 -u geordi -p watson --execute="SELECT 1;"
+            pip --version
+      - run:
+          name: Misc
+          command: pwd
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build

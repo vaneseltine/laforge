@@ -3,7 +3,8 @@ __*/
 .*/
 __test*
 
-# But keep sr.ht builds folder
+# But keep various CI-related folders
+!.circleci/
 !.builds/
 
 # Standardish directories
