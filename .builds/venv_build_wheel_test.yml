@@ -11,22 +11,20 @@ packages:
 sources:
   - https://git.sr.ht/~matvan/laforge
 tasks:
-  - build: |
+  - venv_build: |
         cat ~/.buildenv
         cd laforge
-        python -m pip install --user -q --upgrade pip wheel setuptools
+        python -m venv .venv
+        source ./.venv/bin/activate
+        python -m pip install -q --upgrade pip wheel setuptools
         python -m pip freeze
         python setup.py bdist_wheel
-  - prep: |
-        cd laforge
-        python -m pip install --user -e .
-        python -m pip uninstall laforge -y
   - install: |
-        python -m pip install --user --no-index --find-links=laforge/dist laforge
+        deactivate
+        python -m pip install --find-links=laforge/dist laforge>0.1.6
         python -m pip freeze
   - invoke: |
-        cd /
-        python -m pip freeze
+        cd ~
         python -c "import laforge;print(laforge.__version__)"
         python -m laforge --version
         laforge --version
