@@ -29,7 +29,7 @@ after_success:
   - python -m pip freeze
   - python setup.py build bdist_wheel
   - cd ..
-  - python -m pip install --user -q --no-index --find-links=laforge/dist laforge
+  - python -m pip install -q --no-index --find-links=laforge/dist laforge
   - python -c "import laforge;print(laforge.__version__)"
   - python -m laforge --version
   - laforge --version

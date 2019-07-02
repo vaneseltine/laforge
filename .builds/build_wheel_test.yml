@@ -19,7 +19,7 @@ tasks:
         python setup.py bdist_wheel
   - prep: |
         cd laforge
-        python -m pip install --user -q .
+        python -m pip install --user -e .
         python -m pip uninstall laforge -y
   - install: |
         python -m pip install --user --no-index --find-links=laforge/dist laforge
