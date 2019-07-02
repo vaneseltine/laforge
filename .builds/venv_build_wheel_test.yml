@@ -23,7 +23,8 @@ tasks:
         python setup.py bdist_wheel
   - install: |
         python -m pip --version
-        python -m pip install --find-links=laforge/dist laforge>0.1.6
+        python -m pip freeze
+        python -m pip install --user --find-links=laforge/dist laforge>0.1.6
         python -m pip freeze
   - invoke: |
         cd ~
