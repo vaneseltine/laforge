@@ -111,6 +111,8 @@ https://laforge.readthedocs.io/en/latest/
 
 [![Travis tests across supported Python versions.)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis&logo=travis-ci&logoColor=fff)](https://travis-ci.com/vaneseltine/laforge)
 
+![CircleCI independently tests with databases.](https://img.shields.io/circleci/build/github/vaneseltine/laforge.svg?label=CircleCI&style=for-the-badge&logo=circleci&logoColor=fff)
+
 [![Coveralls reports coverage in a cute way.](https://img.shields.io/coveralls/github/vaneseltine/laforge.svg?style=for-the-badge&logo=coveralls)](https://coveralls.io/github/vaneseltine/laforge)
 
 

@@ -26,6 +26,7 @@ jobs:
           command: |
             python3 -m venv .venv
             . .venv/bin/activate
+            pip install -U pip
             pip install -r requirements.txt
             pip install -e .[mysql,postgresql]
             pip --version
@@ -36,9 +37,9 @@ jobs:
       - run:
           name: Misc
           command: |
-            cp .circleci/config.env ./.env
             pwd
             ls -lah ~
+            cp .circleci/env ./.env
       - run:
           name: Nox
           command: |
