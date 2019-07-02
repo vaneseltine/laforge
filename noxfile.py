@@ -87,7 +87,7 @@ def pytest_db(session, distro):
 def coverage(session):
     clean_dir("./build/coverage")
     session.install("coverage")
-    if len([Path(".").glob(".coverage*")]) > 1:
+    if len(list(Path(".").glob(".coverage*"))) > 1:
         session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
