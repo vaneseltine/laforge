@@ -7,16 +7,20 @@ jobs:
       - image: circleci/python:3.7
       - image: circleci/postgres:latest-ram
         environment:
-          POSTGRES_DB: lf_postg
+          POSTGRES_DB: lftest_postg
           POSTGRES_USER: geordi
           POSTGRES_PASSWORD: watson
       - image: circleci/mysql:8.0.4
         environment:
-          MYSQL_DATABASE: lf_mysql
+          MYSQL_DATABASE: lftest_mysql
           MYSQL_USER: geordi
           MYSQL_PASSWORD: watson
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - dependencies-v1-{{ checksum "requirements.txt" }}
+            - dependencies-v1-
       - run:
           name: Python dependencies
           command: |
@@ -25,21 +29,24 @@ jobs:
             pip install -r requirements.txt
             pip install -e .[mysql,postgresql]
             pip --version
-      - run:
-          name: MYSQL setup
-          command: |
-            sudo apt-get install mysql-client
-            mysql -h 127.0.0.1 -u geordi -p watson --execute="SELECT 1;"
-            pip --version
-      - run:
-          name: PostgreSQL setup
-          command: |
-            sudo apt-get install postgresql-client
-            mysql -h 127.0.0.1 -u geordi -p watson --execute="SELECT 1;"
-            pip --version
+      - save_cache:
+          paths:
+            - ./.venv
+          key: dependencies-v1-{{ checksum "requirements.txt" }}
       - run:
           name: Misc
-          command: pwd
+          command: |
+            cp .circleci/config.env ./.env
+            pwd
+            ls -lah ~
+      - run:
+          name: Nox
+          command: |
+            cat .env
+            pip --version
+            laforge --version
+            pip freeze
+            nox
 workflows:
   version: 2
   build-deploy:
