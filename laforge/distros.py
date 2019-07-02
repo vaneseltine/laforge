@@ -29,7 +29,7 @@ class Distro:
         sa.types.BIGINT: 2 ** 63 - 101,
     }
     NUMERIC_PADDING_FACTOR = 10
-    minimal_keywords = ["server", "schema", "name"]
+    minimal_keywords = ["server", "name"]
 
     find_template = """--Distro.find()
         select table_schema, table_name
