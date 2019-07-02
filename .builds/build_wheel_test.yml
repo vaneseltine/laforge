@@ -1,0 +1,44 @@
+image: archlinux
+environment:
+  PATH: "${PATH}:$HOME/.local/bin"
+secrets:
+  - 2b416998-c1cc-496b-8365-2da512b3fc43
+packages:
+  - python
+  - python-pip
+  - python-setuptools
+  - python-numpy
+sources:
+  - https://git.sr.ht/~matvan/laforge
+tasks:
+  - build: |
+        cat ~/.buildenv
+        cd laforge
+        python -m pip install --user -q --upgrade pip
+        python setup.py bdist_wheel
+  - install: |
+        cd laforge
+        python -m pip freeze
+        python -m pip uninstall -r requirements.txt
+        python -m pip install --user --find-links=dist laforge
+        python -m pip freeze
+  - cli: |
+        python -m laforge --version
+        laforge --version
+        laforge consult
+  - install_dev: |
+        cd laforge
+        python -m pip install --user -q -r requirements.txt
+        python -m pip freeze
+  - pytest: |
+        cd laforge
+        python -m pytest --version
+        python -m pytest -x -rs
+  - flake8: |
+        cd laforge
+        python -m flake8 --version
+        python -m flake8 --statistics ./laforge
+  - pylint: |
+        cd laforge
+        python -m pylint --version
+        python -m pylint --disable=R,C ./laforge
