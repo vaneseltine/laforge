@@ -1,8 +1,8 @@
 <h2>laforge is a low-key build system for working with data.</h2>
 
-[![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0) \
-[![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge) \
-[![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)](https://git.sr.ht/~matvan/laforge) \
+[![License: AGPL 3.0](https://img.shields.io/pypi/l/laforge.svg?style=flat-square&color=violet)](https://www.gnu.org/licenses/agpl-3.0)
+[![Python: 3.6+](https://img.shields.io/pypi/pyversions/laforge.svg?&style=flat-square)](https://pypi.python.org/pypi/laforge)
+[![GitHub last commit](https://img.shields.io/github/last-commit/vaneseltine/laforge.svg?style=flat-square)](https://git.sr.ht/~matvan/laforge)
 [![Cat: Onigiri](https://img.shields.io/badge/cat-Onigiri-333.svg?style=flat-square)](https://raw.githubusercontent.com/vaneseltine/vaneseltine.github.io/master/Oni.jpg)
 
 ---
@@ -125,7 +125,7 @@ https://laforge.readthedocs.io/en/latest/
 
 
 [![https://github.com/vaneseltine](https://img.shields.io/badge/github-vaneseltine-888.svg?style=for-the-badge&logo=github&logoColor=fff&color=2b3137)](https://github.com/vaneseltine)
- 
+
 [![https://twitter.com/vaneseltine](https://img.shields.io/badge/twitter-@vaneseltine-blue.svg?style=for-the-badge&logo=twitter&logoColor=fff&color=1da1f2)](https://twitter.com/vaneseltine)
 
 [![https://stackoverflow.com/users/7846185/matt-vaneseltine](https://img.shields.io/badge/stack_overflow-matt_vaneseltine-888.svg?style=for-the-badge&logo=stack-overflow&logoColor=fff&color=f48024)](https://stackoverflow.com/users/7846185/matt-vaneseltine)

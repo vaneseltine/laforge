@@ -91,4 +91,3 @@ class TestVerifyFileIsWritable:
             write_that.write("blah")
             with pytest.raises(PermissionError):
                 verify_file_is_writable(writable_file)
-
