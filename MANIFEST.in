@@ -1,4 +1,4 @@
 include LICENSE
 include *.md
-recursive-include laforge/data/*
+include laforge/data/*
 prune test

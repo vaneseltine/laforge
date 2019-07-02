@@ -19,9 +19,9 @@ extras = {
 extras["mariadb"] = extras["mysql"]
 extras["all"] = list(set(x for y in extras.values() for x in y))
 
+
 setuptools.setup(
     packages=setuptools.find_packages(),
-    data_files=[("", glob.glob("laforge/data/*"))],
     entry_points={"console_scripts": [f"laforge = laforge:run_laforge"]},
     install_requires=basics,
     extras_require=extras,
