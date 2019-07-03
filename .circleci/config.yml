@@ -2,9 +2,11 @@
 # https://circleci.com/docs/2.0/postgres-config/
 version: 2
 jobs:
-  build:
+  nox:
     docker:
-      - image: circleci/python:3.7
+      # - image: circleci/python:3.7
+      # https://github.com/pydata/pandas-gbq/blob/master/.circleci/config.yml
+      - image: thekevjames/nox
       - image: circleci/postgres:latest-ram
         environment:
           POSTGRES_DB: lftest_postg
@@ -15,6 +17,12 @@ jobs:
           MYSQL_DATABASE: lftest_mysql
           MYSQL_USER: geordi
           MYSQL_PASSWORD: watson
+      # - image: microsoft/mssql-server-linux:2017-latest
+      #   ports:
+      #     - "1433:1433"
+      #   environment:
+      #     ACCEPT_EULA: "Y"
+      #     SA_PASSWORD: watson
     steps:
       - checkout
       - restore_cache:
@@ -48,9 +56,16 @@ jobs:
             . .venv/bin/activate
             pip --version
             pip freeze
-            nox -k 'not doc and not lint'
+            nox -k 'test or coverage'
+      - run:
+          name: Misc
+          command: |
+            compgen -c python
+            which python3
+            pyenv versions
+            pyenv install -l
 workflows:
   version: 2
-  build-deploy:
+  noxify:
     jobs:
-      - build
+      - nox
