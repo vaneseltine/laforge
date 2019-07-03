@@ -262,8 +262,8 @@ class MSSQL(Distro):
             obj.create_date,
             obj.modify_date,
             object_id
-        from {server}.{database}.sys.schemas sch
-        left join {server}.{database}.sys.objects obj
+        from {database}.sys.schemas sch
+        left join {database}.sys.objects obj
         on sch.schema_id = obj.schema_id
         where sch.name like '{schema_pattern}'
         and obj.name like '{object_pattern}'
