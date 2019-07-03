@@ -105,6 +105,7 @@ def medium_df():
 def weird_df():
     df = SAMPLES["weird"]
     df["none"] = None
+    df["int64"] = 64
     return df
 
 

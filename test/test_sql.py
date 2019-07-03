@@ -1,5 +1,6 @@
 import re
 
+import pandas as pd
 import pytest
 from hypothesis import given, settings, strategies
 
@@ -16,17 +17,35 @@ from laforge.sql import (
 )
 
 
-def test_weird_in_and_out(weird_df, arbitrary_table):
-    # print("\n", weird_df, sep="")
-    arbitrary_table.write(weird_df)
-    result = arbitrary_table.read()
-    print(weird_df)
-    print(weird_df.dtypes)
-    print(result)
-    print(result.dtypes)
-    diff = result.values == weird_df.values
-    print(diff)
-    assert diff.all()
+class TestVariousTableFeatures:
+    def t_fix_bad_columns(self, arbitrary_table):
+        has_blank_col = pd.DataFrame([1, 7, 0, 1], columns=[""])
+        assert has_blank_col.columns == [""]
+        arbitrary_table.write(has_blank_col)
+        result = arbitrary_table.read()
+        assert [str(x) for x in result.columns] != [""]
+
+    def t_write_blank_df(self, arbitrary_table):
+        blank_df = pd.DataFrame([])
+        with pytest.raises(RuntimeError):
+            arbitrary_table.write(blank_df)
+
+    @pytest.mark.parametrize("incoming", [0, None, 64, "Engage."])
+    def t_write_non_df(self, incoming, arbitrary_table):
+        with pytest.raises(RuntimeError):
+            arbitrary_table.write(incoming)
+
+    def t_weird_in_and_out(self, weird_df, arbitrary_table):
+        # print("\n", weird_df, sep="")
+        arbitrary_table.write(weird_df)
+        result = arbitrary_table.read()
+        # print(weird_df)
+        # print(weird_df.dtypes)
+        # print(result)
+        # print(result.dtypes)
+        diff = result.values == weird_df.values
+        # print(diff)
+        assert diff.all()
 
 
 class TestChannel:

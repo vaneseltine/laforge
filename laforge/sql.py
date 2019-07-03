@@ -68,13 +68,10 @@ class Channel:
         self.save_engine()
         self.metadata = sa.MetaData(bind=self.engine, schema=self.schema)
 
-        if self.metadata.bind.url.database:
-            self.database = self.metadata.bind.url.database
+        # if self.metadata.bind.url.database:
+        self.database = self.metadata.bind.url.database
 
-        try:
-            self.inspector = sa.inspect(self.engine)
-        except sa.exc.DBAPIError:
-            logger.warning("Ignoring pretend table.")
+        self.inspector = sa.inspect(self.engine)
 
     @classmethod
     def grab(cls):
@@ -324,10 +321,10 @@ class Table:
         self.__server = self.channel.server
         self.__database = identifiers.get("database", self.channel.database)
         self.__schema = identifiers.get("schema", self.channel.schema)
-        try:
-            self.__name = identifiers["name"]
-        except KeyError:
-            raise SQLIdentifierProblem("Must provide table name.")
+        # try:
+        self.__name = identifiers["name"]
+        # except KeyError:
+        # raise SQLIdentifierProblem("Must provide table name.")
         self.__metal = None
 
     @property
@@ -401,10 +398,12 @@ class Table:
 
     def write(self, df, if_exists="replace"):
         """From DataFrame, create a new table and fill it with values"""
-        if df.empty:
-            raise RuntimeError("DataFrame to write is empty!")
-        if not isinstance(df, pd.DataFrame):
+        try:
+            if df.empty:
+                raise RuntimeError("DataFrame to write is empty!")
+        except AttributeError:
             raise RuntimeError(f"Can only write DataFrame, not {type(df)}")
+
         if "" in df.columns:
             df = fix_bad_columns(df)
         dtypes = self.distro.determine_dtypes(df)
