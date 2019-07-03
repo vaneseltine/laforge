@@ -281,15 +281,24 @@ class MSSQL(Distro):
         spec_dict = {
             "server": server,
             "database": database,
-            "driver": "SQL Server",
-            "trusted_connection": "yes",
-            "autocommit": "yes",
             "fast_executemany": "yes",
+            "autocommit": "yes",
         }
+        spec_dict["driver"] = engine_kwargs.pop("driver", "SQL Server")
+        if "username" in engine_kwargs and "password" in engine_kwargs:
+            spec_dict["UID"] = engine_kwargs.pop("username")
+            spec_dict["PWD"] = engine_kwargs.pop("password")
+        else:
+            spec_dict["trusted_connection"] = "yes"
+
+        print(spec_dict)
+
         spec_string = ";".join(f"{k}={{{v}}}" for k, v in spec_dict.items())
         engine_inputs = parse.quote_plus(spec_string)
 
         url = f"{self.name}+{self.driver}:///?odbc_connect={engine_inputs}"
+
+        print(url)
 
         engine_kwargs = {"encoding": "latin1"}
         engine_kwargs.update(engine_kwargs)

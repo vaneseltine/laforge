@@ -94,10 +94,11 @@ jobs:
           name: Prepare Linux environment
           command: |
             apt-get update
-            apt-get install curl ca-certificates gnupg2 software-properties-common -y
-            # TODO POSTGRESQL DEVEL PACKAGE
+            apt-get install curl ca-certificates git gnupg2 software-properties-common -y
+            # postgresql
+            apt-get install libpq-dev -y
       - run:
-          name: Prepare all the snakes
+          name: Install Pythons
           command: |
             cat /etc/os-release 
             apt-add-repository ppa:deadsnakes/ppa -y

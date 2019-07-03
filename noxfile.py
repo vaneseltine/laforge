@@ -18,7 +18,7 @@ nox.options.reuse_existing_virtualenvs = False
 # --no-stop-on-first-error on CLI to override
 nox.options.stop_on_first_error = True
 
-SUPPORTED_PYTHONS = ("python3.6", "python3.7")
+SUPPORTED_PYTHONS = ("python3.6", "python3.7", "python3.8")
 DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
 WINDOWS = sys.platform.startswith("win")
 
