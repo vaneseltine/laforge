@@ -20,6 +20,7 @@ jobs:
           ACCEPT_EULA: "Y"
           MSSQL_PID: Developer
           MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+
     steps:
       - checkout
       - restore_cache:
@@ -29,7 +30,7 @@ jobs:
       - run:
           name: Prepare Linux environment
           command: |
-            apt-get install unixodbc unixodbc-dev -y
+            sudo apt-get install unixodbc unixodbc-dev -y
       - run:
           name: Prepare Python environment
           command: |
@@ -62,13 +63,11 @@ jobs:
           name: Misc
           command: |
             compgen -c python
-            apt-get install python3.6 -y
+            sudo apt-get install python3.6 -y
 
-  nox:
+  snakes:
     docker:
-      # - image: circleci/python:3.7
-      # https://github.com/pydata/pandas-gbq/blob/master/.circleci/config.yml
-      - image: thekevjames/nox
+      - image: ubuntu:18.04
       - image: circleci/postgres:latest-ram
         environment:
           POSTGRES_DB: lftest_postg
@@ -79,6 +78,11 @@ jobs:
           MYSQL_DATABASE: lftest_mysql
           MYSQL_USER: geordi
           MYSQL_PASSWORD: watson
+      - image: microsoft/mssql-server-linux:2017-latest
+        environment:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
     steps:
       - checkout
       # - restore_cache:
@@ -88,10 +92,35 @@ jobs:
       - run:
           name: Prepare Linux environment
           command: |
-            apt-get install git -y
-            apt-get install python3 python3-dev python3-pip python3-venv python3-numpy -y
-            apt-get install unixodbc unixodbc-dev -y
+            apt-get update -y
+            apt-get install curl ca-certificates gnupg2 -y
+            # TODO POSTGRESQL DEVEL PACKAGE
+      - run:
+          name: Prepare all the snakes
+          command: |
+            cat /etc/os-release 
+            apt-add-repository ppa:deadsnakes/ppa -y
+            apt-get update -y 
+            apt-get install python3-pip python3-venv python3-numpy -y
+            apt-get install python3.6 python3.6-dev python3.6-venv -y
+            apt-get install python3.7 python3.7-dev python3.7-venv -y
+            apt-get install python3.8 python3.8-dev python3.8-venv -y
             compgen -c python
+      - run:
+          name: Install MSSQL driver
+          # https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017
+          command: |
+            curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+            curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
+            apt-get update -y
+            ACCEPT_EULA=Y apt-get install msodbcsql17 -y
+            # # optional: for bcp and sqlcmd
+            # ACCEPT_EULA=Y apt-get install mssql-tools
+            # echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bash_profile
+            # echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+            # source ~/.bashrc
+            # optional: for unixODBC development headers
+            apt-get install unixodbc-dev -y
       - run:
           name: Prepare Python environment
           command: |
@@ -122,18 +151,79 @@ jobs:
             pip --version
             pip freeze
             nox -k 'test or coverage' --no-stop-on-first-error
+
+  nox:
+    docker:
+      # - image: circleci/python:3.7
+      # https://github.com/pydata/pandas-gbq/blob/master/.circleci/config.yml
+      - image: thekevjames/nox
+      - image: circleci/postgres:latest-ram
+        environment:
+          POSTGRES_DB: lftest_postg
+          POSTGRES_USER: geordi
+          POSTGRES_PASSWORD: watson
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_DATABASE: lftest_mysql
+          MYSQL_USER: geordi
+          MYSQL_PASSWORD: watson
+      - image: microsoft/mssql-server-linux:2017-latest
+        environment:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+    steps:
+      - checkout
+      # - restore_cache:
+      #     keys:
+      #       - dependencies-v5-{{ checksum "requirements.txt" }}
+      #       - dependencies-v5-
       - run:
-          name: Misc
+          name: Prepare Linux environment
           command: |
+            apt-get install git -y
+            apt-get install python3 python3-dev python3-pip python3-venv python3-numpy -y
+            apt-get install unixodbc unixodbc-dev -y
+            apt-get install libpq-dev -y
             compgen -c python
+      - run:
+          name: Prepare Python environment
+          command: |
             which python3
-            pyenv versions
-            pyenv install -l
+            python3 -m venv .venv
+            . .venv/bin/activate
+            pip install -U pip
+            pip --version
+            pip install -r requirements.txt
+      # - save_cache:
+      #     paths:
+      #       - ./.venv
+      #       - ./.nox
+      #       - ~/.cache/pip
+      #     key: dependencies-v5-{{ checksum "requirements.txt" }}
+      - run:
+          name: Install laforge, updated environment
+          command: |
+            . .venv/bin/activate
+            pip --version
+            cp .circleci/env ./.env
+            pip install -e .[excel]
+      - run:
+          name: Nox
+          command: |
+            . .venv/bin/activate
+            pip --version
+            pip freeze
+            nox -k 'test or coverage' --no-stop-on-first-error
+
 workflows:
   version: 2
   noxified:
     jobs:
       - nox
-  oldschool:
+  old:
     jobs:
       - original
+  matvansnakes:
+    jobs:
+      - snakes
