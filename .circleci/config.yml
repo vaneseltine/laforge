@@ -19,7 +19,7 @@ jobs:
         environment:
           ACCEPT_EULA: "Y"
           MSSQL_PID: Developer
-          MSSQL_SA_PASSWORD: verystrongwatson
+          MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
     steps:
       - checkout
       - restore_cache:
@@ -58,9 +58,7 @@ jobs:
           name: Misc
           command: |
             compgen -c python
-            which python3
-            pyenv versions
-            pyenv install -l
+            apt-get install python3.6 -y
 
   nox:
     docker:
@@ -86,13 +84,13 @@ jobs:
       - run:
           name: Prepare Linux environment
           command: |
-            apt-get install git 
-            apt-get install python3
+            apt-get install git -y
+            apt-get install python3 -y
             compgen -c python
-            apt-get install python3-dev 
-            apt-get install python3-pip
-            apt-get install python3-venv
-            apt-get install python3-numpy
+            apt-get install python3-dev  -y
+            apt-get install python3-pip -y
+            apt-get install python3-venv -y
+            apt-get install python3-numpy -y
       - run:
           name: Prepare Python environment
           command: |
