@@ -92,6 +92,19 @@ class TestChannel:
         t.drop(ignore_existence=True)
         t.write(medium_df)
         assert t.exists()
+
+        try:
+            print(Table("servers", schema="sys", channel=test_channel).read())
+            print(Table("tables", schema="sys", channel=test_channel).read())
+        except:
+            pass
+
+        try:
+            print(Table("sys.tables", channel=test_channel).read())
+            print(Table("sys.servers", channel=test_channel).read())
+        except:
+            pass
+
         assert c.find("laforge_test_tester")
         assert c.find("laforge_%_tester")
         if schema:

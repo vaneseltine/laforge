@@ -18,7 +18,7 @@ nox.options.reuse_existing_virtualenvs = False
 # --no-stop-on-first-error on CLI to override
 nox.options.stop_on_first_error = True
 
-SUPPORTED_PYTHONS = ("python3.6", "python3.7", "python3.8")
+SUPPORTED_PYTHONS = ("python3.6", "python3.7")  # , "python3.8") - numpy
 DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
 WINDOWS = sys.platform.startswith("win")
 
@@ -37,6 +37,21 @@ def clean_dir(s):
         rmtree(folder, ignore_errors=True)
 
 
+@nox.session(reuse_venv=False)
+@nox.parametrize("distro", get_machine_distros(DISTROS))
+def test_database(session, distro):
+    session.install("-r", "requirements.txt")
+    session.install("-e", f".[{distro},excel]")
+    session.run(
+        "coverage",
+        "run",
+        "--parallel-mode",
+        "-m",
+        "pytest",
+        env={"LFTEST_DISTRO": distro},
+    )
+
+
 @nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
 def test_version(session):
     session.install("-r", "requirements.txt")
@@ -52,21 +67,6 @@ def test_version(session):
             "LFTEST_SQLITE": "1",
             "LFTEST_SQLITE_DATABASE": ":memory:",
         },
-    )
-
-
-@nox.session(reuse_venv=False)
-@nox.parametrize("distro", get_machine_distros(DISTROS))
-def test_database(session, distro):
-    session.install("-r", "requirements.txt")
-    session.install("-e", f".[{distro},excel]")
-    session.run(
-        "coverage",
-        "run",
-        "--parallel-mode",
-        "-m",
-        "pytest",
-        env={"LFTEST_DISTRO": distro},
     )
 
 
