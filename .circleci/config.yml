@@ -60,12 +60,7 @@ jobs:
             pip --version
             pip freeze
             #nox -k 'test or coverage' --no-stop-on-first-error
-            nox -k 'just_distro' --no-stop-on-first-error 
-      - run:
-          name: Misc
-          command: |
-            compgen -c python
-            sudo apt-get install -qy python3.6
+            nox -k 'test' --no-stop-on-first-error 
 
   snakes:
     docker:
@@ -155,7 +150,7 @@ jobs:
             pip --version
             pip freeze
             #nox -k 'test or coverage' --no-stop-on-first-error
-            nox -k 'just_distro' --no-stop-on-first-error 
+            nox -k 'test' --no-stop-on-first-error 
 
   nox:
     docker:
@@ -222,7 +217,7 @@ jobs:
             pip --version
             pip freeze
             #nox -k 'test or coverage' --no-stop-on-first-error
-            nox -k 'just_distro' --no-stop-on-first-error 
+            nox -k 'test' --no-stop-on-first-error 
 
 workflows:
   version: 2
