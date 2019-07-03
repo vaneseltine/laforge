@@ -1,4 +1,3 @@
-import glob
 import setuptools
 
 basics = [  # For maximums tested, see requirements.txt

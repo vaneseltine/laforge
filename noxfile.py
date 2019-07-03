@@ -58,21 +58,21 @@ def clean_dir(s):
 
 
 @nox.session(python=SUPPORTED_PYTHONS)
-def pytest_pyv(session):
+def test_version(session):
     """
     Note: tox required passenv = WINDIR
     See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
     """
     session.install("-r", "requirements.txt")
-    session.install("-e", ".[all]")
+    session.install("-e", ".[excel]")
     session.run("coverage", "run", "--parallel-mode", "-m", "pytest")
 
 
 @nox.session()
 @nox.parametrize("distro", get_machine_distros(DISTROS))
-def pytest_db(session, distro):
+def test_database(session, distro):
     session.install("-r", "requirements.txt")
-    session.install("-e", f".[{distro}]")
+    session.install("-e", f".[{distro},excel]")
     session.run(
         "coverage",
         "run",
@@ -81,6 +81,16 @@ def pytest_db(session, distro):
         "pytest",
         env={"LFTEST_DISTRO": distro},
     )
+
+
+@nox.session(python=SUPPORTED_PYTHONS)
+def test_cli(session):
+    session.install("-e", ".")
+    session.chdir("/")
+    session.run("python", "-m", "laforge", "--version", silent=True)
+    session.run("laforge", "--version", silent=True)
+    session.run("laforge", "env", "--no-warning", silent=True)
+    session.run("laforge", "consult", "--match", "diagnostic", silent=True)
 
 
 @nox.session()
@@ -96,18 +106,8 @@ def coverage(session):
         session.run("coveralls")
 
 
-@nox.session(python=SUPPORTED_PYTHONS)
-def cli(session):
-    session.install("-e", ".")
-    session.chdir("/")
-    session.run("python", "-m", "laforge", "--version", silent=True)
-    session.run("laforge", "--version", silent=True)
-    session.run("laforge", "env", "--no-warning", silent=True)
-    session.run("laforge", "consult", "--match", "diagnostic", silent=True)
-
-
 @nox.session(reuse_venv=True)
-def doc8(session):
+def docs_doc8(session):
     session.install("-U", "doc8", "Pygments")
     if WINDOWS:
         session.run("doc8", "./docs", "-q", "--ignore=D002", "--ignore=D004")
@@ -116,7 +116,7 @@ def doc8(session):
 
 
 @nox.session(reuse_venv=True)
-def sphinx(session):
+def docs_sphinx(session):
     # Treat warnings as errors.
     session.env["SPHINXOPTS"] = "-W"
     session.install("-e", ".")
@@ -127,19 +127,19 @@ def sphinx(session):
 
 
 @nox.session(reuse_venv=True)
-def flake8(session):
+def lint_flake8(session):
     session.install("-U", "flake8")
     session.run("python", "-m", "flake8", "./laforge", "--show-source")
 
 
 @nox.session(reuse_venv=True)
-def pylint(session):
+def lint_pylint(session):
     session.install("-U", "pylint")
     session.run("pylint", "./laforge", "-d", "import-error")
 
 
 @nox.session(reuse_venv=True)
-def black(session):
+def lint_black(session):
     session.install("-U", "black")
     session.run("python", "-m", "black", "--target-version", "py36", ".")
 
