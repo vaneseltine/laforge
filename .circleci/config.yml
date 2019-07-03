@@ -2,6 +2,66 @@
 # https://circleci.com/docs/2.0/postgres-config/
 version: 2
 jobs:
+  original:
+    docker:
+      - image: circleci/python:3.7
+      - image: circleci/postgres:latest-ram
+        environment:
+          POSTGRES_DB: lftest_postg
+          POSTGRES_USER: geordi
+          POSTGRES_PASSWORD: watson
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_DATABASE: lftest_mysql
+          MYSQL_USER: geordi
+          MYSQL_PASSWORD: watson
+      - image: microsoft/mssql-server-linux:2017-latest
+        environment:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: watson
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dependencies-v5-{{ checksum "requirements.txt" }}
+            - dependencies-v5-
+      - run:
+          name: Prepare Python environment
+          command: |
+            python3 -m venv .venv
+            . .venv/bin/activate
+            pip install -U pip
+            pip install -r requirements.txt
+            pip --version
+      - save_cache:
+          paths:
+            - ./.venv
+            - ./.nox
+            - ~/.cache/pip
+          key: dependencies-v5-{{ checksum "requirements.txt" }}
+      - run:
+          name: Install laforge, updated environment
+          command: |
+            . .venv/bin/activate
+            pip --version
+            cp .circleci/env ./.env
+            pip install -e .[excel]
+      - run:
+          name: Nox
+          command: |
+            . .venv/bin/activate
+            pip --version
+            pip freeze
+            nox -k 'test or coverage'
+      - run:
+          name: Misc
+          command: |
+            compgen -c python
+            which python3
+            pyenv versions
+            pyenv install -l
+
   nox:
     docker:
       # - image: circleci/python:3.7
@@ -17,32 +77,31 @@ jobs:
           MYSQL_DATABASE: lftest_mysql
           MYSQL_USER: geordi
           MYSQL_PASSWORD: watson
-      # - image: microsoft/mssql-server-linux:2017-latest
-      #   ports:
-      #     - "1433:1433"
-      #   environment:
-      #     ACCEPT_EULA: "Y"
-      #     SA_PASSWORD: watson
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - dependencies-v4-{{ checksum "requirements.txt" }}
-            - dependencies-v4-
+      # - restore_cache:
+      #     keys:
+      #       - dependencies-v5-{{ checksum "requirements.txt" }}
+      #       - dependencies-v5-
       - run:
-          name: Install Python dependencies
+          name: Prepare Linux environment
+          command: |
+            sudo apt-get install python3-dev python3-pip python3-venv
+            compgen -c python
+      - run:
+          name: Prepare Python environment
           command: |
             python3 -m venv .venv
             . .venv/bin/activate
             pip install -U pip
             pip install -r requirements.txt
             pip --version
-      - save_cache:
-          paths:
-            - ./.venv
-            - ./.nox
-            - ~/.cache/pip
-          key: dependencies-v4-{{ checksum "requirements.txt" }}
+      # - save_cache:
+      #     paths:
+      #       - ./.venv
+      #       - ./.nox
+      #       - ~/.cache/pip
+      #     key: dependencies-v5-{{ checksum "requirements.txt" }}
       - run:
           name: Install laforge, updated environment
           command: |
@@ -66,6 +125,9 @@ jobs:
             pyenv install -l
 workflows:
   version: 2
-  noxify:
+  noxified:
     jobs:
       - nox
+  oldschool:
+    jobs:
+      - original
