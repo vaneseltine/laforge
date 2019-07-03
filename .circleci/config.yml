@@ -19,7 +19,7 @@ jobs:
         environment:
           ACCEPT_EULA: "Y"
           MSSQL_PID: Developer
-          MSSQL_SA_PASSWORD: watson
+          MSSQL_SA_PASSWORD: verystrongwatson
     steps:
       - checkout
       - restore_cache:
@@ -86,11 +86,18 @@ jobs:
       - run:
           name: Prepare Linux environment
           command: |
-            sudo apt-get install python3-dev python3-pip python3-venv
+            apt-get install git 
+            apt-get install python3
             compgen -c python
+            apt-get install python3-dev 
+            apt-get install python3-pip
+            apt-get install python3-venv
+            apt-get install python3-numpy
       - run:
           name: Prepare Python environment
           command: |
+            compgen -c python
+            which python3
             python3 -m venv .venv
             . .venv/bin/activate
             pip install -U pip
