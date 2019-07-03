@@ -39,13 +39,20 @@ def clean_dir(s):
 
 @nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
 def test_version(session):
-    """
-    Note: tox required passenv = WINDIR
-    See https://www.kidstrythisathome.com/2017/02/tox-pyodbc-and-appveyor.html
-    """
     session.install("-r", "requirements.txt")
     session.install("-e", ".[excel]")
-    session.run("coverage", "run", "--parallel-mode", "-m", "pytest")
+    session.run(
+        "coverage",
+        "run",
+        "--parallel-mode",
+        "-m",
+        "pytest",
+        env={
+            "LFTEST_DISTRO": "sqlite",
+            "LFTEST_SQLITE": "1",
+            "LFTEST_SQLITE_DATABASE": ":memory:",
+        },
+    )
 
 
 @nox.session(reuse_venv=False)
@@ -61,14 +68,6 @@ def test_database(session, distro):
         "pytest",
         env={"LFTEST_DISTRO": distro},
     )
-
-
-@nox.session(reuse_venv=False)
-@nox.parametrize("distro", get_machine_distros(DISTROS))
-def just_distro(session, distro):
-    session.install("-r", "requirements.txt")
-    session.install("-e", f".[{distro},excel]")
-    session.run("pytest", "test/test_distro.py", env={"LFTEST_DISTRO": distro})
 
 
 @nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
