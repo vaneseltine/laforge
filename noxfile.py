@@ -63,6 +63,14 @@ def test_database(session, distro):
     )
 
 
+@nox.session(reuse_venv=False)
+@nox.parametrize("distro", get_machine_distros(DISTROS))
+def just_distro(session, distro):
+    session.install("-r", "requirements.txt")
+    session.install("-e", f".[{distro},excel]")
+    session.run("pytest", "test/test_distro.py", env={"LFTEST_DISTRO": distro})
+
+
 @nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
 def cli(session):
     session.install("-e", ".")

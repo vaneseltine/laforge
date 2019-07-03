@@ -313,18 +313,13 @@ class Table:
         self.distro = self.channel.distro
 
         identifiers = self._parse_args(name, kwargs)
-        for keyword in self.distro.minimal_keywords:
-            if not identifiers.get(keyword):
-                raise SQLIdentifierProblem(
-                    f"Valid {keyword} required from {identifiers}"
-                )
-        self.__server = self.channel.server
-        self.__database = identifiers.get("database", self.channel.database)
+        try:
+            self.__name = identifiers["name"]
+        except KeyError:
+            raise SQLIdentifierProblem("Must provide table name.")
         self.__schema = identifiers.get("schema", self.channel.schema)
-        # try:
-        self.__name = identifiers["name"]
-        # except KeyError:
-        # raise SQLIdentifierProblem("Must provide table name.")
+        self.__database = identifiers.get("database", self.channel.database)
+        self.__server = self.channel.server
         self.__metal = None
 
     @property

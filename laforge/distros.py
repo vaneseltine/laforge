@@ -29,7 +29,6 @@ class Distro:
         sa.types.BIGINT: 2 ** 63 - 101,
     }
     NUMERIC_PADDING_FACTOR = 10
-    minimal_keywords = ["server", "name"]
 
     find_template = """--Distro.find()
         select table_schema, table_name
@@ -254,7 +253,6 @@ class PostgresQL(Distro):
 class MSSQL(Distro):
     name = "mssql"
     driver = "pyodbc"
-    minimal_keywords = ["server", "database", "schema", "name"]
     resolver = "[{database}].[{schema}].[{name}]"
     find_template = """--MSSQL.find()
         select
@@ -277,14 +275,16 @@ class MSSQL(Distro):
         super().__init__()
         self.large_number_fallback = self.dialect.DECIMAL
 
-    def create_spec(self, *, server, database, engine_kwargs):
+    def create_spec(self, *, server, driver="SQL Server", engine_kwargs):
+        # https://docs.sqlalchemy.org/en/13/dialects/mssql.html
         spec_dict = {
             "server": server,
-            "database": database,
+            "driver": driver,
             "fast_executemany": "yes",
             "autocommit": "yes",
         }
-        spec_dict["driver"] = engine_kwargs.pop("driver", "SQL Server")
+        if "database" in engine_kwargs:
+            spec_dict["database"] = engine_kwargs.pop("database")
         if "username" in engine_kwargs and "password" in engine_kwargs:
             spec_dict["UID"] = engine_kwargs.pop("username")
             spec_dict["PWD"] = engine_kwargs.pop("password")
@@ -294,6 +294,7 @@ class MSSQL(Distro):
         print(spec_dict)
 
         spec_string = ";".join(f"{k}={{{v}}}" for k, v in spec_dict.items())
+        print(spec_string)
         engine_inputs = parse.quote_plus(spec_string)
 
         url = f"{self.name}+{self.driver}:///?odbc_connect={engine_inputs}"
@@ -355,7 +356,6 @@ class SQLite(Distro):
     driver = "sqlite3"
     resolver = "{name}"
 
-    minimal_keywords = ["database", "name"]
     # Filenames have wholly different semantics from other SQL identifiers
     untouchable_identifiers = ["database"]
 
