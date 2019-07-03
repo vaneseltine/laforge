@@ -79,6 +79,8 @@ class TestDistroCreation:
         url, _ = result.create_spec(
             server="srvr", database="db", engine_kwargs=KeyReturner
         )
+        print(url)
+        print(_)
         assert test_distro in url
 
 

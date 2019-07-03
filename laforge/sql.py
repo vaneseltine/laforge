@@ -57,6 +57,7 @@ class Channel:
     def __init__(
         self, distro, *, server=None, database=None, schema=None, **engine_kwargs
     ):
+        """Anything else is captured in engine_kwargs for create_spec"""
         from .distros import Distro
 
         self.distro = Distro.get(distro)

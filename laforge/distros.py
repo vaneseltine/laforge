@@ -275,16 +275,17 @@ class MSSQL(Distro):
         super().__init__()
         self.large_number_fallback = self.dialect.DECIMAL
 
-    def create_spec(self, *, server, driver="SQL Server", engine_kwargs):
+    def create_spec(self, *, server, database, engine_kwargs):
         # https://docs.sqlalchemy.org/en/13/dialects/mssql.html
         spec_dict = {
             "server": server,
-            "driver": driver,
+            "server": database,
+            "driver": "SQL Server",
             "fast_executemany": "yes",
             "autocommit": "yes",
         }
-        if "database" in engine_kwargs:
-            spec_dict["database"] = engine_kwargs.pop("database")
+        if "driver" in engine_kwargs:
+            spec_dict["driver"] = engine_kwargs.pop("driver")
         if "username" in engine_kwargs and "password" in engine_kwargs:
             spec_dict["UID"] = engine_kwargs.pop("username")
             spec_dict["PWD"] = engine_kwargs.pop("password")
