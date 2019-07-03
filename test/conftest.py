@@ -13,7 +13,8 @@ from laforge.sql import Channel, Table
 # Pull variables, especially LFTEST_*, into os.environ
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
+DISTROS = {"mysql", "mssql", "postgresql", "sqlite"}
+TEST_DISTRO = os.environ.get("LFTEST_DISTRO", "sqlite").lower()
 SUPPORTED = [d for d in DISTROS if os.environ.get(f"LFTEST_{d.upper()}") == "1"]
 
 SAMPLES = {f.stem: pd.read_csv(f.resolve()) for f in Path(".").glob("**/*.csv")}
@@ -36,6 +37,21 @@ def pytest_runtest_setup(item):
     Channel.known_engines.clear()
     string_markers = stringify_markers(item.iter_markers())
     skip_by_markers(string_markers)
+    skip_by_sql(item)
+
+
+def skip_by_sql(item):
+    try:
+        # TODO -- there is presumably a more appropriate way to gather this
+        parameters = set(item.name[:-1].split("[")[1].split("-"))
+    except IndexError:
+        return None
+    else:
+        param_distros = DISTROS.intersection(parameters)
+        if not param_distros:
+            return None
+        if TEST_DISTRO not in param_distros:
+            pytest.skip(f"Intended for {param_distros} not {TEST_DISTRO}")
 
 
 def stringify_markers(iter_markers):
@@ -49,10 +65,6 @@ def skip_by_markers(markers):
     platform_skip = platform_violates_mark(markers)
     if platform_skip:
         pytest.skip(platform_skip)
-
-    sql_skip = sql_availability_violates_mark(markers)
-    if sql_skip:
-        pytest.skip(sql_skip)
 
     stata_skip = stata_is_required_but_missing(markers)
     if stata_skip:
@@ -75,17 +87,6 @@ def platform_violates_mark(markers):
     if current_platform in platform_whitelist:
         return 0
     return "Not intended for {}.".format(current_platform)
-
-
-def sql_availability_violates_mark(markers):
-    sql_whitelist = {"postgresql", "mssql", "mysql", "sql", "sqlite"}.intersection(
-        markers
-    )
-    if not sql_whitelist:
-        return 0
-    if set(supported_sqls).intersection(markers):
-        return 0
-    return "Requires specific SQL distribution: {}.".format(";".join(sql_whitelist))
 
 
 # Session-scope fixtures
@@ -111,7 +112,7 @@ def weird_df():
 
 @pytest.fixture(scope="session")
 def test_distro():
-    return os.environ.get("LFTEST_DISTRO", "sqlite").lower()
+    return TEST_DISTRO
 
 
 # Function-scope fixtures
