@@ -38,8 +38,8 @@ jobs:
           command: |
             python3 -m venv .venv
             . .venv/bin/activate
-            pip install -U pip
-            pip install -r requirements.txt
+            pip install -q -U pip
+            pip install -q -r requirements.txt
             pip --version
       - save_cache:
           paths:
@@ -84,10 +84,10 @@ jobs:
           MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
     steps:
       - checkout
-      # - restore_cache:
-      #     keys:
-      #       - dependencies-v5-{{ checksum "requirements.txt" }}
-      #       - dependencies-v5-
+      - restore_cache:
+          keys:
+            - dependencies-v7-{{ checksum "requirements.txt" }}
+            - dependencies-v7-
       - run:
           name: Prepare Linux environment
           command: |
@@ -127,15 +127,15 @@ jobs:
           command: |
             python3 -m venv .venv
             . .venv/bin/activate
-            pip install -U pip
-            pip install -r requirements.txt
+            pip install -q -U pip
+            pip install -q -r requirements.txt
             pip --version
-      # - save_cache:
-      #     paths:
-      #       - ./.venv
-      #       - ./.nox
-      #       - ~/.cache/pip
-      #     key: dependencies-v5-{{ checksum "requirements.txt" }}
+      - save_cache:
+          paths:
+            - ./.venv
+            - ./.nox
+            - ~/.cache/pip
+          key: dependencies-v7-{{ checksum "requirements.txt" }}
       - run:
           name: Install laforge, updated environment
           command: |
@@ -195,9 +195,9 @@ jobs:
             which python3
             python3 -m venv .venv
             . .venv/bin/activate
-            pip install -U pip
+            pip install -q -U pip
             pip --version
-            pip install -r requirements.txt
+            pip install -q -r requirements.txt
       # - save_cache:
       #     paths:
       #       - ./.venv
