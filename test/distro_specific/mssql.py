@@ -3,7 +3,6 @@ from laforge.sql import Channel, Table, Script, execute
 from laforge.distros import Distro
 
 
-@pytest.mark.mssql
 def test_do_not_add_foolish_semicolon(make_channel):
     c = make_channel("mssql")
     Script(
@@ -16,7 +15,6 @@ def test_do_not_add_foolish_semicolon(make_channel):
     ).execute()
 
 
-@pytest.mark.mssql
 @pytest.mark.xfail
 def test_errors_being_swallowed(test_channel):
     raw = """
@@ -49,7 +47,6 @@ def test_errors_being_swallowed(test_channel):
         Script(raw, channel=test_channel).execute()
 
 
-@pytest.mark.mssql
 def test_do_not_add_foolish_semicolon(make_channel):
     c = make_channel("mssql")
     Script(
@@ -82,7 +79,6 @@ def test_script_or_execute_to_df(secrets):
     assert scripted_t == executed_t
 
 
-@pytest.mark.mssql
 def test_do_not_add_foolish_semicolon(make_channel):
     c = make_channel("mssql")
     Script(

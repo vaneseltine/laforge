@@ -94,14 +94,3 @@ def test_builder_sql_list(secrets, tmpdir, load_toml):
 #     t = TaskList(from_dict=task_dict, location=tmpdir)
 #     preempt_tasks(task_dict["config"], t.tasks, secrets)
 #     t.execute()
-
-
-# @pytest.mark.stata
-# def test_builder_stata_list(secrets, tmpdir, load_toml):
-#     task_dict = load_toml("test_builder_stata_list.toml")
-#     task_dict["config"] = secrets
-#     task_dict["config"]["build_dir"] = tmpdir
-
-#     t = TaskList(from_dict=task_dict, location=tmpdir)
-#     preempt_tasks(task_dict["config"], t.tasks, secrets)
-#     t.execute()

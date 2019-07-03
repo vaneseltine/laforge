@@ -1,29 +1,9 @@
-"""
+"""Nox
+
 cf. https://github.com/saltstack/salt/blob
     /328989d6cc8f81fc100c9aa900a4e3613dc7c19d/noxfile.py
 
-example selection from .env:
-
-    LFTEST_MSSQL = 0
-
-    LFTEST_SQLITE = 1
-    LFTEST_SQLITE_DATABASE = :memory:
-
-    LFTEST_MYSQL = 1
-    LFTEST_MYSQL_SERVER = localhost
-    LFTEST_MYSQL_DATABASE = test_mason
-    LFTEST_MYSQL_SCHEMA = test_mason
-    LFTEST_MYSQL_USERNAME = test_mason
-    LFTEST_MYSQL_PASSWORD = test_mason
-
-    LFTEST_POSTGRESQL = 1
-    LFTEST_POSTGRESQL_SERVER = localhost
-    LFTEST_POSTGRESQL_DATABASE = test_mason
-    LFTEST_POSTGRESQL_SCHEMA = test_mason
-    LFTEST_POSTGRESQL_USERNAME = test_mason
-    LFTEST_POSTGRESQL_PASSWORD = test_mason
-
-"""
+For .env setup, see .circleci/env"""
 
 import os
 import sys
@@ -36,7 +16,7 @@ import nox
 # -r on CLI to override and reuse all instead
 nox.options.reuse_existing_virtualenvs = False
 # --no-stop-on-first-error on CLI to override
-nox.options.stop_on_first_error = False
+nox.options.stop_on_first_error = True
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")
 DISTROS = ["mysql", "mssql", "postgresql", "sqlite"]
@@ -101,7 +81,7 @@ def coverage(session):
         session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
-    if not WINDOWS:
+    if os.getenv("COVERALLS_REPO_TOKEN"):
         session.install("coveralls")
         session.run("coveralls")
 

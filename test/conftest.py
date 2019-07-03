@@ -102,6 +102,13 @@ def medium_df():
 
 
 @pytest.fixture(scope="session")
+def weird_df():
+    df = SAMPLES["weird"]
+    df["none"] = None
+    return df
+
+
+@pytest.fixture(scope="session")
 def test_distro():
     return os.environ.get("LFTEST_DISTRO", "sqlite")
 
@@ -111,16 +118,6 @@ def test_distro():
 
 @pytest.fixture(scope="function")
 def test_channel():
-    """
-    e.g.
-    LFTEST_MYSQL = 1
-    LFTEST_MYSQL_SERVER = localhost
-    LFTEST_MYSQL_DATABASE = test_mason
-    LFTEST_MYSQL_SCHEMA = test_mason
-    LFTEST_MYSQL_USERNAME = test_mason
-    LFTEST_MYSQL_PASSWORD = test_mason
-    """
-
     distro = os.environ.get("LFTEST_DISTRO", "sqlite")
     prefix = f"LFTEST_{distro}_".upper()
     crop = len(prefix)

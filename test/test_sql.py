@@ -16,6 +16,19 @@ from laforge.sql import (
 )
 
 
+def test_weird_in_and_out(weird_df, arbitrary_table):
+    # print("\n", weird_df, sep="")
+    arbitrary_table.write(weird_df)
+    result = arbitrary_table.read()
+    print(weird_df)
+    print(weird_df.dtypes)
+    print(result)
+    print(result.dtypes)
+    diff = result.values == weird_df.values
+    print(diff)
+    assert diff.all()
+
+
 class TestChannel:
     def t_empty_blind_execute_fails(self, tmpdir):
         with pytest.raises(SQLChannelNotFound):
@@ -37,8 +50,8 @@ class TestChannel:
 
     def t_same_spec_yields_same_channel(self, tmpdir):
         assert len(Channel.known_channels) == 0
-        c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
-        c2 = Channel(distro="sqlite", database=tmpdir / "c1.db")
+        _ = Channel(distro="sqlite", database=tmpdir / "c1.db")
+        _ = Channel(distro="sqlite", database=tmpdir / "c1.db")
         assert len(Channel.known_channels) == 1
 
     @pytest.mark.parametrize("fetch", ["df", "tuples", False])
