@@ -55,22 +55,22 @@ class TestChannel:
         with pytest.raises(SQLChannelNotFound):
             execute("select 1;")
 
-    def t_blind_execute_with_one_channel(self, tmpdir):
-        c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
+    def t_blind_execute_with_one_channel(self, tmpdir, test_distro):
+        c1 = Channel(distro=test_distro, database=tmpdir / "c1.db")
         assert Channel.grab() == c1
         execute("select 1;")
 
-    def t_blind_grab_the_latest(self, tmpdir):
-        c1 = Channel(distro="sqlite", database=tmpdir / "c1.db")
-        c2 = Channel(distro="sqlite", database=tmpdir / "c2.db")
-        c3 = Channel(distro="sqlite", database=tmpdir / "c3.db")
+    def t_blind_grab_the_latest(self, tmpdir, test_distro):
+        c1 = Channel(distro=test_distro, database=tmpdir / "c1.db")
+        c2 = Channel(distro=test_distro, database=tmpdir / "c2.db")
+        c3 = Channel(distro=test_distro, database=tmpdir / "c3.db")
         assert (c1 != c2) and (c1 != c3) and (c2 != c3)
         assert Channel.grab() == c3
 
-    def t_same_spec_yields_same_channel(self, tmpdir):
+    def t_same_spec_yields_same_channel(self, tmpdir, test_distro):
         assert len(Channel.known_channels) == 0
-        _ = Channel(distro="sqlite", database=tmpdir / "c1.db")
-        _ = Channel(distro="sqlite", database=tmpdir / "c1.db")
+        _ = Channel(distro=test_distro, database=tmpdir / "c1.db")
+        _ = Channel(distro=test_distro, database=tmpdir / "c1.db")
         assert len(Channel.known_channels) == 1
 
     @pytest.mark.parametrize("fetch", ["df", "tuples", False])

@@ -118,14 +118,14 @@ def test_distro():
 
 
 @pytest.fixture(scope="function")
-def test_channel():
-    distro = os.environ.get("LFTEST_DISTRO", "sqlite")
-    prefix = f"LFTEST_{distro}_".upper()
+def test_channel(test_distro):
+    # distro = os.environ.get("LFTEST_DISTRO", "sqlite")
+    prefix = f"LFTEST_{test_distro}_".upper()
     crop = len(prefix)
     kwargs = {
         k[crop:].lower(): v for k, v in os.environ.items() if k.startswith(prefix)
     }
-    return Channel(distro=distro, **kwargs)
+    return Channel(distro=test_distro, **kwargs)
 
 
 @pytest.fixture(scope="function")

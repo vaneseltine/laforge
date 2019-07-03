@@ -88,8 +88,8 @@ jobs:
             pip --version
             pip freeze
             #nox -k 'test or coverage' --no-stop-on-first-error
-            nox -k 'test' -l
-            nox -k 'test' --no-stop-on-first-error 
+            nox -k 'test_database' -l
+            nox -k 'test_database' --no-stop-on-first-error 
 
 workflows:
   version: 2

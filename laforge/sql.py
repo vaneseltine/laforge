@@ -499,8 +499,6 @@ class Identifier:
         self.original = user_input
         self.extra = extra
 
-        print(f"id from {user_input!r}; {extra!r}")
-
         stringed_input = "" if self.original is None else str(self.original)
 
         try:
