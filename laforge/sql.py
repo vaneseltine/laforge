@@ -66,12 +66,14 @@ class Channel:
         self.schema = schema
 
         self.engine = self._construct_engine(**engine_kwargs)
+
         self.save_engine()
         self.metadata = sa.MetaData(bind=self.engine, schema=self.schema)
 
-        # if self.metadata.bind.url.database:
-        self.database = self.metadata.bind.url.database
+        if self.metadata.bind.url.database:
+            self.database = self.metadata.bind.url.database
 
+        print("enginee", self.engine)
         self.inspector = sa.inspect(self.engine)
 
     @classmethod

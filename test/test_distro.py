@@ -5,6 +5,28 @@ import sqlalchemy as sa
 from laforge.distros import Distro, SQLDistroNotFound, round_up
 
 
+class TestDistroCreation:
+    @pytest.mark.parametrize("db", ["", ":memory:", "sqlite.db"])
+    def t_sqlite_prepare_engine(self, db, tmp_path):
+        result = Distro.get("sqlite")
+        if db == "sqlite.db":
+            db = tmp_path / "sqlite.db"
+        url, _ = result.create_spec(server="srvr", database=db, engine_kwargs={})
+        assert str(db or ":memory:") in url
+
+    def t_prepare_for_other_engines(self, test_distro):
+        if test_distro == "sqlite":
+            pytest.skip("sqlite handled elsewhere")
+        try:
+            result = Distro.get(test_distro)
+        except ModuleNotFoundError:
+            pytest.skip(f"Missing {test_distro} module.")
+        url, _ = result.create_spec(server="srvr", database="db", engine_kwargs={})
+        print(url)
+        print(_)
+        assert test_distro in url
+
+
 class TestDistroGet:
     def t_get_exactly_one_distro_canonically(self, test_distro):
         try:
@@ -52,36 +74,6 @@ class TestDistroGet:
     def t_fail_vague_distros(self, vaguename):
         with pytest.raises(SQLDistroNotFound):
             Distro.get(vaguename)
-
-
-class KeyReturner:
-    @staticmethod
-    def pop(key):
-        return str(key)
-
-
-class TestDistroCreation:
-    @pytest.mark.parametrize("db", ["", ":memory:", "sqlite.db"])
-    def t_sqlite_prepare_engine(self, db, tmp_path):
-        result = Distro.get("sqlite")
-        if db == "sqlite.db":
-            db = tmp_path / "sqlite.db"
-        url, _ = result.create_spec(server="srvr", database=db, engine_kwargs={})
-        assert str(db or ":memory:") in url
-
-    def t_prepare_for_other_engines(self, test_distro):
-        if test_distro == "sqlite":
-            pytest.skip("sqlite handled elsewhere")
-        try:
-            result = Distro.get(test_distro)
-        except ModuleNotFoundError:
-            pytest.skip(f"Missing {test_distro} module.")
-        url, _ = result.create_spec(
-            server="srvr", database="db", engine_kwargs=KeyReturner
-        )
-        print(url)
-        print(_)
-        assert test_distro in url
 
 
 class TestDistroFunctionality:

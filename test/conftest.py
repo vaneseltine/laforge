@@ -111,7 +111,7 @@ def weird_df():
 
 @pytest.fixture(scope="session")
 def test_distro():
-    return os.environ.get("LFTEST_DISTRO", "sqlite")
+    return os.environ.get("LFTEST_DISTRO", "sqlite").lower()
 
 
 # Function-scope fixtures

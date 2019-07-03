@@ -178,7 +178,7 @@ class Distro:
     def create_spec(self, *, server, database, engine_kwargs):
         raise NotImplementedError
 
-    def create_engine(self, server, database, engine_kwargs):
+    def create_engine(self, *, server, database, engine_kwargs):
         url, final_engine_kwargs = self.create_spec(
             server=server, database=database, engine_kwargs=engine_kwargs
         )
@@ -279,7 +279,7 @@ class MSSQL(Distro):
         # https://docs.sqlalchemy.org/en/13/dialects/mssql.html
         spec_dict = {
             "server": server,
-            "server": database,
+            "database": database,
             "driver": "SQL Server",
             "fast_executemany": "yes",
             "autocommit": "yes",
