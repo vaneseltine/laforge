@@ -57,7 +57,7 @@ def clean_dir(s):
         rmtree(folder, ignore_errors=True)
 
 
-@nox.session(python=SUPPORTED_PYTHONS)
+@nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
 def test_version(session):
     """
     Note: tox required passenv = WINDIR
@@ -68,7 +68,7 @@ def test_version(session):
     session.run("coverage", "run", "--parallel-mode", "-m", "pytest")
 
 
-@nox.session()
+@nox.session(reuse_venv=False)
 @nox.parametrize("distro", get_machine_distros(DISTROS))
 def test_database(session, distro):
     session.install("-r", "requirements.txt")
@@ -83,8 +83,8 @@ def test_database(session, distro):
     )
 
 
-@nox.session(python=SUPPORTED_PYTHONS)
-def test_cli(session):
+@nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
+def cli(session):
     session.install("-e", ".")
     session.chdir("/")
     session.run("python", "-m", "laforge", "--version", silent=True)
@@ -93,7 +93,7 @@ def test_cli(session):
     session.run("laforge", "consult", "--match", "diagnostic", silent=True)
 
 
-@nox.session()
+@nox.session(reuse_venv=True)
 def coverage(session):
     clean_dir("./build/coverage")
     session.install("coverage")

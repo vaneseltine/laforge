@@ -32,6 +32,7 @@ jobs:
       - save_cache:
           paths:
             - ./.venv
+            - ./.nox
             - ~/.cache/pip
           key: dependencies-v4-{{ checksum "requirements.txt" }}
       - run:
