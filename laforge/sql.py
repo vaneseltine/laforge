@@ -73,7 +73,6 @@ class Channel:
         if self.metadata.bind.url.database:
             self.database = self.metadata.bind.url.database
 
-        print("enginee", self.engine)
         self.inspector = sa.inspect(self.engine)
 
     @classmethod
@@ -340,10 +339,10 @@ class Table:
     @property
     def identifiers(self):
         return {
-            "server": self.__server,
-            "database": self.__database,
-            "schema": self.__schema,
-            "name": self.__name,
+            "server": self.server,
+            "database": self.database,
+            "schema": self.schema,
+            "name": self.name,
         }
 
     @property
@@ -481,7 +480,7 @@ class Identifier:
     VALID_NAME_PATTERN = r"[A-Za-z@_#][\w@_#$]*"
 
     WHITELIST = [":memory:", "tables"]
-    BLACKLIST = ["?column?", ""]
+    BLACKLIST = ["?column?", "", None]
 
     def __init__(self, user_input, extra=None):
         """
@@ -497,35 +496,33 @@ class Identifier:
 
         """
         self.original = user_input
-        self.extra = extra
 
-        stringed_input = "" if self.original is None else str(self.original)
-
-        try:
-            self._leading_underscore = stringed_input.strip().startswith("_")
-        except AttributeError:
-            raise SQLIdentifierProblem(
-                "String or stringlike object required, not {}.".format(stringed_input)
-            )
-        if stringed_input in self.WHITELIST:
-            self.normalized = stringed_input
-        elif str(stringed_input) in self.BLACKLIST:
-            self.normalized = self._normalize("")
+        if self.original in self.WHITELIST:
+            self.normalized = self.original
+        elif self.original in self.BLACKLIST:
+            self.normalized = self._normalize("", leading_underscore=False, extra=extra)
         else:
-            self.normalized = self._normalize(stringed_input)
+            stringed_input = str(self.original).strip()
+            self.normalized = self._normalize(
+                stringed_input,
+                leading_underscore=stringed_input.strip().startswith("_"),
+                extra=extra,
+            )
 
     def check(self):
-        if self.normalized != self.original:
-            logger.debug(
-                "Identifier [%s] suggested normalization: [%s].",
-                self.original,
-                self.normalized,
-            )
+        if self.normalized == self.original:
+            return True
+        logger.debug(
+            "Identifier [%s] suggested normalization: [%s].",
+            self.original,
+            self.normalized,
+        )
+        return False
 
-    def _normalize(self, working):
+    def _normalize(self, working, leading_underscore, extra):
         working = self._replace_characters(working)
-        working = self._fix(working)
-        working = self._stylize(working)
+        working = self._fix(working, extra)
+        working = self._stylize(working, leading_underscore)
         working = self._shorten(working)
         working = self._amend(working)
         return working
@@ -538,21 +535,21 @@ class Identifier:
         )
         return attempt
 
-    def _fix(self, s):
+    def _fix(self, s, extra=None):
         hit = re.search(self.VALID_NAME_PATTERN, s)
         if hit:
             return hit.group(0)
         # Lack of match: no usable first character (could be blank/all specials)
         # But we do need something to work with
-        if not s and self.extra is None:
+        if not s and extra is None:
             raise SQLIdentifierProblem("Empty identifier requires extra input")
-        fixed = f"column_{s or self.extra}"
+        fixed = f"column_{s or extra}"
         logger.warning(f"No useful name from: [{s}], replaced with: [{fixed}]")
         return fixed
 
-    def _stylize(self, attempt):
+    def _stylize(self, attempt, leading_underscore):
         # Don't add a leading underscore if it wasn't there already (junk replacement)
-        if not self._leading_underscore:
+        if not leading_underscore:
             attempt = attempt.lstrip("_")
         return attempt
 

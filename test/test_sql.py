@@ -134,6 +134,25 @@ class TestFinding:
             assert not c.find("laforge_test_tester", schema_pattern=schema)
 
 
+class TestIdentifier:
+    @pytest.mark.parametrize("name", Identifier.WHITELIST)
+    def t_whitelist(self, name):
+        ident = Identifier(name, extra="xx")
+
+        assert name == ident.normalized
+        assert ident.check()
+
+    # @pytest.mark.parametrize("name", Identifier.BLACKLIST)
+    @pytest.mark.parametrize("name", ["?column?"])
+    def t_blacklist(self, name):
+        ident = Identifier(name, extra="xx")
+
+        assert name != ident.normalized
+        assert not ident.check()
+        # assert Identifier(name, extra="0").normalized != name
+        # assert Identifier(name).check()
+
+
 class TestIdentifierNormalization:
     @pytest.mark.parametrize(
         "incoming, norm",
@@ -204,6 +223,7 @@ class TestIdentifierNormalization:
     def t_non_names_without_extra_produce_exceptions(self, n):
         with pytest.raises(ValueError):
             _ = Identifier(n, extra=None).normalized
+            print(_)
 
     @pytest.mark.parametrize(
         "column_in, extra, column_out",
@@ -466,6 +486,22 @@ iso_table_names = strategies.from_regex(regex=r"[A-Za-z_][A-Za-z0-9_]+", fullmat
 
 
 class TestTable:
+    def t_get_back_info(self, test_channel):
+        name = "enterprise"
+        t = Table(name, channel=test_channel)
+        assert t.identifiers == {
+            "name": name,
+            "database": test_channel.database,
+            "server": test_channel.server,
+            "schema": test_channel.schema,
+        }
+        assert name in t.resolve()
+
+    def t_resolve(self, arbitrary_table):
+        assert arbitrary_table.resolve()
+        with pytest.raises(Exception):
+            arbitrary_table.resolve(strict=True)
+
     @pytest.mark.slow
     @given(incoming=iso_table_names)
     @settings(max_examples=50, deadline=None)
