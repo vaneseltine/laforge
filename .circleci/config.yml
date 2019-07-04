@@ -93,9 +93,64 @@ jobs:
             pip freeze
             nox -k 'test or coverage' -l
             nox -k 'test or coverage' --no-stop-on-first-error
+  herpephilia:
+    docker:
+      - image: matvan/herpephilia
+      - image: circleci/postgres:latest-ram
+        environment:
+          POSTGRES_DB: lftest_postg
+          POSTGRES_USER: geordi
+          POSTGRES_PASSWORD: watson
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_DATABASE: lftest_mysql
+          MYSQL_USER: geordi
+          MYSQL_PASSWORD: watson
+      - image: microsoft/mssql-server-linux:2017-latest
+        environment:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - dependencies-v8-{{ checksum "requirements.txt" }}
+            - dependencies-v8-
+      - run:
+          name: Prepare Python environment
+          command: |
+            python3 -m venv .venv
+            . .venv/bin/activate
+            pip install -q -U pip
+            pip install -q -r requirements.txt
+            pip --version
+      - save_cache:
+          paths:
+            - ./.venv
+            - ./.nox
+            - ~/.cache/pip
+          key: dependencies-v8-{{ checksum "requirements.txt" }}
+      - run:
+          name: Install laforge, updated environment
+          command: |
+            . .venv/bin/activate
+            pip --version
+            cp .circleci/env ./.env
+            pip install -e .[excel]
+      - run:
+          name: Nox
+          command: |
+            . .venv/bin/activate
+            pip --version
+            pip freeze
+            nox -k 'test or coverage' -l
+            nox -k 'test or coverage' --no-stop-on-first-error
 
 workflows:
   version: 2
   multitest:
     jobs:
       - snakes
+    jobs:
+      - herpephilia
