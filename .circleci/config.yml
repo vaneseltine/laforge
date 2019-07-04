@@ -5,23 +5,31 @@ jobs:
   snakes:
     docker:
       - image: ubuntu:18.04
+          environnment:
+            DEBIAN_FRONTEND: noninteractive
+            ACCEPT_EULA: "Y"
       - image: circleci/postgres:latest-ram
-        environment:
-          POSTGRES_DB: lftest_postg
-          POSTGRES_USER: geordi
-          POSTGRES_PASSWORD: watson
+          environment:
+            POSTGRES_DB: lftest_postg
+            POSTGRES_USER: geordi
+            POSTGRES_PASSWORD: watson
       - image: circleci/mysql:5.6
-        environment:
-          MYSQL_DATABASE: lftest_mysql
-          MYSQL_USER: geordi
-          MYSQL_PASSWORD: watson
+          environment:
+            MYSQL_DATABASE: lftest_mysql
+            MYSQL_USER: geordi
+            MYSQL_PASSWORD: watson
       - image: microsoft/mssql-server-linux:2017-latest
-        environment:
-          ACCEPT_EULA: "Y"
-          MSSQL_PID: Developer
-          MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+          environment:
+            ACCEPT_EULA: "Y"
+            MSSQL_PID: Developer
+            MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
     steps:
       - checkout
+      - run:
+          name: Bare minimum for restore_cache
+          command: |
+            apt-get update
+            apt-get install ca-certificates
       - restore_cache:
           keys:
             - dependencies-v7-{{ checksum "requirements.txt" }}
@@ -30,17 +38,16 @@ jobs:
           name: Prepare Linux environment
           command: |
             apt-get update
-            apt-get install -qy curl ca-certificates git gnupg2 software-properties-common
-            # postgresql
+            apt-get install -qy curl git gnupg2 software-properties-common
             apt-get install -qy libpq-dev
       - run:
           name: Install Pythons
           command: |
-            cat /etc/os-release 
+            cat /etc/os-release
             apt-add-repository ppa:deadsnakes/ppa -y
             apt-get update
-            apt-get install -qy python3-pip python3-venv python3-numpy 
-            apt-get install -qy python3.6 python3.6-dev python3.6-venv 
+            apt-get install -qy python3-pip python3-venv python3-numpy
+            apt-get install -qy python3.6 python3.6-dev python3.6-venv
             apt-get install -qy python3.7 python3.7-dev python3.7-venv python3.7-distutils
             apt-get install -qy python3.8 python3.8-dev python3.8-venv python3.8-distutils
       - run:
@@ -88,7 +95,7 @@ jobs:
             pip --version
             pip freeze
             nox -k 'test or coverage' -l
-            nox -k 'test or coverage' --no-stop-on-first-error 
+            nox -k 'test or coverage' --no-stop-on-first-error
 
 workflows:
   version: 2
