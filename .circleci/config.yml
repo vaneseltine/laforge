@@ -20,6 +20,7 @@ jobs:
           ACCEPT_EULA: "Y"
           MSSQL_PID: Developer
           MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+    parallelism: 2
     steps:
       - checkout
       - run:
@@ -112,6 +113,7 @@ jobs:
           ACCEPT_EULA: "Y"
           MSSQL_PID: Developer
           MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+    parallelism: 2
     steps:
       - checkout
       - restore_cache:
