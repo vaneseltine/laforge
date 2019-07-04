@@ -2,7 +2,7 @@
 # https://circleci.com/docs/2.0/postgres-config/
 version: 2
 jobs:
-  snakes:
+  ubuntu:
     docker:
       - image: ubuntu:18.04
       - image: circleci/postgres:latest-ram
@@ -91,8 +91,9 @@ jobs:
             . .venv/bin/activate
             pip --version
             pip freeze
-            nox -k 'test or coverage' -l
-            nox -k 'test or coverage' --no-stop-on-first-error
+            # Note -- this job does not submit coverage
+            nox -k 'test' -l
+            nox -k 'test' --no-stop-on-first-error
   herpephilia:
     docker:
       - image: matvan/herpephilia
@@ -151,5 +152,5 @@ workflows:
   version: 2
   multitest:
     jobs:
-      - snakes
+      - ubuntu  # Note -- ubuntu job does not submit coverage
       - herpephilia
