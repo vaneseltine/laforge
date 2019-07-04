@@ -6,20 +6,20 @@ jobs:
     docker:
       - image: ubuntu:18.04
       - image: circleci/postgres:latest-ram
-          environment:
-            POSTGRES_DB: lftest_postg
-            POSTGRES_USER: geordi
-            POSTGRES_PASSWORD: watson
+        environment:
+          POSTGRES_DB: lftest_postg
+          POSTGRES_USER: geordi
+          POSTGRES_PASSWORD: watson
       - image: circleci/mysql:5.6
-          environment:
-            MYSQL_DATABASE: lftest_mysql
-            MYSQL_USER: geordi
-            MYSQL_PASSWORD: watson
+        environment:
+          MYSQL_DATABASE: lftest_mysql
+          MYSQL_USER: geordi
+          MYSQL_PASSWORD: watson
       - image: microsoft/mssql-server-linux:2017-latest
-          environment:
-            ACCEPT_EULA: "Y"
-            MSSQL_PID: Developer
-            MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
+        environment:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: SUPERDUPERSTRONGwatson!
     steps:
       - checkout
       - run:
