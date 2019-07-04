@@ -5,9 +5,6 @@ jobs:
   snakes:
     docker:
       - image: ubuntu:18.04
-          environnment:
-            DEBIAN_FRONTEND: noninteractive
-            ACCEPT_EULA: "Y"
       - image: circleci/postgres:latest-ram
           environment:
             POSTGRES_DB: lftest_postg
