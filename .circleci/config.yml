@@ -152,5 +152,4 @@ workflows:
   multitest:
     jobs:
       - snakes
-    jobs:
       - herpephilia
