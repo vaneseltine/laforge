@@ -543,23 +543,12 @@ class Identifier:
         if hit:
             return hit.group(0)
         # Lack of match: no usable first character (could be blank/all specials)
-        if self.extra is None:
-            raise SQLIdentifierProblem(
-                "Could not create a useful name out of empty: {}".format(s)
-            )
-        fixed = self._force_fix(s, self.extra)
-        logger.warning(
-            "Could not parse a useful name from: [%s], replaced with: [%s]", s, fixed
-        )
+        # But we do need something to work with
+        if not s and self.extra is None:
+            raise SQLIdentifierProblem("Empty identifier requires extra input")
+        fixed = f"column_{s or self.extra}"
+        logger.warning(f"No useful name from: [{s}], replaced with: [{fixed}]")
         return fixed
-
-    @staticmethod
-    def _force_fix(name, extra):
-        if not name:
-            return "column_{}".format(extra)
-        if not name[0].isalpha():
-            return "column_{}".format(name)
-        return name
 
     def _stylize(self, attempt):
         # Don't add a leading underscore if it wasn't there already (junk replacement)

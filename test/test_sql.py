@@ -73,13 +73,33 @@ class TestChannel:
         _ = Channel(distro="sqlite", database=tmpdir / "c1.db")
         assert len(Channel.known_channels) == 1
 
-    @pytest.mark.parametrize("fetch", ["df", "tuples", False])
-    def t_bad_statements(self, test_channel, fetch):
-        with pytest.raises(Exception):
-            test_channel.execute_statement(
-                "select aoweifjwo from wagurgugbbb;", fetch=fetch
-            )
 
+class TestExecutions:
+
+    very_simple = {
+        "mssql": "select top 5 1 from information_schema.tables;",
+        "postgresql": "select 1, 2 from information_schema.tables limit 5;",
+        "mysql": "select 1, 2 from information_schema.tables limit 5;",
+        "sqlite": "select 1, 2 from sqlite_master;",
+    }
+
+    @pytest.mark.parametrize("fetch", ["df", "tuples", False])
+    def t_try_to_fetch_bad_statements(self, test_channel, fetch):
+        nonsense = "select aoweifjwo from wagurgugbbb;"
+        with pytest.raises(Exception):
+            test_channel.execute_statement(nonsense, fetch=fetch)
+        with pytest.raises(Exception):
+            execute(nonsense, fetch=fetch, channel=test_channel)
+
+    @pytest.mark.parametrize("quote_ch", ["'", '"', ""])
+    @pytest.mark.parametrize("fetch", ["df", "tuples", False])
+    def t_fetch_good_statements(self, test_channel, test_distro, fetch, quote_ch):
+        statement = quote_ch + self.very_simple[test_distro] + quote_ch
+        test_channel.execute_statement(statement, fetch=fetch)
+        execute(statement, fetch=fetch, channel=test_channel)
+
+
+class TestFinding:
     def t_create_objects_via_shared_channel(self, test_channel):
         s = Script("select * from spam;", channel=test_channel)
         t = Table("spam", channel=test_channel)
@@ -92,27 +112,6 @@ class TestChannel:
         t.drop(ignore_existence=True)
         t.write(medium_df)
         assert t.exists()
-
-        try:
-            print(Table("servers", schema="sys", channel=test_channel).read())
-        except Exception as err:
-            print(err)
-
-        try:
-            print(Table("tables", schema="sys", channel=test_channel).read())
-        except Exception as err:
-            print(err)
-
-        try:
-            print(Table("sys.servers", channel=test_channel).read())
-        except Exception as err:
-            print(err)
-
-        try:
-            print(Table("sys.tables", channel=test_channel).read())
-        except Exception as err:
-            print(err)
-
         assert c.find("laforge_test_tester")
         assert c.find("laforge_%_tester")
         if schema:
@@ -197,8 +196,12 @@ class TestIdentifierNormalization:
         assert str(incoming) != str(Identifier(incoming))
         assert caplog.text
 
-    @pytest.mark.parametrize("n", [None, 1245, "", "&&&", "$$$", "1234"])
-    def t_very_bad_names_without_extra_produce_exceptions(self, n):
+    @pytest.mark.parametrize("n", [1245, "1234"])
+    def t_bad_names_without_extra_are_manageable(self, n):
+        _ = Identifier(n, extra=None).normalized
+
+    @pytest.mark.parametrize("n", [None, ""])
+    def t_non_names_without_extra_produce_exceptions(self, n):
         with pytest.raises(ValueError):
             _ = Identifier(n, extra=None).normalized
 
@@ -232,7 +235,48 @@ class TestIdentifierNormalization:
         )
 
 
-class TestScript:
+class TestScriptResults:
+    def t_real_query_with_bad_columns(self, test_channel, test_distro, caplog):
+        stmt = {
+            "mssql": "select top 5 1 from information_schema.tables;",
+            "postgresql": "select 1, 2 from information_schema.tables limit 5;",
+            "mysql": "select 1, 2 from information_schema.tables limit 5;",
+            "sqlite": "select 1, 2 from sqlite_master;",
+        }[test_distro]
+
+        df = Script(stmt, channel=test_channel).to_table()
+        # Builtin SQL drivers return bad column names (blank or '?column?')
+        assert "WARNING" in caplog.text
+        assert len(df.columns) > 0
+        # and there should be no bad columns in the final set
+        assert not set(Identifier.BLACKLIST).intersection(df.columns)
+        # FYI, this is exactly what this should look like for mssql/postgresql
+        # result = list(tuple(x) for x in df.to_records())
+        # assert result == [(0, 1, 2), (1, 1, 2), (2, 1, 2), (3, 1, 2), (4, 1, 2)]
+
+
+class TestScriptActivation:
+
+    simple_statements = ["select 1;", "select 1;\n go \n select 1;"]
+
+    @pytest.mark.parametrize("stmt", simple_statements)
+    def t_execute_with_channel_spec(self, test_channel, stmt):
+        Script(stmt, channel=test_channel).execute()
+
+    @pytest.mark.parametrize("stmt", simple_statements)
+    def t_execute_without_channel_spec(self, test_channel, stmt):
+        Script(stmt).execute()
+
+    @pytest.mark.parametrize("stmt", simple_statements)
+    def t_execute_read(self, test_channel, stmt):
+        Script(stmt).read()
+
+    @pytest.mark.parametrize("stmt", simple_statements)
+    def t_execute_to_table(self, test_channel, stmt):
+        Script(stmt).to_table()
+
+
+class TestScriptParsing:
     @pytest.mark.parametrize(
         "semi",
         [
@@ -260,24 +304,6 @@ class TestScript:
     )
     def t_do_not_get_too_angry_at_go(self, s):
         assert "go" in Script._normalize_batch_end(s)
-
-    def t_real_query_with_bad_columns(self, test_channel, test_distro, caplog):
-        stmt = {
-            "mssql": "select top 5 1 from information_schema.tables;",
-            "postgresql": "select 1, 2 from information_schema.tables limit 5;",
-            "mysql": "select 1, 2 from information_schema.tables limit 5;",
-            "sqlite": "select 1, 2 from sqlite_master;",
-        }[test_distro]
-
-        df = Script(stmt, channel=test_channel).to_table()
-        # Builtin SQL drivers return bad column names (blank or '?column?')
-        assert "WARNING" in caplog.text
-        assert len(df.columns) > 0
-        # and there should be no bad columns in the final set
-        assert not set(Identifier.BLACKLIST).intersection(df.columns)
-        # FYI, this is exactly what this should look like for mssql/postgresql
-        # result = list(tuple(x) for x in df.to_records())
-        # assert result == [(0, 1, 2), (1, 1, 2), (2, 1, 2), (3, 1, 2), (4, 1, 2)]
 
     def t_q_parsing(self, test_channel):
         q = Script("select * from hi.there;", channel=test_channel)
