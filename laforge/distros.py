@@ -19,7 +19,7 @@ class SQLDistroNotFound(Exception):
 
 
 class Distro:
-    name = "generic"
+    name = "ANSI"
     driver = ""
 
     # Note: sqlite only has a generic Integer
@@ -30,7 +30,7 @@ class Distro:
     }
     NUMERIC_PADDING_FACTOR = 10
 
-    find_template = """--Distro.find()
+    find_template = """--ANSI.find()
         select table_schema, table_name
         from information_schema.tables
         where table_schema like '{schema_pattern}'
@@ -40,13 +40,20 @@ class Distro:
     _registered_distros = []
 
     def __init__(self):
+        if not self.driver:
+            raise RuntimeError("Use Distro.get() to create a Distro instance.")
         self.large_number_fallback = None
         self.untouchable_identifiers = []
         self.varchar_fallback = None
         self.varchar_max_specs = -1
         self.varchar_override = None
-        import_module(self.driver)
-        self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
+        try:
+            import_module(self.driver)
+        except ModuleNotFoundError:
+            logger.warning(f"No driver ({self.driver}) to support distro {self.name}")
+            self.dialect = None
+        else:
+            self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
 
     def determine_dtypes(self, df):
         new_dtypes = {}
@@ -65,9 +72,6 @@ class Distro:
             return self._check_float_spec(df, column)
         if df[column].dtype in ("int64",):
             return self._check_integer_spec(df, column)
-        logger.debug(
-            f"Not intervening on dtype of column [{column}] {df[column].dtype}."
-        )
         return None
 
     @classmethod

@@ -6,6 +6,12 @@ from laforge.distros import Distro, SQLDistroNotFound, round_up
 
 
 class TestDistroGet:
+    def t_straight_instantiate(self, capsys):
+        captured = capsys.readouterr()
+        with pytest.raises(Exception):
+            _ = Distro()
+            assert "Distro.get" in captured.err
+
     def t_get_exactly_one_distro_canonically(self, test_distro):
         try:
             result = Distro.get(test_distro)
@@ -41,7 +47,7 @@ class TestDistroGet:
         assert Distro.get(incoming).name == canonical
         assert Distro.get(incoming.upper()).name == canonical
 
-    @pytest.mark.parametrize("badname", ["", 293, "asdf"])
+    @pytest.mark.parametrize("badname", ["", 293, "asdf", "positronic"])
     def t_fail_bad_distros(self, badname):
         with pytest.raises(SQLDistroNotFound):
             Distro.get(badname)
@@ -70,6 +76,26 @@ class TestDistroFunctionality:
                 return None
             Distro._well_within_range(sequence, sa.types.INT)
         assert len(record) == 0
+
+
+@Distro.register("MOCK")
+class MockDistro(Distro):
+    name = "mockdistro"
+    driver = "mockdistro"
+    resolver = "mockdistro:{name}"
+
+    def __init__(self):
+        super().__init__()
+
+    def create_spec(self, *, server, database, engine_kwargs):
+        return ("fake://mockdistro-url", {})
+
+
+class TestMockDistro:
+    def t_driver_warning_on_instantiate(self, caplog):
+        d = Distro.get("MOCK")
+        assert d.name == "mockdistro"
+        assert "driver" in caplog.text
 
 
 class TestRoundUp:
