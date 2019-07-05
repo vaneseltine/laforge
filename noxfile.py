@@ -88,8 +88,12 @@ def coverage(session):
         session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
+
+
+@nox.session(reuse_venv=True)
+def coveralls(session):
     if os.getenv("COVERALLS_REPO_TOKEN"):
-        session.install("coveralls")
+        session.install("coverage", "coveralls")
         session.run("coveralls")
 
 

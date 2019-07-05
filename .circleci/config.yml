@@ -147,8 +147,8 @@ jobs:
             . .venv/bin/activate
             pip --version
             pip freeze
-            nox -k 'test or coverage' -l
-            nox -k 'test or coverage' --no-stop-on-first-error
+            nox -k 'test or cover' -l
+            nox -k 'test or cover' --no-stop-on-first-error
 
 workflows:
   version: 2

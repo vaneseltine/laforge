@@ -43,7 +43,6 @@ class Distro:
         self.large_number_fallback = None
         self.untouchable_identifiers = []
         self.varchar_fallback = None
-        self.varchar_max_specs = -1
         self.varchar_override = None
         import_module(self.driver)
         self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
@@ -53,8 +52,6 @@ class Distro:
         for column in df.columns:
             col = df[column].copy()
             col.dropna()
-            if col.empty:
-                continue
             sql_specification = self._determine_dtype(df, column)
             if sql_specification:
                 new_dtypes[column] = sql_specification
@@ -100,31 +97,21 @@ class Distro:
         return valid
 
     def _get_varchar_spec(self, df, column):
+        if self.varchar_override:
+            return self.varchar_override
         try:
             stringed = df[column].str.encode(encoding="utf-8").str
         except AttributeError:
-            # Not a string? Well, Pandas also keeps very long numbers as object...
-            logger.debug("Very long integer in column %s?", column)
-            return self.large_number_fallback
-        if self.varchar_override:
-            return self.varchar_override
+            return None
         observed_len = stringed.len().max()
-        return self._create_varchar_spec(observed_len, column, self)
+        return self._create_varchar_spec(observed_len)
 
-    @classmethod
-    def _create_varchar_spec(cls, max_length, field_name, distro):
+    @staticmethod
+    def _create_varchar_spec(max_length):
         try:
             rounded = round_up(max_length, nearest=50)
         except ValueError:
-            logger.warning("All null field %s?", field_name)
             return None
-        if rounded == 0:
-            logger.warning("0-length string field %s", field_name)
-            return None
-        if distro.varchar_max_specs > 0 and rounded > distro.varchar_max_specs:
-            fallback = distro.varchar_fallback
-            logger.debug("Out of range of VARCHAR length. Fallback to %s.", fallback)
-            return fallback
         return sa.VARCHAR(rounded)
 
     @classmethod
@@ -210,7 +197,6 @@ class Distro:
 class MySQL(Distro):
     name = "mysql"
     driver = "pymysql"
-    varchar_max_specs = 2 ** 16 - 101
     resolver = "{schema}.`{name}`"
 
     def __init__(self):
