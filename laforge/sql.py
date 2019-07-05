@@ -429,10 +429,6 @@ class Table:
         assert not self.exists()
         logger.debug("%s dropped.", self)
 
-    @property
-    def columns(self):
-        return self.metal.columns
-
     def __len__(self):
         count_query = sa.select([sa.func.count()]).select_from(self.metal)
         return int(Scalar(self.metadata.bind.execute(count_query)))
@@ -547,7 +543,8 @@ class Identifier:
         logger.warning(f"No useful name from: [{s}], replaced with: [{fixed}]")
         return fixed
 
-    def _stylize(self, attempt, leading_underscore):
+    @staticmethod
+    def _stylize(attempt, leading_underscore):
         # Don't add a leading underscore if it wasn't there already (junk replacement)
         if not leading_underscore:
             attempt = attempt.lstrip("_")

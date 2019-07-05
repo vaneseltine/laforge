@@ -292,15 +292,10 @@ class MSSQL(Distro):
         else:
             spec_dict["trusted_connection"] = "yes"
 
-        print(spec_dict)
-
         spec_string = ";".join(f"{k}={{{v}}}" for k, v in spec_dict.items())
-        print(spec_string)
         engine_inputs = parse.quote_plus(spec_string)
 
         url = f"{self.name}+{self.driver}:///?odbc_connect={engine_inputs}"
-
-        print(url)
 
         engine_kwargs = {"encoding": "latin1"}
         engine_kwargs.update(engine_kwargs)
