@@ -43,6 +43,7 @@ class Distro:
         self.large_number_fallback = None
         self.untouchable_identifiers = []
         self.varchar_fallback = None
+        self.varchar_max_specs = -1
         self.varchar_override = None
         import_module(self.driver)
         self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
@@ -97,12 +98,14 @@ class Distro:
         return valid
 
     def _get_varchar_spec(self, df, column):
-        if self.varchar_override:
-            return self.varchar_override
         try:
             stringed = df[column].str.encode(encoding="utf-8").str
         except AttributeError:
-            return None
+            # Not a string? Well, Pandas also keeps very long numbers as object...
+            logger.debug("Very long integer in column %s?", column)
+            return self.large_number_fallback
+        if self.varchar_override:
+            return self.varchar_override
         observed_len = stringed.len().max()
         return self._create_varchar_spec(observed_len)
 
@@ -197,6 +200,7 @@ class Distro:
 class MySQL(Distro):
     name = "mysql"
     driver = "pymysql"
+    varchar_max_specs = 2 ** 16 - 101
     resolver = "{schema}.`{name}`"
 
     def __init__(self):

@@ -1,18 +1,11 @@
 import pytest
-from laforge.sql import Channel, Table, Script, execute
+from laforge.sql import Script, execute
 from laforge.distros import Distro
-
-STATEMENTS = {
-    "mssql": "select top 10 name, schema_id, type_desc from sys.tables;",
-    "postgresql": "select * from pg_class where oid >= 13015;",
-}
+import pandas as pd
 
 
-def test_script_or_execute_to_df(secrets):
-    c = Channel(**secrets["sql"])
-    stmt = STATEMENTS.get(c.distro.name)
-    if not stmt:
-        pytest.skip()
+def test_script_or_execute_to_df(test_channel):
+    stmt = "select * from pg_class where oid >= 13015;"
     scripted_r = Script(stmt).read()
     executed_r = execute(stmt, fetch="df")
     assert scripted_r.equals(executed_r)
@@ -33,11 +26,13 @@ def test_script_or_execute_to_df(secrets):
         (2 ** 64, "DOUBLE"),
     ],
 )
-def test_numeric_data_types_myorpost(n, expectation, distro, arbitrary_table):
+def test_numeric_data_types_myorpost(n, expectation, arbitrary_table):
     Distro.NUMERIC_PADDING_FACTOR = 1
-    distrocol = {"postgresql": "data_type", "mysql": "COLUMN_TYPE"}[distro]
     t = arbitrary_table
     t.write(pd.DataFrame([n], columns=["mrcolumnface"]))
-    for c in t.columns:
+    for c in t.metal.columns:
+        print(c.type)
+        print(expectation)
         assert str(c.type).startswith(expectation)
+
     t.drop()

@@ -1,18 +1,5 @@
 import pytest
-from laforge.sql import Channel, Table, Script, execute
-from laforge.distros import Distro
-
-
-def test_do_not_add_foolish_semicolon(make_channel):
-    c = make_channel("mssql")
-    Script(
-        """
-    SELECT 1 FROM SYS.TABLES;
-    GO
-    SELECT 1 FROM SYS.TABLES
-    GO""",
-        channel=c,
-    ).execute()
+from laforge.sql import Script, execute
 
 
 @pytest.mark.xfail
@@ -22,7 +9,8 @@ def test_errors_being_swallowed(test_channel):
 
     select * from linkage.sodifjsd;
 
-    if object_id('IRISpii.linkage.setup_for_reparsing') is not null drop table IRISpii.linkage.setup_for_reparsing;
+    if object_id('IRISpii.linkage.setup_for_reparsing') is not null
+        drop table IRISpii.linkage.setup_for_reparsing;
 
     CREATE TABLE [linkage].[setup_for_reparsing](
         [display_id] [int] NULL,
@@ -36,10 +24,17 @@ def test_errors_being_swallowed(test_channel):
     with fulled as (
         select
             *,
-            concat(rtrim(replace(emp_last_name, ',', '')), ', ', rtrim(emp_first_name), ' '+rtrim(middle_name)) as full_name
+            concat(
+                rtrim(replace(emp_last_name, ',', '')),
+                ', ',
+                rtrim(emp_first_name),
+                ' '+rtrim(middle_name)
+            ) as full_name
         from linkage.sdaoifjs
     )
-    insert into linkage.setup_for_reparsing (display_id, new_emp_number, last_name, first_name, middle_name, full_name)
+    insert into linkage.setup_for_reparsing (
+        display_id, new_emp_number, last_name, first_name, middle_name, full_name
+    )
     select * from fulled;
 
     go """
@@ -47,29 +42,8 @@ def test_errors_being_swallowed(test_channel):
         Script(raw, channel=test_channel).execute()
 
 
-def test_do_not_add_foolish_semicolon(make_channel):
-    c = make_channel("mssql")
-    Script(
-        """
-    SELECT 1 FROM SYS.TABLES;
-    GO
-    SELECT 1 FROM SYS.TABLES
-    GO""",
-        channel=c,
-    ).execute()
-
-
-STATEMENTS = {
-    "mssql": "select top 10 name, schema_id, type_desc from sys.tables;",
-    "postgresql": "select * from pg_class where oid >= 13015;",
-}
-
-
-def test_script_or_execute_to_df(secrets):
-    c = Channel(**secrets["sql"])
-    stmt = STATEMENTS.get(c.distro.name)
-    if not stmt:
-        pytest.skip()
+def test_script_or_execute_to_df(test_channel):
+    stmt = "select top 10 name, schema_id, type_desc from sys.tables;"
     scripted_r = Script(stmt).read()
     executed_r = execute(stmt, fetch="df")
     assert scripted_r.equals(executed_r)
@@ -79,13 +53,12 @@ def test_script_or_execute_to_df(secrets):
     assert scripted_t == executed_t
 
 
-def test_do_not_add_foolish_semicolon(make_channel):
-    c = make_channel("mssql")
+def test_do_not_add_foolish_semicolon(test_channel):
     Script(
         """
     SELECT 1 FROM SYS.TABLES;
     GO
     SELECT 1 FROM SYS.TABLES
     GO""",
-        channel=c,
+        channel=test_channel,
     ).execute()

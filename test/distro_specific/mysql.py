@@ -1,6 +1,9 @@
 import pytest
-from laforge.sql import Channel, Table, Script, execute
+
+# from laforge.sql import Table, Script, execute
 from laforge.distros import Distro
+import sqlalchemy as sa
+import pandas as pd
 
 
 @pytest.mark.parametrize(
@@ -20,14 +23,13 @@ from laforge.distros import Distro
         # (2 ** 16, sa.types.LONGTEXT),
     ],
 )
-def test_varchar_border_with_picky_sql_alchemy_types(n, expectation, make_temp_table):
-    t = make_temp_table("mysql")
+def test_varchar_border_with_picky_sql_alchemy_types(n, expectation, arbitrary_table):
     df = pd.DataFrame(["x" * n], columns=["mscolumnface"])
-    t.write(df)
-    for c in t.columns:
+    arbitrary_table.write(df)
+    for c in arbitrary_table.metal.columns:
         assert str(c.type) == str(expectation)
-    # assert t.columns[0].type.lower() == expectation
-    t.drop()
+    # assert arbitrary_table.columns[0].type.lower() == expectation
+    arbitrary_table.drop()
 
 
 @pytest.mark.parametrize(
@@ -38,14 +40,13 @@ def test_varchar_border_with_picky_sql_alchemy_types(n, expectation, make_temp_t
         (2 ** 16, "INT"),
         (2 ** 24, "INT"),
         (2 ** 48, "BIGINT"),
-        (2 ** 64, "DOUBLE"),
+        # (2 ** 64 - 100, "DOUBLE"),
     ],
 )
-def test_numeric_data_types_myorpost(n, expectation, distro, arbitrary_table):
+def test_numeric_data_types_myorpost(n, expectation, arbitrary_table):
     Distro.NUMERIC_PADDING_FACTOR = 1
-    distrocol = {"postgresql": "data_type", "mysql": "COLUMN_TYPE"}[distro]
     t = arbitrary_table
     t.write(pd.DataFrame([n], columns=["mrcolumnface"]))
-    for c in t.columns:
+    for c in t.metal.columns:
         assert str(c.type).startswith(expectation)
     t.drop()

@@ -48,6 +48,15 @@ def test_database(session, distro):
         "--parallel-mode",
         "-m",
         "pytest",
+        f"test/distro_specific/{distro}.py",
+        env={"LFTEST_DISTRO": distro},
+    )
+    session.run(
+        "coverage",
+        "run",
+        "--parallel-mode",
+        "-m",
+        "pytest",
         env={"LFTEST_DISTRO": distro},
     )
 
