@@ -19,6 +19,11 @@ class SQLDistroNotFound(Exception):
 
 
 class Distro:
+    """Base class for SQL Distros
+
+    ..note:: http://troels.arvin.dk/db/rdbms/
+    """
+
     name = "ANSI"
     driver = ""
 
@@ -36,8 +41,6 @@ class Distro:
         where table_schema like '{schema_pattern}'
             and table_name like '{object_pattern}';
         """
-
-    _registered_distros = []
 
     def __init__(self):
         if not self.driver:
@@ -123,20 +126,22 @@ class Distro:
 
     @classmethod
     def get(cls, given_name):
-        distro_matches = [
-            subclass
-            for pattern, subclass in cls._registered_distros
-            if pattern.match(str(given_name))
-        ]
+        distro_matches = cls._match_regexes(given_name)
         if len(distro_matches) != 1:
             cls._failed_to_find(given_name)
-        selected_distro = distro_matches.pop()
-        distro_instance = selected_distro()
-        return distro_instance
+        return distro_matches.pop()()
+
+    @classmethod
+    def _match_regexes(cls, s):
+        return [
+            x
+            for x in cls.__subclasses__()
+            if re.match(x.regex, str(s), flags=re.IGNORECASE)
+        ]
 
     @classmethod
     def _failed_to_find(cls, given_name):
-        known_distros = tuple(x.name for p, x in cls._registered_distros)
+        known_distros = tuple(x.name for x in cls.__subclasses__())
         err_msg = (
             f"Given input `{given_name}`, "
             + f"could not match distribution to known: {known_distros}"
@@ -158,16 +163,6 @@ class Distro:
             for x in df.itertuples(index=False)
         ]
         return result_list
-
-    @classmethod
-    def register(cls, pattern):
-        def decorator(delegate):
-            cls._registered_distros.append(
-                (re.compile(pattern, flags=re.IGNORECASE), delegate)
-            )
-            return delegate
-
-        return decorator
 
     def create_spec(self, *, server, database, engine_kwargs):
         raise NotImplementedError
@@ -200,9 +195,9 @@ class Distro:
         return f"Distro('{self.name}')"
 
 
-@Distro.register(r"^(my|maria).*")
 class MySQL(Distro):
     name = "mysql"
+    regex = "^(my|maria).*"
     driver = "pymysql"
     varchar_max_specs = 2 ** 16 - 101
     resolver = "{schema}.`{name}`"
@@ -224,9 +219,9 @@ class MySQL(Distro):
         return (url, engine_kwargs)
 
 
-@Distro.register(r"^post.*")
 class PostgresQL(Distro):
     name = "postgresql"
+    regex = r"^post.*"
     driver = "psycopg2"
     # resolver = '{schema}."{name}"'
     resolver = "{schema}.{name}"
@@ -243,9 +238,9 @@ class PostgresQL(Distro):
         return (url, engine_kwargs)
 
 
-@Distro.register(r"(^(mss|ms s|micro).*)|(.*server)")
 class MSSQL(Distro):
     name = "mssql"
+    regex = r"(^(mss|ms s|micro).*)|(.*server)"
     driver = "pyodbc"
     resolver = "[{database}].[{schema}].[{name}]"
     find_template = """--MSSQL.find()
@@ -340,9 +335,9 @@ class MSSQL(Distro):
         return result_list
 
 
-@Distro.register(r"^.*lite\d?")
 class SQLite(Distro):
     name = "sqlite"
+    regex = r"^.*lite\d?"
     driver = "sqlite3"
     resolver = "{name}"
 

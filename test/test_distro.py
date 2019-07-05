@@ -78,9 +78,9 @@ class TestDistroFunctionality:
         assert len(record) == 0
 
 
-@Distro.register("MOCK")
 class MockDistro(Distro):
     name = "mockdistro"
+    regex = "mock.*"
     driver = "mockdistro"
     resolver = "mockdistro:{name}"
 
@@ -93,7 +93,7 @@ class MockDistro(Distro):
 
 class TestMockDistro:
     def t_driver_warning_on_instantiate(self, caplog):
-        d = Distro.get("MOCK")
+        d = Distro.get("mocky")
         assert d.name == "mockdistro"
         assert "driver" in caplog.text
 

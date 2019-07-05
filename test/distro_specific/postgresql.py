@@ -17,14 +17,7 @@ def test_script_or_execute_to_df(test_channel):
 
 @pytest.mark.parametrize(
     "n, expectation",
-    [
-        (2 ** 4, "SMALLINT"),
-        (2 ** 12, "SMALLINT"),
-        (2 ** 16, "INT"),
-        (2 ** 24, "INT"),
-        (2 ** 48, "BIGINT"),
-        (2 ** 64, "DOUBLE"),
-    ],
+    [(2 ** 4, "SMALLINT"), (2 ** 12, "SMALLINT"), (2 ** 16, "INT"), (2 ** 24, "INT")],
 )
 def test_numeric_data_types_myorpost(n, expectation, arbitrary_table):
     Distro.NUMERIC_PADDING_FACTOR = 1
