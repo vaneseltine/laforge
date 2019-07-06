@@ -64,11 +64,16 @@ def test_do_not_add_foolish_semicolon(test_channel):
     ).execute()
 
 
-def test_trusted_connection(test_channel):
+def test_trusted_connection_overly_complex(test_channel):
     c = Channel(
         distro="mssql",
-        server=test_channel.server,
+        server=f"meow_{test_channel.server}",
         database=test_channel.database,
         schema=test_channel.schema,
     )
+    assert "trusted" in str(c.engine.url)
+
+
+def test_trusted_connection():
+    c = Channel(distro="mssql", server=f"SERVER", database="DATABASE", schema="SCHEMA")
     assert "trusted" in str(c.engine.url)

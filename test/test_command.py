@@ -18,11 +18,6 @@ def test_better_env(cmd):
 
 
 @pytest.mark.xfail
-def test_env():
-    env()
-
-
-@pytest.mark.xfail
 def test_build():
     build()
 
