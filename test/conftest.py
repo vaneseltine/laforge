@@ -7,6 +7,8 @@ from tempfile import TemporaryDirectory
 import dotenv
 import pandas as pd
 import pytest
+from click.testing import CliRunner
+
 from laforge.builder import Verb
 from laforge.sql import Channel, Table
 
@@ -116,6 +118,11 @@ def test_distro():
 
 
 # Function-scope fixtures
+
+
+@pytest.fixture(scope="function")
+def cli_runner():
+    return CliRunner()
 
 
 @pytest.fixture(scope="function")
