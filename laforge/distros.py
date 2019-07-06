@@ -24,8 +24,8 @@ class Distro:
     ..note:: http://troels.arvin.dk/db/rdbms/
     """
 
-    name = "ANSI"
-    driver = ""
+    driver = None
+    name = "n/a"
 
     # Note: sqlite only has a generic Integer
     NUMERIC_RANGES = {
@@ -41,31 +41,48 @@ class Distro:
         where table_schema like '{schema_pattern}'
             and table_name like '{object_pattern}';
         """
+    untouchable_identifiers = []
 
-    def __new__(cls, given):
-        distro_matches = cls._match_regexes(given)
-        if len(distro_matches) != 1:
-            cls._failed_to_find(given)
-        subc = distro_matches.pop()
-        print(f"hi {given} you get a {subc}")
+    def __new__(cls, name):
+        subc = cls._get_subclass_given(name)
         return super().__new__(subc)
 
-    def __init__(self, given=None):
-        #
-        # if not self.driver:
-        #     raise RuntimeError("Use Distro.get() to create a Distro instance.")
-        self.large_number_fallback = None
-        self.untouchable_identifiers = []
-        self.varchar_fallback = None
-        self.varchar_max_specs = -1
-        self.varchar_override = None
+    @classmethod
+    def _get_subclass_given(cls, name):
+        distro_exact = cls._get_exact(name)
+        if distro_exact:
+            return distro_exact.pop()
+        distro_fuzzy = cls._get_fuzzy(name)
+        if len(distro_fuzzy) != 1:
+            cls._fail_to_find_requested_distro(name)
+        return distro_fuzzy.pop()
+
+    @classmethod
+    def _get_exact(cls, s):
+        return [x for x in cls.__subclasses__() if x.name == s]
+
+    @classmethod
+    def _get_fuzzy(cls, s):
+        return [
+            x
+            for x in cls.__subclasses__()
+            if re.match(x.regex, str(s), flags=re.IGNORECASE)
+        ]
+
+    @classmethod
+    def _fail_to_find_requested_distro(cls, given_name):
+        known_distros = tuple(x.name for x in cls.__subclasses__())
+        err_msg = (
+            f"Given input `{given_name}`, "
+            + f"could not match distribution to known: {known_distros}"
+        )
+        raise SQLDistroNotFound(err_msg)
+
+    def __init__(self, _):
         try:
             import_module(self.driver)
         except ModuleNotFoundError:
             logger.warning(f"No driver ({self.driver}) to support distro {self.name}")
-            self.dialect = None
-        else:
-            self.dialect = import_module(f"sqlalchemy.dialects.{self.name}")
 
     def determine_dtypes(self, df):
         new_dtypes = {}
@@ -117,11 +134,7 @@ class Distro:
         try:
             stringed = df[column].str.encode(encoding="utf-8").str
         except AttributeError:
-            # Not a string? Well, Pandas also keeps very long numbers as object...
-            logger.debug("Very long integer in column %s?", column)
-            return self.large_number_fallback
-        if self.varchar_override:
-            return self.varchar_override
+            return None
         observed_len = stringed.len().max()
         return self._create_varchar_spec(observed_len)
 
@@ -132,30 +145,6 @@ class Distro:
         except ValueError:
             return None
         return sa.VARCHAR(rounded)
-
-    # @classmethod
-    # def get(cls, given_name):
-    #     distro_matches = cls._match_regexes(given_name)
-    #     if len(distro_matches) != 1:
-    #         cls._failed_to_find(given_name)
-    #     return distro_matches.pop()()
-
-    @classmethod
-    def _match_regexes(cls, s):
-        return [
-            x
-            for x in cls.__subclasses__()
-            if re.match(x.regex, str(s), flags=re.IGNORECASE)
-        ]
-
-    @classmethod
-    def _failed_to_find(cls, given_name):
-        known_distros = tuple(x.name for x in cls.__subclasses__())
-        err_msg = (
-            f"Given input `{given_name}`, "
-            + f"could not match distribution to known: {known_distros}"
-        )
-        raise SQLDistroNotFound(err_msg)
 
     def find(self, channel, object_pattern="%", schema_pattern="%"):
 
@@ -208,13 +197,7 @@ class MySQL(Distro):
     name = "mysql"
     regex = "^(my|maria).*"
     driver = "pymysql"
-    varchar_max_specs = 2 ** 16 - 101
     resolver = "{schema}.`{name}`"
-
-    def __init__(self, _):
-        super().__init__()
-        self.varchar_fallback = self.dialect.LONGTEXT
-        self.large_number_fallback = self.dialect.DOUBLE
 
     def create_spec(self, *, server, database, engine_kwargs):
         username = engine_kwargs.pop("username")
@@ -232,14 +215,7 @@ class PostgresQL(Distro):
     name = "postgresql"
     regex = r"^post.*"
     driver = "psycopg2"
-    # resolver = '{schema}."{name}"'
     resolver = "{schema}.{name}"
-
-    def __init__(self, _):
-
-        super().__init__()
-        self.large_number_fallback = self.dialect.DOUBLE_PRECISION
-        self.varchar_override = self.dialect.TEXT
 
     def create_spec(self, *, server, database, engine_kwargs):
         username = engine_kwargs.pop("username")
@@ -269,11 +245,6 @@ class MSSQL(Distro):
         and type_desc not like '%constraint%'
         and type_desc not in ('sql_stored_procedure');
         """
-
-    def __init__(self, _):
-
-        super().__init__()
-        self.large_number_fallback = self.dialect.DECIMAL
 
     def create_spec(self, *, server, database, engine_kwargs):
         # https://docs.sqlalchemy.org/en/13/dialects/mssql.html
@@ -359,11 +330,6 @@ class SQLite(Distro):
         select name as table_name from sqlite_master
         where type = 'table' and name like '{object_pattern}';
         """
-
-    def __init__(self, _):
-
-        super().__init__()
-        self.varchar_override = self.dialect.TEXT
 
     def create_spec(self, *, server, database, engine_kwargs):
         assert True or server  # unused
