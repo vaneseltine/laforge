@@ -1,5 +1,5 @@
 import pytest
-from laforge.sql import Script, execute
+from laforge.sql import Channel, Script, execute
 
 
 @pytest.mark.xfail
@@ -62,3 +62,13 @@ def test_do_not_add_foolish_semicolon(test_channel):
     GO""",
         channel=test_channel,
     ).execute()
+
+
+def test_trusted_connection(test_channel):
+    c = Channel(
+        distro="mssql",
+        server=test_channel.server,
+        database=test_channel.database,
+        schema=test_channel.schema,
+    )
+    assert "trusted" in c.engine.url

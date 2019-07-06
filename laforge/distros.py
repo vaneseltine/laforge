@@ -27,7 +27,6 @@ class Distro:
     driver = None
     name = "n/a"
 
-    # Note: sqlite only has a generic Integer
     NUMERIC_RANGES = {
         sa.types.SMALLINT: 2 ** 15 - 101,
         sa.types.INT: 2 ** 31 - 101,
@@ -43,12 +42,22 @@ class Distro:
         """
     untouchable_identifiers = []
 
+    def __init__(self, _):
+        try:
+            import_module(self.driver)
+        except ModuleNotFoundError:
+            logger.warning(f"No driver ({self.driver}) to support distro {self.name}")
+
     def __new__(cls, name):
-        subc = cls._get_subclass_given(name)
-        return super().__new__(subc)
+        retrieved_subclass = cls._get_subclass_given(name)
+        return super().__new__(retrieved_subclass)
 
     @classmethod
     def _get_subclass_given(cls, name):
+        """
+        ..note :: These pop; a user-defined subclass will come up last.
+
+        """
         distro_exact = cls._get_exact(name)
         if distro_exact:
             return distro_exact.pop()
@@ -77,12 +86,6 @@ class Distro:
             + f"could not match distribution to known: {known_distros}"
         )
         raise SQLDistroNotFound(err_msg)
-
-    def __init__(self, _):
-        try:
-            import_module(self.driver)
-        except ModuleNotFoundError:
-            logger.warning(f"No driver ({self.driver}) to support distro {self.name}")
 
     def determine_dtypes(self, df):
         new_dtypes = {}
@@ -130,13 +133,14 @@ class Distro:
         valid = bool(-limit < -test_level and test_level < limit)
         return valid
 
-    def _get_varchar_spec(self, df, column):
+    @classmethod
+    def _get_varchar_spec(cls, df, column):
         try:
             stringed = df[column].str.encode(encoding="utf-8").str
         except AttributeError:
             return None
         observed_len = stringed.len().max()
-        return self._create_varchar_spec(observed_len)
+        return cls._create_varchar_spec(observed_len)
 
     @staticmethod
     def _create_varchar_spec(max_length):
@@ -332,18 +336,17 @@ class SQLite(Distro):
         """
 
     def create_spec(self, *, server, database, engine_kwargs):
-        assert True or server  # unused
-        if not database or database in ("", ":memory:"):
-            db_for_url = ":memory:"
+        # pylint: disable=unused-argument # server unneeded
+        if not database or re.match("[^a-z]*memory[^a-z]*", str(database).lower()):
+            final_database = ":memory:"
         else:
             resolved = Path(database).expanduser().resolve()
             resolved.touch()
-            db_for_url = str(resolved)
-        url = f"{self.name}:///{db_for_url}"
+            final_database = str(resolved)
+        url = f"{self.name}:///{final_database}"
         return (url, engine_kwargs)
 
     def find(self, channel, object_pattern="%", schema_pattern="%"):
-
         object_query = self.find_template.format(object_pattern=object_pattern)
         object_script = Script(object_query, channel=channel)
         df = object_script.to_table()[["table_name"]]
