@@ -1,6 +1,8 @@
 import pytest
 from laforge.sql import Channel, Script, execute
 
+import os
+
 
 @pytest.mark.xfail
 def test_errors_being_swallowed(test_channel):
@@ -70,10 +72,16 @@ def test_trusted_connection_overly_complex(test_channel):
         server=f"meow_{test_channel.server}",
         database=test_channel.database,
         schema=test_channel.schema,
+        driver=os.environ.get("LFTEST_MSSQL_DRIVER"),
     )
     assert "trusted" in str(c.engine.url)
 
 
 def test_trusted_connection():
-    c = Channel(distro="mssql", server=f"SERVER", database="DATABASE", schema="SCHEMA")
+    c = Channel(
+        distro="mssql",
+        server=f"localhost",
+        database="master",
+        driver="ODBC Driver 17 for SQL Server",
+    )
     assert "trusted" in str(c.engine.url)

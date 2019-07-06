@@ -5,6 +5,9 @@ jobs:
   ubuntu:
     docker:
       - image: ubuntu:18.04
+        environment:
+          LC_ALL: C.UTF-8
+          LANG: C.UTF-8
       - image: circleci/postgres:latest-ram
         environment:
           POSTGRES_DB: lftest_postg
@@ -98,6 +101,9 @@ jobs:
   herpephilia:
     docker:
       - image: matvan/herpephilia
+        environment:
+          LC_ALL: C.UTF-8
+          LANG: C.UTF-8
       - image: circleci/postgres:latest-ram
         environment:
           POSTGRES_DB: lftest_postg
