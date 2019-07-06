@@ -71,4 +71,4 @@ def test_trusted_connection(test_channel):
         database=test_channel.database,
         schema=test_channel.schema,
     )
-    assert "trusted" in c.engine.url
+    assert "trusted" in str(c.engine.url)
