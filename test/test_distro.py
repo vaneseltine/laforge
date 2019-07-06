@@ -6,15 +6,15 @@ from laforge.distros import Distro, SQLDistroNotFound, round_up
 
 
 class TestDistroGet:
-    def t_straight_instantiate(self, capsys):
-        captured = capsys.readouterr()
-        with pytest.raises(Exception):
-            _ = Distro()
-            assert "Distro.get" in captured.err
+    # def t_straight_instantiate(self, capsys):
+    #     captured = capsys.readouterr()
+    #     with pytest.raises(Exception):
+    #         _ = Distro()
+    #         assert "Distro.get" in captured.err
 
     def t_get_exactly_one_distro_canonically(self, test_distro):
         try:
-            result = Distro.get(test_distro)
+            result = Distro(test_distro)
             assert test_distro.lower() == result.name.lower()
         except ModuleNotFoundError:
             pytest.skip(f"Missing {test_distro} module.")
@@ -44,20 +44,20 @@ class TestDistroGet:
     def t_get_exactly_one_distro_variants(self, canonical, incoming, test_distro):
         if canonical != test_distro:
             pytest.skip("")
-        assert Distro.get(incoming).name == canonical
-        assert Distro.get(incoming.upper()).name == canonical
+        assert Distro(incoming).name == canonical
+        assert Distro(incoming.upper()).name == canonical
 
     @pytest.mark.parametrize("badname", ["", 293, "asdf", "positronic"])
     def t_fail_bad_distros(self, badname):
         with pytest.raises(SQLDistroNotFound):
-            Distro.get(badname)
+            Distro(badname)
 
     @pytest.mark.parametrize(
         "vaguename", ["sql", "m sql", "MSQL", "MYSQL SERVER", "SQLITE SERVER"]
     )
     def t_fail_vague_distros(self, vaguename):
         with pytest.raises(SQLDistroNotFound):
-            Distro.get(vaguename)
+            Distro(vaguename)
 
 
 class TestDistroFunctionality:
@@ -84,16 +84,13 @@ class MockDistro(Distro):
     driver = "mockdistro"
     resolver = "mockdistro:{name}"
 
-    def __init__(self):
-        super().__init__()
-
     def create_spec(self, *, server, database, engine_kwargs):
         return ("fake://mockdistro-url", {})
 
 
 class TestMockDistro:
     def t_driver_warning_on_instantiate(self, caplog):
-        d = Distro.get("mocky")
+        d = Distro("mocky")
         assert d.name == "mockdistro"
         assert "driver" in caplog.text
 

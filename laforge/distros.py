@@ -42,9 +42,18 @@ class Distro:
             and table_name like '{object_pattern}';
         """
 
-    def __init__(self):
-        if not self.driver:
-            raise RuntimeError("Use Distro.get() to create a Distro instance.")
+    def __new__(cls, given):
+        distro_matches = cls._match_regexes(given)
+        if len(distro_matches) != 1:
+            cls._failed_to_find(given)
+        subc = distro_matches.pop()
+        print(f"hi {given} you get a {subc}")
+        return super().__new__(subc)
+
+    def __init__(self, given=None):
+        #
+        # if not self.driver:
+        #     raise RuntimeError("Use Distro.get() to create a Distro instance.")
         self.large_number_fallback = None
         self.untouchable_identifiers = []
         self.varchar_fallback = None
@@ -124,12 +133,12 @@ class Distro:
             return None
         return sa.VARCHAR(rounded)
 
-    @classmethod
-    def get(cls, given_name):
-        distro_matches = cls._match_regexes(given_name)
-        if len(distro_matches) != 1:
-            cls._failed_to_find(given_name)
-        return distro_matches.pop()()
+    # @classmethod
+    # def get(cls, given_name):
+    #     distro_matches = cls._match_regexes(given_name)
+    #     if len(distro_matches) != 1:
+    #         cls._failed_to_find(given_name)
+    #     return distro_matches.pop()()
 
     @classmethod
     def _match_regexes(cls, s):
@@ -202,7 +211,7 @@ class MySQL(Distro):
     varchar_max_specs = 2 ** 16 - 101
     resolver = "{schema}.`{name}`"
 
-    def __init__(self):
+    def __init__(self, _):
         super().__init__()
         self.varchar_fallback = self.dialect.LONGTEXT
         self.large_number_fallback = self.dialect.DOUBLE
@@ -226,7 +235,8 @@ class PostgresQL(Distro):
     # resolver = '{schema}."{name}"'
     resolver = "{schema}.{name}"
 
-    def __init__(self):
+    def __init__(self, _):
+
         super().__init__()
         self.large_number_fallback = self.dialect.DOUBLE_PRECISION
         self.varchar_override = self.dialect.TEXT
@@ -260,7 +270,8 @@ class MSSQL(Distro):
         and type_desc not in ('sql_stored_procedure');
         """
 
-    def __init__(self):
+    def __init__(self, _):
+
         super().__init__()
         self.large_number_fallback = self.dialect.DECIMAL
 
@@ -349,7 +360,8 @@ class SQLite(Distro):
         where type = 'table' and name like '{object_pattern}';
         """
 
-    def __init__(self):
+    def __init__(self, _):
+
         super().__init__()
         self.varchar_override = self.dialect.TEXT
 

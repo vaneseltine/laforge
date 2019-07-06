@@ -60,7 +60,7 @@ class Channel:
         """Anything else is captured in engine_kwargs for create_spec"""
         from .distros import Distro
 
-        self.distro = Distro.get(distro)
+        self.distro = Distro(distro)
         self.server = server
         self.database = database
         self.schema = schema
