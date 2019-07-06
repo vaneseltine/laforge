@@ -171,41 +171,23 @@ def create(path):
 @click.argument("path", type=click.Path(), nargs=-1)
 @click.option(
     "--no-warning",
-    help="Do not display cleartext warning.",
+    help="Do not display warning about cleartext.",
     default=False,
     is_flag=True,
+    prompt="WARNING: Output may include passwords or keys stored as cleartext "
+    + "in laforge build INIs, configs, or .envs. Continue?",
 )
-def env(path=None, no_warning=False):
-    from .builder import show_env
+def env(no_warning=False, path=None):
+    user_has_accepted_warning = no_warning
 
-    if user_confirms_cleartext(no_warning):
+    if user_has_accepted_warning:
+        from .builder import show_env
+
         path = Path(" ".join(path)) if path else None
         result = show_env(path=path)
         pprint(result)
-
-
-def user_confirms_cleartext(no_warning):
-    import PyInquirer as inq
-
-    if no_warning:
-        return True
-
-    answers = inq.prompt(
-        {
-            "type": "confirm",
-            "name": "continuing",
-            "message": (
-                "Output may include passwords or keys stored as cleartext "
-                + "in laforge build INIs, configs, or .envs. Continue?"
-            ),
-            "default": False,
-            "qmark": "WARNING:",
-        },
-        style=inq.style_from_dict(
-            {inq.Token.QuestionMark: "#cd422d bold", inq.Token.Question: "#cd422d"}
-        ),
-    )
-    return answers.get("continuing", False)
+    else:
+        click.echo("Canceled.")
 
 
 run_cli.add_command(build)
