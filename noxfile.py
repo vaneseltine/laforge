@@ -48,6 +48,7 @@ def test_database(session, distro):
         "--parallel-mode",
         "-m",
         "pytest",
+        "-rxXs",
         f"test/distro_specific/{distro}.py",
         env={"LFTEST_DISTRO": distro},
     )
@@ -57,6 +58,7 @@ def test_database(session, distro):
         "--parallel-mode",
         "-m",
         "pytest",
+        "-rxXs",
         env={"LFTEST_DISTRO": distro},
     )
 
@@ -71,6 +73,7 @@ def test_version(session):
         "--parallel-mode",
         "-m",
         "pytest",
+        "-rxXs",
         env={
             "LFTEST_DISTRO": "sqlite",
             "LFTEST_SQLITE": "1",

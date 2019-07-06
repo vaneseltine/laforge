@@ -55,11 +55,26 @@ Functions:
 laforge.distros
 ---------------
 Classes:
- * Distro
- * MSSQL
- * MySQL
- * PostgresQL
- * SQLite
+ * Distro -- missing methods:
+
+   - create_engine
+   - create_spec
+   - determine_dtypes
+   - find
+ * MSSQL -- missing methods:
+
+   - create_spec
+   - find
+ * MySQL -- missing methods:
+
+   - create_spec
+ * PostgresQL -- missing methods:
+
+   - create_spec
+ * SQLite -- missing methods:
+
+   - create_spec
+   - find
 
 laforge.sql
 -----------
