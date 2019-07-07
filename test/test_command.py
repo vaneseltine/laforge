@@ -1,8 +1,8 @@
+from pathlib import Path
+
 import pytest
 
-from laforge.command import run_cli  # env, consult, create, build
-
-## version
+from laforge.command import run_cli
 
 
 class TestBasicCLI:
@@ -27,11 +27,39 @@ class TestBasicCLI:
 
 
 class TestBuild:
-    def t_empty_dir_fails(self, cli_runner):
+    """'{filename} launched' is a good marker of succcess"""
+
+    @pytest.mark.parametrize("specify_filename", [True, False])
+    @pytest.mark.parametrize("filename", ["build.ini", "build1.ini", "laforge.ini"])
+    def t_build_here(self, cli_runner, caplog, specify_filename, filename):
         with cli_runner.isolated_filesystem():
+            Path(filename).write_text(".")
+            if specify_filename:
+                cli_runner.invoke(run_cli, ["build", filename])
+            else:
+                cli_runner.invoke(run_cli, ["build"])
+            assert f"{filename} launched" in caplog.text
+
+    @pytest.mark.parametrize("specify_filename", [True, False])
+    @pytest.mark.parametrize("filename", ["build.ini", "build1.ini", "laforge.ini"])
+    def t_build_elsewhere(self, cli_runner, specify_filename, filename, tmpdir, caplog):
+        ini = Path(tmpdir, filename).resolve()
+        ini.write_text(".")
+        with cli_runner.isolated_filesystem():
+            target = str(ini) if specify_filename else str(ini.parent)
+            cli_runner.invoke(run_cli, ["build", target])
+            assert f"{filename} launched" in caplog.text
+
+    @pytest.mark.parametrize("filenames", [[], ["build1.ini", "laforge.ini"]])
+    def t_try_dir_fails_when_empty_or_too_many(self, cli_runner, filenames, caplog):
+        with cli_runner.isolated_filesystem():
+            for f in filenames:
+                Path(f).write_text(".")
             result = cli_runner.invoke(run_cli, ["build"])
+            print(result.output)
             assert result.exit_code != 0
-            assert result.output
+            assert "launched" not in result.output
+            assert "launched" not in caplog.text
 
 
 class TestEnv:
@@ -49,3 +77,23 @@ class TestEnv:
         result = cli_runner.invoke(run_cli, ["env"], input="N\n")
         assert result.exit_code == 0
         assert "sql" not in result.output.lower()
+
+
+class TestConsult:
+    def t_prints_single_line(self, cli_runner):
+        result = cli_runner.invoke(run_cli, ["consult"])
+        assert len(result.output.splitlines()) == 1
+
+    @pytest.mark.parametrize("term", ["a", "j", "x", "v"])
+    def t_prints_match(self, cli_runner, term):
+        result = cli_runner.invoke(run_cli, ["consult", "--match", term])
+        assert term in result.output.lower()
+
+    @pytest.mark.parametrize("term", ["xyzzy", "aviaeur"])
+    def t_does_not_crash_on_bad_match(self, cli_runner, term):
+        result = cli_runner.invoke(run_cli, ["consult", "--match", term])
+        assert term not in result.output.lower()
+
+
+class TestCreateINI:
+    pass

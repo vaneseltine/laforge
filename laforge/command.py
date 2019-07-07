@@ -76,11 +76,9 @@ def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
 def find_build_config_in_directory(path):
     """..todo: TODO: move interactive portion to command.py"""
     _acceptable_globs = ["build*.ini", "*laforge*.ini"]
-    build_files = None
+    build_files = []
     for fileglob in _acceptable_globs:
-        build_files = list(path.glob(fileglob))
-        if build_files:
-            break
+        build_files.extend(list(path.glob(fileglob)))
     if not build_files:
         print(
             "ERROR: No laforge INI (e.g., {eg}) "
