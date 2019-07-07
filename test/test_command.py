@@ -38,14 +38,14 @@ class TestEnv:
     def t_env_works_with_flag(self, cli_runner):
         result = cli_runner.invoke(run_cli, ["env", "--no-warning"])
         assert result.exit_code == 0
-        assert "LFTEST" in result.output
+        assert "sql" in result.output.lower()
 
     def t_env_works_with_Y_to_warning(self, cli_runner):
         result = cli_runner.invoke(run_cli, ["env"], input="Y\n")
         assert result.exit_code == 0
-        assert "LFTEST" in result.output
+        assert "sql" in result.output.lower()
 
     def t_env_cancels_with_N_to_warning(self, cli_runner):
         result = cli_runner.invoke(run_cli, ["env"], input="N\n")
         assert result.exit_code == 0
-        assert "LFTEST" not in result.output
+        assert "sql" not in result.output.lower()
