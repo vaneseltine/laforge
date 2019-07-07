@@ -117,6 +117,13 @@ def test_distro():
     return TEST_DISTRO
 
 
+@pytest.fixture(scope="session")
+def barebones_build():
+    return """[task1]
+    shell: echo Hello, galaxy!
+    """
+
+
 # Function-scope fixtures
 
 

@@ -47,9 +47,6 @@ def build(ini, log="./laforge.log", debug=False, dry_run=False):
 
 
 def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
-    """laforge's core build command
-
-    ..todo: TODO: move interactive portion to command.py"""
     path = Path(script_path)
     if path.is_dir():
         path = find_build_config_in_directory(path)
@@ -69,12 +66,11 @@ def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
         task_list.dry_run()
     else:
         task_list.execute()
-        elapsed = seconds_since(start_time)
+        elapsed = round(time.time() - start_time, 2)
         logger.info("%s completed in %s seconds.", path, elapsed)
 
 
 def find_build_config_in_directory(path):
-    """..todo: TODO: move interactive portion to command.py"""
     _acceptable_globs = ["build*.ini", "*laforge*.ini"]
     build_files = []
     for fileglob in _acceptable_globs:
@@ -91,16 +87,7 @@ def find_build_config_in_directory(path):
     return build_files[0]
 
 
-def seconds_since(previous_time, round_to=2):
-    """..todo: TODO: to command.py"""
-    elapsed_raw = time.time() - previous_time
-    if round_to:
-        return round(elapsed_raw, round_to)
-    return elapsed_raw
-
-
 def get_package_logger(log_file, debug):
-    """..todo: TODO: to command.py"""
     noisiness = logging.DEBUG if debug else logging.INFO
 
     if noisiness == logging.DEBUG:

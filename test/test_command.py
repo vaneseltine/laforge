@@ -29,37 +29,57 @@ class TestBasicCLI:
 class TestBuild:
     """'{filename} launched' is a good marker of succcess"""
 
+    @pytest.mark.parametrize("debug", [False, True])
     @pytest.mark.parametrize("specify_filename", [True, False])
     @pytest.mark.parametrize("filename", ["build.ini", "build1.ini", "laforge.ini"])
-    def t_build_here(self, cli_runner, caplog, specify_filename, filename):
+    def t_build_here(
+        self, cli_runner, caplog, specify_filename, barebones_build, debug, filename
+    ):
         with cli_runner.isolated_filesystem():
-            Path(filename).write_text(".")
+            Path(filename).write_text(barebones_build)
+            args = ["build"]
+            if debug:
+                args.append("--debug")
             if specify_filename:
-                cli_runner.invoke(run_cli, ["build", filename])
-            else:
-                cli_runner.invoke(run_cli, ["build"])
-            assert f"{filename} launched" in caplog.text
+                args.append(filename)
+            print(args)
+            cli_runner.invoke(run_cli, args)
+        assert f"{filename} launched" in caplog.text
+        if debug:
+            assert "debug mode" in caplog.text.lower()
 
     @pytest.mark.parametrize("specify_filename", [True, False])
     @pytest.mark.parametrize("filename", ["build.ini", "build1.ini", "laforge.ini"])
-    def t_build_elsewhere(self, cli_runner, specify_filename, filename, tmpdir, caplog):
+    def t_build_elsewhere(
+        self, cli_runner, specify_filename, barebones_build, filename, tmpdir, caplog
+    ):
         ini = Path(tmpdir, filename).resolve()
-        ini.write_text(".")
+        ini.write_text(barebones_build)
         with cli_runner.isolated_filesystem():
             target = str(ini) if specify_filename else str(ini.parent)
             cli_runner.invoke(run_cli, ["build", target])
             assert f"{filename} launched" in caplog.text
 
     @pytest.mark.parametrize("filenames", [[], ["build1.ini", "laforge.ini"]])
-    def t_try_dir_fails_when_empty_or_too_many(self, cli_runner, filenames, caplog):
+    def t_try_dir_fails_when_empty_or_too_many(
+        self, cli_runner, barebones_build, filenames, caplog
+    ):
         with cli_runner.isolated_filesystem():
             for f in filenames:
-                Path(f).write_text(".")
+                Path(f).write_text(barebones_build)
             result = cli_runner.invoke(run_cli, ["build"])
-            print(result.output)
             assert result.exit_code != 0
             assert "launched" not in result.output
             assert "launched" not in caplog.text
+
+    def t_dry_run(self, cli_runner, barebones_build, caplog):
+        with cli_runner.isolated_filesystem():
+            Path("build.ini").write_text(barebones_build)
+            result = cli_runner.invoke(run_cli, ["build", "--dry-run"])
+            assert result.exit_code == 0
+            assert "info" in caplog.text.lower()
+            assert "complete" not in result.output
+            assert "complete" not in caplog.text
 
 
 class TestEnv:
