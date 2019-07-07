@@ -5,6 +5,39 @@ import pytest
 from laforge.command import run_cli
 
 
+class TestCreateINI:
+    @pytest.mark.xfail
+    def t_does_something(self, cli_runner, caplog, capsys):
+        with cli_runner.isolated_filesystem():
+            result = cli_runner.invoke(run_cli, ["create"])
+            captured = capsys.readouterr()
+        assert result.output == ""
+        assert captured.out
+        assert not captured.err
+        assert result.exit_code == 0
+
+    @pytest.mark.xfail
+    def t_does_something2(self, cli_runner, caplog, capsys):
+        with cli_runner.isolated_filesystem():
+            result = cli_runner.invoke(run_cli, ["create", "build.ini"])
+            captured = capsys.readouterr()
+        assert result.output == ""
+        assert captured.out
+        assert not captured.err
+        assert result.exit_code == 0
+
+    @pytest.mark.xfail
+    def t_does_something3(self, cli_runner, caplog, capsys):
+        with cli_runner.isolated_filesystem():
+            Path("build.ini").write_text("conflicting file")
+            result = cli_runner.invoke(run_cli, ["create", "build.ini"])
+            captured = capsys.readouterr()
+        assert result.output == ""
+        assert not captured.out
+        assert captured.err
+        assert result.exit_code != 0
+
+
 class TestBasicCLI:
     def t_version(self, cli_runner):
         result = cli_runner.invoke(run_cli, ["--version"])
@@ -113,7 +146,3 @@ class TestConsult:
     def t_does_not_crash_on_bad_match(self, cli_runner, term):
         result = cli_runner.invoke(run_cli, ["consult", "--match", term])
         assert term not in result.output.lower()
-
-
-class TestCreateINI:
-    pass

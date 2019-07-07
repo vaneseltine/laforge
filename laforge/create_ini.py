@@ -1,11 +1,11 @@
 """ Create a new build INI. """
 
 import os
+import sys
 from datetime import datetime as dt
 from pathlib import Path
 
 import PyInquirer as inq
-
 
 DISTROS = {
     "Microsoft SQL Server": "mssql",
@@ -26,11 +26,12 @@ INQ_STYLE = inq.style_from_dict(
 )
 
 
-def create_ini(path):
-    path = receive_path(default=path)
+def create_ini(path, interactive=True):
+    interactive = interactive and sys.stdout.isatty()
+    path = receive_path(default=path) if interactive else path
     if not path:
         return 125
-    responses = receive_input(path.parent)
+    responses = receive_input(path.parent) if interactive else {}
     if not responses:
         return 125
     output = create_output(path, responses)
