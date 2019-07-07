@@ -5,6 +5,37 @@ import pytest
 from laforge.command import run_cli
 
 
+class TestEnv:
+    def t_env_works_with_flag(self, cli_runner):
+        with cli_runner.isolated_filesystem():
+            result = cli_runner.invoke(run_cli, ["env", "--no-warning"])
+            assert result.exit_code == 0
+            assert "sql" in result.output.lower()
+
+    def t_env_works_with_Y_to_warning(self, cli_runner):
+        result = cli_runner.invoke(run_cli, ["env"], input="Y\n")
+        assert result.exit_code == 0
+        assert "sql" in result.output.lower()
+
+    def t_env_cancels_with_N_to_warning(self, cli_runner):
+        result = cli_runner.invoke(run_cli, ["env"], input="N\n")
+        assert result.exit_code == 0
+        assert "sql" not in result.output.lower()
+
+    @pytest.mark.xfail
+    def t_env_works_on_remote(self, cli_runner, tmpdir):
+        env_file = Path(tmpdir, ".env")
+        env_file.write_text("hi: there")
+        with cli_runner.isolated_filesystem():
+            result = cli_runner.invoke(
+                run_cli, ["env", "--no-warning", str(env_file.parent.resolve())]
+            )
+            # assert result.exit_code == 0
+            assert "sql" in result.output.lower()
+            print(result.output)
+            assert False
+
+
 class TestCreateINI:
     @pytest.mark.xfail
     def t_does_something(self, cli_runner, caplog, capsys):
@@ -113,23 +144,6 @@ class TestBuild:
             assert "info" in caplog.text.lower()
             assert "complete" not in result.output
             assert "complete" not in caplog.text
-
-
-class TestEnv:
-    def t_env_works_with_flag(self, cli_runner):
-        result = cli_runner.invoke(run_cli, ["env", "--no-warning"])
-        assert result.exit_code == 0
-        assert "sql" in result.output.lower()
-
-    def t_env_works_with_Y_to_warning(self, cli_runner):
-        result = cli_runner.invoke(run_cli, ["env"], input="Y\n")
-        assert result.exit_code == 0
-        assert "sql" in result.output.lower()
-
-    def t_env_cancels_with_N_to_warning(self, cli_runner):
-        result = cli_runner.invoke(run_cli, ["env"], input="N\n")
-        assert result.exit_code == 0
-        assert "sql" not in result.output.lower()
 
 
 class TestConsult:

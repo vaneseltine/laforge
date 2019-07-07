@@ -20,9 +20,7 @@ logger.debug(__name__)
 
 
 def show_env(path=None):
-    """Show the calculated generic section environment
-
-    ..todo: TODO: move interactive portion to command.py"""
+    """Show the calculated generic section environment"""
     if path:
         path = Path(path).resolve(strict=True)
         config_str = path.read_text()
