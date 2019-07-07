@@ -21,6 +21,8 @@ logger.debug(__name__)
 
 def show_env(path=None):
     """Show the calculated generic section environment"""
+    print("hi")
+
     if path:
         path = Path(path).resolve(strict=True)
         config_str = path.read_text()
@@ -28,6 +30,8 @@ def show_env(path=None):
     else:
         config_str = ""
         location = Path(".")
+    print(f"location is {location}")
+    print(f"string is {config_str}")
     task_list = TaskList(from_string=config_str, location=location)
     return task_list.load_section_config()
 
@@ -182,6 +186,7 @@ class TaskList:
         section_config["build_dir"] = build_dir.resolve(strict=True)
 
         dotenv.load_dotenv(build_dir)
+        print("build dir is ", build_dir)
         env_config = dotenv.dotenv_values()
         tasklist_config = dict(self.parser["DEFAULT"])
         raw_section_config = dict(self.parser[section])

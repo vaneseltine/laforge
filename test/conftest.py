@@ -134,7 +134,6 @@ def cli_runner():
 
 @pytest.fixture(scope="function")
 def test_channel(test_distro):
-    # distro = os.environ.get("LFTEST_DISTRO", "sqlite")
     prefix = f"LFTEST_{test_distro}_".upper()
     crop = len(prefix)
     kwargs = {

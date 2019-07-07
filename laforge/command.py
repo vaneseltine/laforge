@@ -47,9 +47,7 @@ def build(ini, log="./laforge.log", debug=False, dry_run=False):
 
 
 def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
-    path = Path(script_path)
-    if path.is_dir():
-        path = find_build_config_in_directory(path)
+    path = find_build_config(script_path)
 
     start_time = time.time()
     logger = get_package_logger(log, debug)
@@ -70,7 +68,10 @@ def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
         logger.info("%s completed in %s seconds.", path, elapsed)
 
 
-def find_build_config_in_directory(path):
+def find_build_config(path):
+    path = Path(path)
+    if path.is_file():
+        return path
     _acceptable_globs = ["build*.ini", "*laforge*.ini"]
     build_files = []
     for fileglob in _acceptable_globs:
@@ -165,14 +166,16 @@ def create(path):
 def env(no_warning=False, path=None):
     user_has_accepted_warning = no_warning
 
-    if user_has_accepted_warning:
-        from .builder import show_env
-
-        path = Path(" ".join(path)) if path else None
-        result = show_env(path=path)
-        pprint(result)
-    else:
+    if not user_has_accepted_warning:
         click.echo("Canceled.")
+        return 1
+
+    from .builder import show_env
+
+    path = Path(" ".join(path) if path else ".")
+    build_path = find_build_config(path)
+    result = show_env(path=build_path)
+    pprint(result)
 
 
 run_cli.add_command(build)

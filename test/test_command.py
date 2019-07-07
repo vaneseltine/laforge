@@ -6,34 +6,38 @@ from laforge.command import run_cli
 
 
 class TestEnv:
-    def t_env_works_with_flag(self, cli_runner):
+    def t_env_works_with_flag(self, cli_runner, barebones_build):
         with cli_runner.isolated_filesystem():
+            Path("./build.ini").write_text(barebones_build)
             result = cli_runner.invoke(run_cli, ["env", "--no-warning"])
             assert result.exit_code == 0
-            assert "sql" in result.output.lower()
+            assert "sql" in result.output
 
-    def t_env_works_with_Y_to_warning(self, cli_runner):
-        result = cli_runner.invoke(run_cli, ["env"], input="Y\n")
-        assert result.exit_code == 0
-        assert "sql" in result.output.lower()
-
-    def t_env_cancels_with_N_to_warning(self, cli_runner):
-        result = cli_runner.invoke(run_cli, ["env"], input="N\n")
-        assert result.exit_code == 0
-        assert "sql" not in result.output.lower()
-
-    @pytest.mark.xfail
-    def t_env_works_on_remote(self, cli_runner, tmpdir):
-        env_file = Path(tmpdir, ".env")
-        env_file.write_text("hi: there")
+    def t_env_works_with_Y_to_warning(self, cli_runner, barebones_build):
         with cli_runner.isolated_filesystem():
-            result = cli_runner.invoke(
-                run_cli, ["env", "--no-warning", str(env_file.parent.resolve())]
-            )
+            Path("./build.ini").write_text(barebones_build)
+            result = cli_runner.invoke(run_cli, ["env"], input="Y\n")
+            assert result.exit_code == 0
+            assert "sql" in result.output
+
+    def t_env_cancels_with_N_to_warning(self, cli_runner, barebones_build):
+        with cli_runner.isolated_filesystem():
+            Path("./build.ini").write_text(barebones_build)
+            result = cli_runner.invoke(run_cli, ["env"], input="N\n")
+            assert result.exit_code == 0
+            assert "sql" not in result.output
+
+    @pytest.mark.xfail(reason="Not sure why this is not working.")
+    def t_nothing_in_empty_env(self, cli_runner, tmpdir, barebones_build):
+        with cli_runner.isolated_filesystem():
+            Path("./.env").write_text("greetings: Klingons")
+            Path("./build.ini").write_text(barebones_build)
+            result = cli_runner.invoke(run_cli, ["env", "--no-warning"])
+            assert "Klingons" in result.output
+
             # assert result.exit_code == 0
-            assert "sql" in result.output.lower()
-            print(result.output)
-            assert False
+            # print(result.output)
+            # assert False
 
 
 class TestCreateINI:
