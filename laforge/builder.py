@@ -31,8 +31,8 @@ def show_env(path):
 class Verb(Enum):
     READ = "read"
     WRITE = "write"
+    ECHO = "echo"
     EXECUTE = "execute"
-    SHELL = "shell"
     EXIST = "exist"
 
 
@@ -402,20 +402,11 @@ class InternalPythonExecutor(BaseTask):
         logger.info("Executed: %s", self.path)
 
 
-@Task.register(Verb.SHELL)
-class ShellExecutor(BaseTask):
+@Task.register(Verb.ECHO)
+class Echoer(BaseTask):
     def implement(self, prior_results=None):
-        logger.debug("Executing: %s", self.content)
-        run_cmd(
-            full_command=self.content.split(" "),
-            cwd=self.config["dir"][Verb.SHELL],
-            shell=True,
-        )
-        logger.info("Executed: %s", self.content)
-
-
-def run_cmd(full_command, cwd=None, shell=False):
-    return subprocess.run(full_command, cwd=cwd, shell=shell, check=True)
+        logger.debug(f"Echoing {self.content}")
+        print(self.content)
 
 
 @Task.register(Verb.EXECUTE, Target.DO)
@@ -428,8 +419,9 @@ class StataExecutor(BaseTask):
         logger.info("Executing %s", do_path)
         stata_command_list = [stata_exe, "/e", "do", do_path] + do_parameters
         full_command = [str(x) for x in stata_command_list]
-
-        run_cmd(full_command=full_command, cwd=do_path.parent, shell=False)
+        subprocess.run(
+            full_command=full_command, cwd=do_path.parent, shell=False, check=True
+        )
         logger.info("Executed: %s", do_path)
 
 

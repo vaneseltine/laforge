@@ -7,12 +7,10 @@ from pathlib import Path
 
 import questionary
 
-DISTROS = {
-    "Microsoft SQL Server": "mssql",
-    "MySQL/MariaDB": "mysql",
-    "PostgreSQL": "postgresql",
-    "SQLite": "sqlite",
-}
+from .distros import Distro
+
+
+DISTROS = {v: k for k, v in Distro.known().items()}
 
 
 def create_ini(path, interactive=True):
@@ -97,7 +95,7 @@ def receive_input(build_dir):
             "type": "list",
             "name": "distro",
             "message": "SQL Distribution:",
-            "choices": ["None"] + [*DISTROS.keys()],
+            "choices": ["None"] + sorted(DISTROS.keys()),
             "filter": DISTROS.get,
         },
         {
@@ -132,7 +130,7 @@ def create_output(path, answers):
         "",
         "[DEFAULT]",
     ]
-    outtro = ["\n[hello_world]", "SHELL: echo 'Hello, world!'", ""]
+    outtro = ["\n[hello_world]", "ECHO: Hello, world!", ""]
     output = intro
     for option, answer in answers.items():
         comment = "# " if not answer else ""

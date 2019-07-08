@@ -11,21 +11,17 @@ from click.testing import CliRunner
 
 from laforge.builder import Verb
 from laforge.sql import Channel, Table
+from laforge.distros import Distro
 
 # Pull variables, especially LFTEST_*, into os.environ
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-DISTROS = {"mysql", "mssql", "postgresql", "sqlite"}
+DISTROS = set(Distro.known())
+
+
 TEST_DISTRO = os.environ.get("LFTEST_DISTRO", "sqlite").lower()
-SUPPORTED = [d for d in DISTROS if os.environ.get(f"LFTEST_{d.upper()}") == "1"]
 
 SAMPLES = {f.stem: pd.read_csv(f.resolve()) for f in Path(".").glob("**/*.csv")}
-
-
-@pytest.fixture(scope="session")
-def supported_sqls():
-    return SUPPORTED or ["sqlite"]
-
 
 # Hooks and skips
 
@@ -45,7 +41,7 @@ def pytest_runtest_setup(item):
 def skip_by_sql(item):
     try:
         # TODO -- there is presumably a more appropriate way to gather this
-        parameters = set(item.name[:-1].split("[")[1].split("-"))
+        parameters = set(item.name.lower()[:-1].split("[")[1].split("-"))
     except IndexError:
         return None
     else:
@@ -182,13 +178,11 @@ def task_config():
         working_test_config = {
             "build_dir": temp_build_dir,
             "execute_dir": temp_build_dir,
-            "shell_dir": temp_build_dir,
             "read_dir": temp_build_dir / "data/",
             "write_dir": temp_build_dir / "output/",
             "section": "testsection",
             "dir": {
                 Verb.EXECUTE: temp_build_dir,
-                Verb.SHELL: temp_build_dir,
                 Verb.READ: temp_build_dir / "data/",
                 Verb.WRITE: temp_build_dir / "output/",
             },

@@ -7,16 +7,6 @@ from laforge.builder import Target, Task, Verb
 
 
 class TestTask:
-    @pytest.mark.win32
-    def t_shell(self,):
-        task = Task.from_strings(
-            raw_verb="shell",
-            raw_content="dir",
-            config={"dir": {Verb.SHELL: Path(".").absolute()}},
-        )
-        # print(task)
-        task.implement()
-
     def t_fail_verb(self,):
         with pytest.raises(ValueError):
             _ = Task.from_strings(

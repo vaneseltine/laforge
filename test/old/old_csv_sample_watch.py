@@ -15,7 +15,6 @@ raw_ini_contents = dedent(
 
     [original_csv_to_sql]
     exist = sample_in.csv
-    shell = dir
     read = sample_in.csv
     write = sample_one
 

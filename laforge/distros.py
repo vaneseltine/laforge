@@ -26,6 +26,7 @@ class Distro:
 
     driver = None
     name = "n/a"
+    human_name = "n/a"
 
     NUMERIC_RANGES = {
         sa.types.SMALLINT: 2 ** 15 - 101,
@@ -68,7 +69,7 @@ class Distro:
 
     @classmethod
     def _get_exact(cls, s):
-        return [x for x in cls.__subclasses__() if x.name == s]
+        return [x for x in cls.__subclasses__() if x.name.lower() == str(s).lower()]
 
     @classmethod
     def _get_fuzzy(cls, s):
@@ -80,12 +81,15 @@ class Distro:
 
     @classmethod
     def _fail_to_find_requested_distro(cls, given_name):
-        known_distros = tuple(x.name for x in cls.__subclasses__())
         err_msg = (
             f"Given input `{given_name}`, "
-            + f"could not match distribution to known: {known_distros}"
+            + f"could not match distribution to known: {cls.known()}"
         )
         raise SQLDistroNotFound(err_msg)
+
+    @classmethod
+    def known(cls):
+        return {x.name: x.human_name for x in cls.__subclasses__()}
 
     def determine_dtypes(self, df):
         new_dtypes = {}
@@ -199,6 +203,7 @@ class Distro:
 
 class MySQL(Distro):
     name = "mysql"
+    human_name = "MySQL/MariaDB"
     regex = "^(my|maria).*"
     driver = "pymysql"
     resolver = "{schema}.`{name}`"
@@ -217,6 +222,7 @@ class MySQL(Distro):
 
 class PostgresQL(Distro):
     name = "postgresql"
+    human_name = "PostgreSQL"
     regex = r"^post.*"
     driver = "psycopg2"
     resolver = "{schema}.{name}"
@@ -230,6 +236,7 @@ class PostgresQL(Distro):
 
 class MSSQL(Distro):
     name = "mssql"
+    human_name = "Microsoft SQL Server"
     regex = r"(^(mss|ms s|micro).*)|(.*server)"
     driver = "pyodbc"
     resolver = "[{database}].[{schema}].[{name}]"
@@ -323,6 +330,7 @@ class MSSQL(Distro):
 
 class SQLite(Distro):
     name = "sqlite"
+    human_name = "SQLite"
     regex = r"^.*lite\d?"
     driver = "sqlite3"
     resolver = "{name}"
