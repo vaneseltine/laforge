@@ -236,32 +236,23 @@ class Task:
     _handlers = {}
 
     @classmethod
-    def from_strings(cls, *, raw_verb, raw_content, config=None):
-        if not config:
-            config = {}
-        identifier = f"{config.get('section', '')}.{raw_verb}"
-
+    def from_strings(cls, *, raw_verb, raw_content, config):
         verb = get_verb(raw_verb)
-
-        if verb in cls._universal_handlers:
-            target = Target.ANY  # No need to try to parse content.
+        if verb in cls._handlers:
+            target = Target.ANY
         else:
             target = Target.parse(verb, raw_content)
-
-        handler = cls._get_handler(verb, target)
-        return handler(
-            identifier=identifier,
+        return cls.from_qualified(
             verb=verb,
             target=target,
             content=raw_content,
             config=config,
+            identifier=f"{config.get('section', '')}.{raw_verb}",
         )
 
     @classmethod
-    def from_qualified(cls, verb, target, content, config=None, identifier=None):
+    def from_qualified(cls, verb, target, content, config=None, identifier="TBD"):
         handler = cls._get_handler(verb, target)
-        if not identifier:
-            identifier = "TBD"
         return handler(
             identifier=identifier,
             verb=verb,
@@ -272,19 +263,19 @@ class Task:
 
     @classmethod
     def _get_handler(cls, verb, target):
-        try:
-            handler = cls._universal_handlers.get(verb) or cls._handlers[(verb, target)]
-        except KeyError:
-            raise TaskConstructionError(
-                "No handler for verb <{}>, target <{}>".format(verb, target)
-            )
-        return handler
+        handler = cls._handlers.get(verb, None)
+        if handler:
+            return handler
+        handler = cls._handlers.get((verb, target), None)
+        if handler:
+            return handler
+        raise TaskConstructionError(f"No handler for verb <{verb}>, target <{target}>")
 
     @classmethod
     def register(cls, verb, target=Target.ANY):
         def decorator(delegate):
             if target is Target.ANY:
-                cls._universal_handlers[verb] = delegate
+                cls._handlers[verb] = delegate
             else:
                 cls._handlers[(verb, target)] = delegate
             return delegate
