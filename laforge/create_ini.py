@@ -5,7 +5,7 @@ import sys
 from datetime import datetime as dt
 from pathlib import Path
 
-import PyInquirer as inq
+import questionary
 
 DISTROS = {
     "Microsoft SQL Server": "mssql",
@@ -13,17 +13,6 @@ DISTROS = {
     "PostgreSQL": "postgresql",
     "SQLite": "sqlite",
 }
-
-
-INQ_STYLE = inq.style_from_dict(
-    {
-        inq.Token.QuestionMark: "#7366ff bold",
-        inq.Token.Answer: "#66ccff bold",
-        inq.Token.Selected: "#66ccff bold",
-        inq.Token.Instruction: "",  # defaults
-        inq.Token.Question: "",
-    }
-)
 
 
 def create_ini(path, interactive=True):
@@ -58,15 +47,16 @@ def receive_path(default):
     ]
 
     while True:
-        responses = inq.prompt(ini_questions, style=INQ_STYLE)
+        responses = questionary.prompt(ini_questions)
         # PyInquirer doesn't handle this quite how I'd prefer.
+        #   I'm going to assume for now that questionary has not changed the behavior.
         # I can't simply distinguish between an unneeded confirmation
         # and a ctrl+c'd confirmation.
         #                       ini exists
         #                       yes     no
-        # confirmed    yes      True   n/a
-        #               no     False   n/a
-        #           ctrl+c     False   n/a
+        # confirmed    yes      True    n/a
+        #               no     False    n/a
+        #           ctrl+c     False    n/a
         # So we have to walk through this.
         if not responses:  # ctrl+c from the filename prompt
             return False
@@ -74,7 +64,7 @@ def receive_path(default):
         if not proposed_path.exists():  # doesn't exist: confirmation was unnecessary
             build_path = proposed_path
             break
-        if "confirmed" not in responses:  # exists but ctrl+c from conf
+        if "confirmed" not in responses:  # exists but ctrl+c from confirmation
             return False
         if responses["confirmed"]:
             build_path = responses["ini"]
@@ -130,7 +120,7 @@ def receive_input(build_dir):
         },
     ]
 
-    return inq.prompt(questions, style=INQ_STYLE)
+    return questionary.prompt(questions)
 
 
 def create_output(path, answers):

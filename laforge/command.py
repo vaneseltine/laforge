@@ -153,8 +153,7 @@ def create(path):
     sys.exit(return_code)
 
 
-@click.command(help="Describe the build environment known to laforge.")
-@click.argument("path", type=click.Path(), nargs=-1)
+@click.command(help="Describe the present build environment known to laforge.")
 @click.option(
     "--no-warning",
     help="Do not display warning about cleartext.",
@@ -163,19 +162,18 @@ def create(path):
     prompt="WARNING: Output may include passwords or keys stored as cleartext "
     + "in laforge build INIs, configs, or .envs. Continue?",
 )
-def env(no_warning=False, path=None):
+def env(no_warning=False):
     user_has_accepted_warning = no_warning
-
     if not user_has_accepted_warning:
         click.echo("Canceled.")
         return 1
 
     from .builder import show_env
 
-    path = Path(" ".join(path) if path else ".")
-    build_path = find_build_config(path)
-    result = show_env(path=build_path)
+    result = show_env(Path(".").resolve())
+    print("Constructed build environment:")
     pprint(result)
+    return 0
 
 
 run_cli.add_command(build)

@@ -2,6 +2,7 @@
 
 import configparser
 import logging
+import os
 import runpy
 import subprocess
 import textwrap
@@ -19,19 +20,15 @@ logger = logging.getLogger(__name__)
 logger.debug(__name__)
 
 
-def show_env(path=None):
+def show_env(path=Path(".")):
     """Show the calculated generic section environment"""
-    print("hi")
-
-    if path:
-        path = Path(path).resolve(strict=True)
+    path = path.resolve()
+    if path.is_file():
         config_str = path.read_text()
         location = path.parent
     else:
         config_str = ""
-        location = Path(".")
-    print(f"location is {location}")
-    print(f"string is {config_str}")
+        location = path
     task_list = TaskList(from_string=config_str, location=location)
     return task_list.load_section_config()
 
@@ -121,6 +118,9 @@ class TaskList:
 
         self.parser.read_string(from_string)
         self.location = Path(location).resolve(strict=True)
+
+        self.env_config = load_env(self.location)
+
         self.config = self.load_section_config("DEFAULT")
 
         self.tasks = list(self.load_tasks())
@@ -185,15 +185,12 @@ class TaskList:
         section_config = {}
         section_config["build_dir"] = build_dir.resolve(strict=True)
 
-        dotenv.load_dotenv(build_dir)
-        print("build dir is ", build_dir)
-        env_config = dotenv.dotenv_values()
         tasklist_config = dict(self.parser["DEFAULT"])
         raw_section_config = dict(self.parser[section])
 
         from collections import ChainMap
 
-        chained_dicts = ChainMap(raw_section_config, tasklist_config, env_config)
+        chained_dicts = ChainMap(raw_section_config, tasklist_config, self.env_config)
         collapsed_dict = dict(chained_dicts)
 
         # Load in SQL
@@ -579,6 +576,33 @@ class ExistenceChecker(BaseTask):
     def _check_existence_sql_raw_query(self, line):
         df = execute(line, channel=Channel(**self.config["sql"]), fetch="df")
         assert not df.empty
+
+
+class DirectoryVisit:
+    def __init__(self, path):
+        self.old = Path(".").resolve()
+        self.new = Path(path).resolve()
+        if self.old != self.new:
+            os.chdir(self.new)
+
+    def __enter__(self):
+        return self.new
+
+    def __exit__(self, type, value, traceback):  # pylint: disable=redefined-builtin
+        if self.old != self.new:
+            os.chdir(self.old)
+
+
+def load_env(path):
+    """Get .env values without dotenv's default to silently pull package dir"""
+    with DirectoryVisit(path):
+        try:
+            env_config = dotenv.dotenv_values(
+                dotenv.find_dotenv(usecwd=True, raise_error_if_not_found=True)
+            )
+        except IOError:
+            env_config = {}
+    return env_config
 
 
 """
