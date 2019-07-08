@@ -24,8 +24,6 @@ def test_numeric_data_types_myorpost(n, expectation, arbitrary_table):
     t = arbitrary_table
     t.write(pd.DataFrame([n], columns=["mrcolumnface"]))
     for c in t.metal.columns:
-        print(c.type)
-        print(expectation)
         assert str(c.type).startswith(expectation)
 
     t.drop()

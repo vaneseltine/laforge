@@ -61,8 +61,7 @@ class TestTask:
     def t_write_creates_specified_file(
         self, task_config, minimal_df, random_filename, suffix
     ):
-        # the random_filename fixture automagically receives suffix
-        # it's pretty cool
+        # The random_filename fixture automagically receives suffix
         final_path = Path(task_config["write_dir"], random_filename)
         assert suffix.value in str(final_path)
         writer = Task.from_strings(

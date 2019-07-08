@@ -68,7 +68,6 @@ class Target(Enum):
     XLSX = ".xlsx"
     RAWQUERY = "SQL query"
     SQLTABLE = "SQL table"
-    # NONE = None
     ANY = "(all)"
 
     @classmethod
@@ -80,7 +79,6 @@ class Target(Enum):
         if ";" in content or "\n" in content:
             return Target.RAWQUERY
 
-        # print(f"verb {verb} raw_content {raw_content} content {content}")
         content_suffix = Path(content).suffix.strip().lower()
         if not content_suffix:
             return Target.SQLTABLE
@@ -170,11 +168,8 @@ class TaskList:
         # Passing content through a formatter
         # Allows, e.g., read = {write_dir}/output.csv
         if "{" in new_content or "}" in new_content:
-            # print(content)
-            # print("presto change-o")
             formattable_config = {k: v for k, v in config.items() if isinstance(k, str)}
             new_content = new_content.format(**formattable_config)
-            # print(new_content)
         return new_content
 
     def load_section_config(self, section="DEFAULT"):
@@ -200,7 +195,6 @@ class TaskList:
         section_config["dir"] = {}
         for human, robot in self._KNOWN_DIRS.items():
             section_config["dir"][robot] = build_dir / collapsed_dict.get(human, ".")
-            # section_config[human] = section_config["dir"][robot]
 
         ignorables = self._SQL_KEYS + list(self._KNOWN_DIRS) + list(section_config)
 
@@ -223,7 +217,7 @@ class TaskList:
             log_intro = f"{log_prefix}{task.identifier} {task.description}"
 
             logger.info(log_intro)
-            # rotate results during implementation
+            # Rotate results during implementation
             self.prior_results = task.implement(self.prior_results)
             logger.debug("%s complete", log_prefix)
 
@@ -257,7 +251,6 @@ class Task:
         if verb in cls._universal_handlers:
             target = Target.ANY  # No need to try to parse content.
         else:
-            # target = cls.determine_target(verb, raw_content)
             target = Target.parse(verb, raw_content)
 
         handler = cls._get_handler(verb, target)
@@ -297,7 +290,6 @@ class Task:
         def decorator(delegate):
             if target is Target.ANY:
                 cls._universal_handlers[verb] = delegate
-                # cls._handlers[verb] = delegate
             else:
                 cls._handlers[(verb, target)] = delegate
             return delegate
@@ -361,7 +353,6 @@ class BaseTask:
         return textwrap.shorten(repr(self.content), 80)
 
     def __str__(self):
-        # return repr(self) + "hi"
         return f"{self.identifier:<30} {self.target.name:<10} {self.content}"
 
     def __repr__(self):

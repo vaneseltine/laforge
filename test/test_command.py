@@ -113,7 +113,6 @@ class TestBuild:
                 args.append("--debug")
             if specify_filename:
                 args.append(filename)
-            print(args)
             cli_runner.invoke(run_cli, args)
         assert f"{filename} launched" in caplog.text
         if debug:

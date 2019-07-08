@@ -222,8 +222,7 @@ class TestIdentifierNormalization:
     @pytest.mark.parametrize("n", [None, ""])
     def t_non_names_without_extra_produce_exceptions(self, n):
         with pytest.raises(ValueError):
-            _ = Identifier(n, extra=None).normalized
-            print(_)
+            Identifier(n, extra=None).normalized
 
     @pytest.mark.parametrize(
         "column_in, extra, column_out",

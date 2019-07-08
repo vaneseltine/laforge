@@ -77,13 +77,13 @@ def find_build_config(path):
     for fileglob in _acceptable_globs:
         build_files.extend(list(path.glob(fileglob)))
     if not build_files:
-        print(
+        click.echo(
             "ERROR: No laforge INI (e.g., {eg}) "
             "found in {dir}. ".format(dir=path, eg=(" or ".join(_acceptable_globs)))
         )
         sys.exit(2)
     if len(build_files) > 1:
-        print("ERROR: Must specify a laforge INI: {}".format(build_files))
+        click.echo("ERROR: Must specify a laforge INI: {}".format(build_files))
         sys.exit(17)
     return build_files[0]
 
@@ -135,7 +135,7 @@ def technobabble(babbler, n=1, match=None):
             babble = babbler.find(match)
         else:
             babble = babbler().babble()
-        print(babble)
+        click.echo(babble)
 
 
 @click.command(help="Interactively create a new laforge build INI.")
@@ -171,7 +171,7 @@ def env(no_warning=False):
     from .builder import show_env
 
     result = show_env(Path(".").resolve())
-    print("Constructed build environment:")
+    click.echo("Constructed build environment:")
     pprint(result)
     return 0
 
