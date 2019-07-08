@@ -77,14 +77,11 @@ def find_build_config(path):
     for fileglob in _acceptable_globs:
         build_files.extend(list(path.glob(fileglob)))
     if not build_files:
-        click.echo(
-            "ERROR: No laforge INI (e.g., {eg}) "
-            "found in {dir}. ".format(dir=path, eg=(" or ".join(_acceptable_globs)))
-        )
-        sys.exit(2)
+        globs = " or ".join(_acceptable_globs)
+        raise FileNotFoundError(f"No laforge INI (e.g., {globs}) found in {path}.")
     if len(build_files) > 1:
-        click.echo("ERROR: Must specify a laforge INI: {}".format(build_files))
-        sys.exit(17)
+        found = "; ".join(str(x) for x in build_files)
+        raise FileExistsError(f"Multiple possible laforge INIs found: {found}.")
     return build_files[0]
 
 
@@ -154,6 +151,7 @@ def create(path):
 
 
 @click.command(help="Describe the present build environment known to laforge.")
+@click.argument("path", type=click.Path(), nargs=-1)
 @click.option(
     "--no-warning",
     help="Do not display warning about cleartext.",
@@ -162,7 +160,7 @@ def create(path):
     prompt="WARNING: Output may include passwords or keys stored as cleartext "
     + "in laforge build INIs, configs, or .envs. Continue?",
 )
-def env(no_warning=False):
+def env(no_warning=False, path=None):
     user_has_accepted_warning = no_warning
     if not user_has_accepted_warning:
         click.echo("Canceled.")
@@ -170,7 +168,13 @@ def env(no_warning=False):
 
     from .builder import show_env
 
-    result = show_env(Path(".").resolve())
+    path = Path(" ".join(path) if path else ".")
+    try:
+        build_path = find_build_config(path)
+    except FileNotFoundError:
+        build_path = path
+
+    result = show_env(build_path)
     click.echo("Constructed build environment:")
     pprint(result)
     return 0

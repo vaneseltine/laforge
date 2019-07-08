@@ -20,16 +20,11 @@ logger = logging.getLogger(__name__)
 logger.debug(__name__)
 
 
-def show_env(path=Path(".")):
+def show_env(path):
     """Show the calculated generic section environment"""
-    path = path.resolve()
-    if path.is_file():
-        config_str = path.read_text()
-        location = path.parent
-    else:
-        config_str = ""
-        location = path
-    task_list = TaskList(from_string=config_str, location=location)
+    from_string = path.read_text() if path.is_file() else ""
+    location = path.parent if path.is_file() else path
+    task_list = TaskList(from_string=from_string, location=location)
     return task_list.load_section_config()
 
 
