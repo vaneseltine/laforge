@@ -148,6 +148,8 @@ class TestBuild:
             result = cli_runner.invoke(run_cli, ["build", "--dry-run"])
             assert result.exit_code == 0
             assert "info" in caplog.text.lower()
+            assert "hello" in barebones_build.lower()
+            assert "hello" in caplog.text.lower()
             assert "complete" not in result.output
             assert "complete" not in caplog.text
 

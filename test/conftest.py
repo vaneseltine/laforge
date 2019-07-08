@@ -119,7 +119,7 @@ def test_distro():
 @pytest.fixture(scope="session")
 def barebones_build():
     return """[task1]
-    shell: echo Hello, galaxy!
+    echo: Hello, galaxy!
     """
 
 
