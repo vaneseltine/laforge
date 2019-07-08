@@ -104,7 +104,10 @@ def medium_df():
 def weird_df():
     df = SAMPLES["weird"]
     df["none"] = None
-    df["int64"] = 64
+    df["justanint"] = 64
+    df["justanint8"] = df["justanint"].astype(pd.Int8Dtype())
+    df["justanint16"] = df["justanint"].astype(pd.Int16Dtype())
+    df["stardate"] = pd.Timestamp(2233, 3, 22)
     return df
 
 

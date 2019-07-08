@@ -36,15 +36,10 @@ class TestVariousTableFeatures:
             arbitrary_table.write(incoming)
 
     def t_weird_in_and_out(self, weird_df, arbitrary_table):
-        # print("\n", weird_df, sep="")
         arbitrary_table.write(weird_df)
         result = arbitrary_table.read()
-        # print(weird_df)
-        # print(weird_df.dtypes)
-        # print(result)
-        # print(result.dtypes)
+        # print(weird_df.dtypes, '\n', result.dtypes)
         diff = result.values == weird_df.values
-        # print(diff)
         assert diff.all()
 
 
