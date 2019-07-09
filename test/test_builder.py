@@ -1,9 +1,20 @@
+import warnings
 from pathlib import Path
 from textwrap import dedent
 
+import pandas as pd
 import pytest
 
-from laforge.builder import Target, Task, Verb
+from laforge.builder import (
+    FileReader,
+    FileWriter,
+    SQLExecutor,
+    SQLQueryReader,
+    SQLReaderWriter,
+    Target,
+    Task,
+    Verb,
+)
 
 
 class TestTarget:
@@ -90,17 +101,25 @@ class TestTask:
 
 
 class TestFileReader:
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_read_dta(self):
-        assert False
-
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_read_xls(self):
-        assert False
-
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_read_xlsx(self):
-        assert False
+    @pytest.mark.parametrize(
+        "suffix", [Target.CSV, Target.XLSX, Target.XLS, Target.DTA]
+    )
+    def t_read_csv(self, give_me_path, medium_df, task_config, suffix):
+        outfile = give_me_path(str(suffix).lower())
+        if suffix == Target.CSV:
+            medium_df.to_csv(outfile)
+        elif suffix == Target.XLSX:
+            medium_df.to_excel(outfile, engine="openpyxl")
+        elif suffix == Target.XLS:
+            medium_df.to_excel(outfile, engine="openpyxl")  # xlwt
+        elif suffix == Target.DTA:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                medium_df.to_stata(outfile)
+        t = Task.from_strings(
+            raw_verb="read", raw_content=str(outfile), config=task_config
+        )
+        assert len(medium_df) == len(t.implement())
 
     @pytest.mark.parametrize("suffix", [Target.CSV])
     def t_read_csv_do_not_assume_null_values_from_text(self, give_me_path, task_config):
@@ -131,7 +150,7 @@ class TestFileReader:
 
 class TestFileWriter:
     @pytest.mark.parametrize(
-        "suffix", [Target.CSV, Target.DTA, Target.HTML, Target.XLSX]
+        "suffix", [Target.CSV, Target.DTA, Target.HTML, Target.XLS, Target.XLSX]
     )
     def t_write_creates_specified_file(
         self, task_config, minimal_df, random_filename, suffix
@@ -149,9 +168,14 @@ class TestFileWriter:
         else:
             assert final_path.exists()
 
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_write_actually_writes_correct_values(self):
-        assert False
+    def t_write_actually_writes_correct_values(self, minimal_df, tmpdir, task_config):
+        outfile = Path(tmpdir) / "out.csv"
+        writer = Task.from_strings(
+            raw_verb="write", raw_content=str(outfile), config=task_config
+        )
+        writer.implement(minimal_df)
+        diff = pd.read_csv(outfile) == minimal_df
+        assert diff.all().all()
 
     @pytest.mark.xfail(reason="Test to be implemented")
     def t_writing_empty_df_gives_warning(self):

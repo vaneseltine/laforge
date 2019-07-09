@@ -358,8 +358,8 @@ class FileReader(BaseTask):
             method="read_csv", kwargs={"keep_default_na": False, "na_values": [""]}
         ),
         Target.DTA: FileCall(method="read_stata", kwargs={}),
-        Target.XLS: FileCall(method="read_excel", kwargs={"dtype"}),
-        Target.XLSX: FileCall(method="read_excel", kwargs={"dtype"}),
+        Target.XLS: FileCall(method="read_excel", kwargs={}),  # kwargs={"dtype"}),
+        Target.XLSX: FileCall(method="read_excel", kwargs={}),  # kwargs={"dtype"}),
     }
 
     def implement(self, prior_results=None):
@@ -462,6 +462,7 @@ class SQLReaderWriter(BaseTask):
 @Task.register(Verb.WRITE, Target.DTA)
 @Task.register(Verb.WRITE, Target.HTML)
 @Task.register(Verb.WRITE, Target.XLSX)
+@Task.register(Verb.WRITE, Target.XLS)
 class FileWriter(BaseTask):
     """Handles all tasks writing to file."""
 
@@ -472,7 +473,12 @@ class FileWriter(BaseTask):
             method="to_html",
             kwargs={"show_dimensions": True, "justify": "left", "index": False},
         ),
-        Target.XLSX: FileCall(method="to_excel", kwargs={"index": False}),
+        Target.XLSX: FileCall(
+            method="to_excel", kwargs={"index": False, "engine": "xlsxwriter"}
+        ),
+        Target.XLS: FileCall(
+            method="to_excel", kwargs={"index": False, "engine": "xlsxwriter"}
+        ),
     }
 
     def implement(self, prior_results=None):
