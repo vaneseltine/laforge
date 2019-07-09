@@ -540,7 +540,7 @@ class ExistenceChecker(BaseTask):
             logger.info(f"Verified that {line} exists.")
 
     def _check_existence_path(self, line):
-        path = self.config["dir"][Verb.EXIST] / line
+        path = self.config["build_dir"] / line
         if not path.exists():
             raise FileNotFoundError(path)
 

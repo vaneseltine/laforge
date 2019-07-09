@@ -13,6 +13,7 @@ from laforge.builder import (
     SQLReaderWriter,
     Target,
     Task,
+    TaskExecutionError,
     Verb,
 )
 
@@ -38,23 +39,23 @@ class TestTaskList:
         assert False
 
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_start_and_stop(self):
-        # also throws warning
-        assert False
+    def t_start_and_stop(self, caplog):
+        caplog.set_level(1)
+        assert "warning" in caplog.text.lower()
 
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_start_without_stop(self):
-        # also throws warning
-        assert False
+    def t_start_without_stop(self, caplog):
+        caplog.set_level(1)
+        assert "warning" in caplog.text.lower()
 
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_stop_without_start(self):
-        # also throws warning
-        assert False
+    def t_stop_without_start(self, caplog):
+        caplog.set_level(1)
+        assert "warning" in caplog.text.lower()
 
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_dry_run(self):
-        assert False
+    # @pytest.mark.xfail(reason="Test to be implemented")
+    # def t_dry_run(self):
+    #     assert False
 
     @pytest.mark.xfail(reason="Test to be implemented")
     def t_skip_when_no_content_following_key(self):
@@ -69,11 +70,7 @@ class TestTaskList:
         assert False
 
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_enumerate_tasks(self):
-        assert False
-
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_full_length_test(self):
+    def t_full_test(self):
         assert False
 
 
@@ -177,30 +174,59 @@ class TestFileWriter:
         diff = pd.read_csv(outfile) == minimal_df
         assert diff.all().all()
 
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_writing_empty_df_gives_warning(self):
-        assert False
+    def t_writing_empty_df_gives_warning(self, tmpdir, task_config, caplog):
+        outfile = Path(tmpdir) / "out.csv"
+        writer = Task.from_strings(
+            raw_verb="write", raw_content=str(outfile), config=task_config
+        )
+        writer.implement(pd.DataFrame([]))
+        caplog.set_level(1)
+        assert "warning" in caplog.text.lower()
 
     @pytest.mark.xfail(reason="Test to be implemented")
     def t_writing_to_locked_file_gives_time_to_free(self):
         assert False
 
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_write_without_results_fails(self):
-        assert False
+    def t_write_without_any_results_fails(self, tmpdir, task_config, caplog):
+        outfile = Path(tmpdir) / "out.csv"
+        writer = Task.from_strings(
+            raw_verb="write", raw_content=str(outfile), config=task_config
+        )
+        with pytest.raises(TaskExecutionError):
+            writer.implement(prior_results=None)
 
 
 class TestExistenceChecker:
+    def t_file_fail(self, tmpdir, task_config):
+        outfile = Path(tmpdir) / "nonexistent.csv"
+        task = Task.from_strings(
+            raw_verb="exist", raw_content=str(outfile), config=task_config
+        )
+        with pytest.raises(FileNotFoundError):
+            task.implement()
+
+    def t_file_pass(self, tmpdir, task_config):
+        outfile = Path(tmpdir) / "existent.csv"
+        outfile.write_text("Engage")
+        task = Task.from_strings(
+            raw_verb="exist", raw_content=str(outfile), config=task_config
+        )
+        task.implement()
+
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_file(self):
+    def t_table_fail(self):
         assert False
 
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_table(self):
+    def t_table_pass(self):
         assert False
 
     @pytest.mark.xfail(reason="Test to be implemented")
-    def t_result_of_query(self):
+    def t_result_of_query_fail(self):
+        assert False
+
+    @pytest.mark.xfail(reason="Test to be implemented")
+    def t_result_of_query_pass(self):
         assert False
 
 
