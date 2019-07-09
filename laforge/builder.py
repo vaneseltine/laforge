@@ -63,9 +63,8 @@ class Target(Enum):
     ANY = "(all)"
 
     @classmethod
-    def parse(cls, verb, raw_content):
+    def parse(cls, raw_content):
 
-        assert verb
         content = str(raw_content).strip()
 
         if ";" in content or "\n" in content:
@@ -238,7 +237,7 @@ class Task:
         if verb in cls._handlers:
             target = Target.ANY
         else:
-            target = Target.parse(verb, raw_content)
+            target = Target.parse(raw_content)
         return cls.from_qualified(
             verb=verb,
             target=target,
@@ -390,7 +389,9 @@ class InternalPythonExecutor(BaseTask):
 class Echoer(BaseTask):
     def implement(self, prior_results=None):
         logger.debug(f"Echoing {self.content}")
-        print(self.content)
+        from click import echo
+
+        echo(self.content)
 
 
 @Task.register(Verb.READ, Target.RAWQUERY)
@@ -504,7 +505,7 @@ class ExistenceChecker(BaseTask):
         lines = [s for s in self.content.splitlines() if s.strip()]
         assert lines, "Accidental blank line?"
         for line in lines:
-            target = Target.parse(self.verb, line)
+            target = Target.parse(line)
             logger.debug(f"Verifying that {line} ({target}) exists...")
             if target is Target.SQLTABLE:
                 self._check_existence_sql_table(line)

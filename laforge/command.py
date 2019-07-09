@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Command-line interface for laforge."""
 
-from pathlib import Path
-from pprint import pprint
-import time
 import logging
 import sys
+import time
+from pathlib import Path
+from pprint import pprint
 
 import click
 
@@ -176,7 +176,7 @@ def env(no_warning=False, path=None):
 
     result = show_env(build_path)
     click.echo("Constructed build environment:")
-    pprint(result)
+    pprint(result)  # noqa
     return 0
 
 

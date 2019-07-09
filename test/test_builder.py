@@ -24,12 +24,12 @@ class TestTarget:
         "raw", ["select 1 from engineering;", "select\n    1,\n    2\nfrom engineering"]
     )
     def t_parse_raw_query_by_content_features(self, verb, raw):
-        assert Target.parse(verb, raw) == Target.RAWQUERY
+        assert Target.parse(raw) == Target.RAWQUERY
 
     @pytest.mark.parametrize("verb", [Verb.READ, Verb.WRITE, Verb.EXIST])
     @pytest.mark.parametrize("raw", ["crew_manifest", "engineering.crew_manifest"])
     def t_parse_sql_table_by_content_features(self, verb, raw):
-        assert Target.parse(verb, raw) == Target.SQLTABLE
+        assert Target.parse(raw) == Target.SQLTABLE
 
 
 class TestTaskList:

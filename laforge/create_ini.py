@@ -9,7 +9,6 @@ import questionary
 
 from .distros import Distro
 
-
 DISTROS = {v: k for k, v in Distro.known().items()}
 
 

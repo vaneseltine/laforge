@@ -12,7 +12,7 @@ Process             Tool         Documentation
 **Test coverage**   pytest-cov   `<https://pytest-cov.readthedocs.io/>`_
 **Format**          Black        `<https://black.readthedocs.io/>`_
 **Lint**            Flake8       `<http://flake8.pycqa.org/>`_
-**List more**       Pylint       `<https://pylint.readthedocs.io/en/latest/>`_
+**Lint more**       Pylint       `<https://pylint.readthedocs.io/en/latest/>`_
 **Document**        Sphinx       `<https://www.sphinx-doc.org/>`_
 ==================  =========== ==============================================
 
@@ -36,8 +36,12 @@ Suggested Environment
     # Install packages
     python -m pip install -r requirements.txt
 
-    # Optional [packages] to include Excel and/or non-SQLite databases
-    python -m pip install -e .[mysql]
+    # Install working copy
+    
+    # If desired, optional packages for Excel or other DBs...
+    # python -m pip install -e .[excel]
+    # python -m pip install -e .[mysql]
+    # python -m pip install -e .[all]
 
     # Run tests
     python -m pytest
