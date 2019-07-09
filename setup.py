@@ -13,7 +13,7 @@ extras = {
     "postgresql": ["psycopg2>=2.8"],  # PostgreSQL -- sr.ht can't build
     "mysql": ["pymysql>=0.9"],  # MySQL or MariaDB
     "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server -- travis can't build
-    "excel": ["xlrd==1.2.0", "openpyxl==2.6.2"],  # Pandas backends
+    "excel": ["xlrd==1.2.0", "XlsxWriter==1.1.8"],  # Pandas backends
 }
 extras["mariadb"] = extras["mysql"]
 extras["all"] = list(set(x for y in extras.values() for x in y))

@@ -5,13 +5,16 @@ laforge.builder
 Functions:
  * get_verb
  * is_verb
- * run_cmd
 
 Classes:
  * BaseTask -- missing methods:
 
    - implement
    - validate_results
+ * DirectoryVisit
+ * Echoer -- missing methods:
+
+   - implement
  * ExistenceChecker -- missing methods:
 
    - implement
@@ -34,9 +37,6 @@ Classes:
  * SQLReaderWriter -- missing methods:
 
    - implement
- * ShellExecutor -- missing methods:
-
-   - implement
  * StataExecutor -- missing methods:
 
    - implement
@@ -49,8 +49,10 @@ Classes:
 laforge.command
 ---------------
 Functions:
+ * find_build_config
+ * get_package_logger
+ * run_build
  * technobabble
- * user_confirms_cleartext
 
 laforge.distros
 ---------------
@@ -61,6 +63,7 @@ Classes:
    - create_spec
    - determine_dtypes
    - find
+   - known
  * MSSQL -- missing methods:
 
    - create_spec

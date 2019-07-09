@@ -106,9 +106,9 @@ class TestFileReader:
         if suffix == Target.CSV:
             medium_df.to_csv(outfile)
         elif suffix == Target.XLSX:
-            medium_df.to_excel(outfile, engine="openpyxl")
+            medium_df.to_excel(outfile, engine="xlsxwriter")
         elif suffix == Target.XLS:
-            medium_df.to_excel(outfile, engine="openpyxl")  # xlwt
+            medium_df.to_excel(outfile, engine="xlsxwriter")
         elif suffix == Target.DTA:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
