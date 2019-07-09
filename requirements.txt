@@ -12,6 +12,7 @@ black==19.3b0
 coverage==4.5.3
 coveralls==1.8.1
 flake8==3.7.7
+flake8-comprehensions==2.1.0
 hypothesis[pandas]==4.24.6
 nox==2019.5.30
 pylint==2.3.1

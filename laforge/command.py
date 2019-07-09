@@ -13,7 +13,7 @@ from . import __doc__ as LF_DOCSTRING
 from . import __version__ as LF_VERSION
 from . import logo
 
-CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)

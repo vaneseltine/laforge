@@ -4,7 +4,6 @@ import configparser
 import logging
 import os
 import runpy
-import subprocess
 import textwrap
 import time
 from collections import namedtuple

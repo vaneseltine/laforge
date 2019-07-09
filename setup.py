@@ -16,7 +16,7 @@ extras = {
     "excel": ["xlrd==1.2.0", "XlsxWriter==1.1.8"],  # Pandas backends
 }
 extras["mariadb"] = extras["mysql"]
-extras["all"] = list(set(x for y in extras.values() for x in y))
+extras["all"] = [*{x for y in extras.values() for x in y}]
 
 
 setuptools.setup(
