@@ -98,9 +98,7 @@ class TestTask:
 
 
 class TestFileReader:
-    @pytest.mark.parametrize(
-        "suffix", [Target.CSV, Target.XLSX, Target.XLS, Target.DTA]
-    )
+    @pytest.mark.parametrize("suffix", [Target.CSV, Target.XLSX, Target.XLS])
     def t_read_csv(self, give_me_path, medium_df, task_config, suffix):
         outfile = give_me_path(str(suffix).lower())
         if suffix == Target.CSV:
@@ -109,10 +107,8 @@ class TestFileReader:
             medium_df.to_excel(outfile, engine="xlsxwriter")
         elif suffix == Target.XLS:
             medium_df.to_excel(outfile, engine="xlsxwriter")
-        elif suffix == Target.DTA:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                medium_df.to_stata(outfile)
+        else:
+            raise NotImplementedError(suffix)
         t = Task.from_strings(
             raw_verb="read", raw_content=str(outfile), config=task_config
         )
@@ -147,7 +143,7 @@ class TestFileReader:
 
 class TestFileWriter:
     @pytest.mark.parametrize(
-        "suffix", [Target.CSV, Target.DTA, Target.HTML, Target.XLS, Target.XLSX]
+        "suffix", [Target.CSV, Target.HTML, Target.XLS, Target.XLSX]
     )
     def t_write_creates_specified_file(
         self, task_config, minimal_df, random_filename, suffix
@@ -251,12 +247,6 @@ class TestEchoer:
 
 
 class TestInternalPythonExecutor:
-    @pytest.mark.xfail(reason="Test to be implemented")
-    def t_execute(self):
-        assert False
-
-
-class TestStataExecutor:
     @pytest.mark.xfail(reason="Test to be implemented")
     def t_execute(self):
         assert False

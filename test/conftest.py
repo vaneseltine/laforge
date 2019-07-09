@@ -49,7 +49,7 @@ def skip_by_sql(item):
         if not param_distros:
             return None
         if TEST_DISTRO not in param_distros:
-            pytest.skip(f"Intended for {param_distros} not {TEST_DISTRO}")
+            pytest.skip(f"Intended for {'; '.join(param_distros)} not {TEST_DISTRO}")
 
 
 def stringify_markers(iter_markers):
@@ -63,18 +63,6 @@ def skip_by_markers(markers):
     platform_skip = platform_violates_mark(markers)
     if platform_skip:
         pytest.skip(platform_skip)
-
-    stata_skip = stata_is_required_but_missing(markers)
-    if stata_skip:
-        pytest.skip(stata_skip)
-
-
-def stata_is_required_but_missing(markers):
-    if "stata" not in markers:
-        return 0
-    if os.environ.get("stata_executable"):
-        return 0
-    return "Path to Stata executable not available."
 
 
 def platform_violates_mark(markers):

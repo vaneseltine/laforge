@@ -4,7 +4,7 @@ Overview
 ********************************
 
 *laforge* is a low-key build system designed to interoperate
-Python, SQL, and Stata data work, originally developed internally
+Python and SQL data work, originally developed internally
 for `IRIS, the Institute for Research on Innovation and Science
 <https://iris.isr.umich.edu>`_
 at the `University of Michigan's Institute for Social Research
@@ -12,7 +12,7 @@ at the `University of Michigan's Institute for Social Research
 
 Features:
 
-* Interoperable: Read, write, and execute Python, SQL, and Stata scripts/data.
+* Interoperable: Read, write, and execute Python and SQL scripts/data.
 * Straightforward: Simple build INI files designed for a one-click build.
 * No lock-in: Maintain scripts independent from *laforge*.
 

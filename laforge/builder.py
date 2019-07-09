@@ -52,8 +52,6 @@ def is_verb(raw):
 
 class Target(Enum):
     CSV = ".csv"
-    DO = ".do"
-    DTA = ".dta"
     HTML = ".html"
     JSON = ".json"
     PICKLE = ".pickle"
@@ -334,8 +332,6 @@ class BaseTask:
 
     @property
     def short_content(self):
-        if " " not in self.content:
-            return self.content
         return textwrap.shorten(repr(self.content), 80)
 
     def __str__(self):
@@ -348,7 +344,6 @@ class BaseTask:
 
 
 @Task.register(Verb.READ, Target.CSV)
-@Task.register(Verb.READ, Target.DTA)
 @Task.register(Verb.READ, Target.XLS)
 @Task.register(Verb.READ, Target.XLSX)
 class FileReader(BaseTask):
@@ -357,7 +352,6 @@ class FileReader(BaseTask):
         Target.CSV: FileCall(
             method="read_csv", kwargs={"keep_default_na": False, "na_values": [""]}
         ),
-        Target.DTA: FileCall(method="read_stata", kwargs={}),
         Target.XLS: FileCall(method="read_excel", kwargs={}),  # kwargs={"dtype"}),
         Target.XLSX: FileCall(method="read_excel", kwargs={}),  # kwargs={"dtype"}),
     }
@@ -398,22 +392,6 @@ class Echoer(BaseTask):
     def implement(self, prior_results=None):
         logger.debug(f"Echoing {self.content}")
         print(self.content)
-
-
-@Task.register(Verb.EXECUTE, Target.DO)
-class StataExecutor(BaseTask):
-    def implement(self, prior_results=None):
-        stata_exe = Path(self.config["stata_executable"])
-        assert stata_exe.exists()
-        do_parameters = self.config.get("stata_parameters", [])
-        do_path = self.path.absolute()
-        logger.info("Executing %s", do_path)
-        stata_command_list = [stata_exe, "/e", "do", do_path] + do_parameters
-        full_command = [str(x) for x in stata_command_list]
-        subprocess.run(
-            full_command=full_command, cwd=do_path.parent, shell=False, check=True
-        )
-        logger.info("Executed: %s", do_path)
 
 
 @Task.register(Verb.READ, Target.RAWQUERY)
@@ -459,7 +437,6 @@ class SQLReaderWriter(BaseTask):
 
 
 @Task.register(Verb.WRITE, Target.CSV)
-@Task.register(Verb.WRITE, Target.DTA)
 @Task.register(Verb.WRITE, Target.HTML)
 @Task.register(Verb.WRITE, Target.XLSX)
 @Task.register(Verb.WRITE, Target.XLS)
@@ -468,7 +445,6 @@ class FileWriter(BaseTask):
 
     filetypes = {
         Target.CSV: FileCall(method="to_csv", kwargs={"index": False}),
-        Target.DTA: FileCall(method="to_stata", kwargs={"write_index": False}),
         Target.HTML: FileCall(
             method="to_html",
             kwargs={"show_dimensions": True, "justify": "left", "index": False},

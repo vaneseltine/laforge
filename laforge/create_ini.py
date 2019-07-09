@@ -70,7 +70,7 @@ def receive_path(default):
     return Path(build_path).resolve()
 
 
-def receive_input(build_dir):
+def receive_input(build_dir, answers=None):
 
     questions = [
         {
@@ -118,7 +118,7 @@ def receive_input(build_dir):
         },
     ]
 
-    return questionary.prompt(questions)
+    return questionary.prompt(questions, answers=answers)
 
 
 def create_output(path, answers):

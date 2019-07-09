@@ -97,6 +97,10 @@ def coverage(session):
     clean_dir("./build/coverage")
     session.install("coverage")
     if len(list(Path(".").glob(".coverage*"))) > 1:
+        try:
+            Path(".coverage").unlink()
+        except FileNotFoundError:
+            pass
         session.run("coverage", "combine")
     session.run("coverage", "report")
     session.run("coverage", "html")
