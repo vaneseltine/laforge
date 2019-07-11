@@ -9,15 +9,15 @@ from pprint import pprint
 
 import click
 
-from . import __doc__ as LF_DOCSTRING
-from . import __version__ as LF_VERSION
+from . import __doc__ as package_docstring
+from . import __version__ as package_version
 from . import logo
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
-@click.version_option(version=LF_VERSION, message=logo.get_version_display())
+@click.group(context_settings=CONTEXT_SETTINGS, help=package_docstring)
+@click.version_option(version=package_version, message=logo.get_version_display())
 def run_cli():
     pass
 
