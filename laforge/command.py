@@ -28,22 +28,30 @@ def run_cli():
 )
 @click.option("--debug", default=False, is_flag=True)
 @click.option("--dry-run", "-n", default=False, is_flag=True)
+@click.option("--loop", default=False, is_flag=True)
 @click.option(
     "--log",
     default="laforge.log",
     type=click.Path(resolve_path=True, dir_okay=False),
     help="Log build process at LOG.",
 )
-def build(ini, log="./laforge.log", debug=False, dry_run=False):
+def build(ini, log="./laforge.log", debug=False, dry_run=False, loop=False):
     from .builder import TaskList
 
-    run_build(
-        list_class=TaskList,
-        script_path=Path(ini),
-        log=Path(log),
-        debug=debug,
-        dry_run=dry_run,
-    )
+    runs = 1 if not loop else 100
+    for _ in range(runs):
+        run_build(
+            list_class=TaskList,
+            script_path=Path(ini),
+            log=Path(log),
+            debug=debug,
+            dry_run=dry_run,
+        )
+        if loop:
+            response = input("\nEnter to rebuild, anything else to quit: ")
+            if response:
+                break
+            print("")
 
 
 def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
