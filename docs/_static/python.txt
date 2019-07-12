@@ -37,9 +37,6 @@ Classes:
  * SQLReaderWriter -- missing methods:
 
    - implement
- * StataExecutor -- missing methods:
-
-   - implement
  * Task
  * TaskList -- missing methods:
 

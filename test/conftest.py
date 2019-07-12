@@ -10,17 +10,13 @@ import pytest
 from click.testing import CliRunner
 
 from laforge.builder import Verb
-from laforge.sql import Channel, Table
 from laforge.distros import Distro
+from laforge.sql import Channel, Table
 
 # Pull variables, especially LFTEST_*, into os.environ
 dotenv.load_dotenv(dotenv.find_dotenv())
-
 DISTROS = set(Distro.known())
-
-
 TEST_DISTRO = os.environ.get("LFTEST_DISTRO", "sqlite").lower()
-
 SAMPLES = {f.stem: pd.read_csv(f.resolve()) for f in Path(".").glob("**/*.csv")}
 
 # Hooks and skips

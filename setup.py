@@ -10,9 +10,9 @@ basics = [  # For maximums tested, see requirements.txt
     "SQLAlchemy>=1.1",
 ]
 extras = {
-    "postgresql": ["psycopg2>=2.8"],  # PostgreSQL -- sr.ht can't build
+    "postgresql": ["psycopg2>=2.8"],  # PostgreSQL
     "mysql": ["pymysql>=0.9"],  # MySQL or MariaDB
-    "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server -- travis can't build
+    "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server
     "excel": ["xlrd==1.2.0", "XlsxWriter==1.1.8"],  # Pandas backends
 }
 extras["mariadb"] = extras["mysql"]
