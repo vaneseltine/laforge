@@ -71,9 +71,9 @@ disable=bad-continuation,               # handled by black
         too-many-instance-attributes,   # disagree
         missing-kwoa,                   # pylint confused by factory
         logging-fstring-interpolation,  # plz
+        logging-format-interpolation,   # plzzz
         missing-docstring,              # yes yes
         empty-docstring                 # yes yes yes
-
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

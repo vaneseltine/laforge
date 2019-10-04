@@ -63,7 +63,7 @@ def test_database(session, distro):
     )
 
 
-@nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
+@nox.session(python=SUPPORTED_PYTHONS)
 def test_version(session):
     session.install("-r", "requirements.txt")
     session.install("-e", ".[excel]")
@@ -82,7 +82,7 @@ def test_version(session):
     )
 
 
-@nox.session(python=SUPPORTED_PYTHONS, reuse_venv=False)
+@nox.session(python=SUPPORTED_PYTHONS)
 def cli(session):
     session.install("-e", ".")
     session.chdir("/")
@@ -92,10 +92,9 @@ def cli(session):
     session.run("laforge", "consult", "--match", "diagnostic", silent=True)
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def coverage(session):
     clean_dir("./build/coverage")
-    session.install("coverage")
     if len(list(Path(".").glob(".coverage*"))) > 1:
         try:
             Path(".coverage").unlink()
@@ -106,48 +105,42 @@ def coverage(session):
     session.run("coverage", "html")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def coveralls(session):
-    if os.getenv("COVERALLS_REPO_TOKEN"):
-        session.install("coverage", "coveralls")
-        session.run("coveralls")
+    if not os.getenv("COVERALLS_REPO_TOKEN"):
+        session.skip()
+    session.run("coveralls")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def docs_doc8(session):
-    session.install("-U", "doc8", "Pygments")
     if WINDOWS:
         session.run("doc8", "./docs", "-q", "--ignore=D002", "--ignore=D004")
     else:
         session.run("doc8", "./docs", "-q")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def docs_sphinx(session):
     # Treat warnings as errors.
     session.env["SPHINXOPTS"] = "-W"
-    session.install("-e", ".")
-    session.install("-r", "./docs/requirements.txt")
     clean_dir("./build/sphinx")
     session.run("python", "-m", "sphinx", "-b", "coverage", "./docs", "./docs/_static")
     session.run("python", "setup.py", "build_sphinx", "-b", "html", "-W")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def lint_flake8(session):
-    session.install("-U", "flake8")
     session.run("python", "-m", "flake8", "./laforge", "--show-source")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def lint_pylint(session):
-    session.install("-U", "pylint")
     session.run("pylint", "./laforge", "-d", "import-error")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(python=False)
 def lint_black(session):
-    session.install("-U", "black")
     session.run("python", "-m", "black", "--target-version", "py36", ".")
 
 
