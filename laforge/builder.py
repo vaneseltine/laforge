@@ -90,140 +90,94 @@ class TaskExecutionError(RuntimeError):
     pass
 
 
-class TaskList:
-    """TaskList
+import inspect
 
-    .. todo:: Implement cache_results=False
-    """
+import importlib
 
-    _SQL_KEYS = ["distro", "server", "database", "schema"]
-    _KNOWN_DIRS = {f"{verb.value}_dir": verb for verb in Verb}
 
-    def __init__(self, from_string, location="."):
+def module_from_path(path):
+    import importlib.util
 
-        self.parser = configparser.ConfigParser(
-            interpolation=configparser.ExtendedInterpolation(), strict=False
-        )
+    spec = importlib.util.spec_from_file_location("buildfile", str(path))
+    foo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(foo)
 
-        self.parser.read_string(from_string)
-        self.location = Path(location).resolve(strict=True)
 
-        self.env_config = load_env(self.location)
-
-        self.config = self.load_section_config("DEFAULT")
-
-        self.tasks = list(self.load_tasks())
-        logger.debug("Loaded %s tasks.", len(self.tasks))
-        self.prior_results = None
-
-    def load_tasks(self):
-        skip_to_start = self.parser.has_section("start")
-        if skip_to_start:
-            logger.warning("Starting execution at section [start].")
-        for section in self.parser:
-            if skip_to_start:
-                if section != "start":
-                    continue
-                skip_to_start = False
-            if section == self.parser.default_section:
-                continue
-            logger.debug("Loading section %s", section)
-            if section.lower() in ("stop", "halt", "quit", "exit"):
-                logger.warning(
-                    "Will only execute until -- and not including -- "
-                    "the section titled [%s].",
-                    section,
-                )
-                break
-            section_config = self.load_section_config(section)
-            section_config["section"] = section
-            # Each section can have up to 1 of each verb as a key
-            for option in self.parser[section]:
-                if not is_verb(option):
-                    continue
-                raw_content = self.parser[section][option]
-                if raw_content is None:
-                    continue
-                templated_content = self.template_content(raw_content, section_config)
-                task = Task.from_strings(
-                    raw_verb=option,
-                    raw_content=templated_content,
-                    config=section_config,
-                )
-                logger.debug(task)
-                yield task
-
-    @classmethod
-    def template_content(cls, content, config):
-        new_content = str(content).strip()
-        # Passing content through a formatter
-        # Allows, e.g., read = {write_dir}/output.csv
-        if "{" in new_content or "}" in new_content:
-            formattable_config = {k: v for k, v in config.items() if isinstance(k, str)}
-            new_content = new_content.format(**formattable_config)
-        return new_content
-
-    def load_section_config(self, section="DEFAULT"):
-        """Put together config from env, TaskList config, section config"""
-
-        specified_build = Path(self.parser[section].get("build_dir", "."))
-        build_dir = self.location / specified_build
-        section_config = {}
-        section_config["build_dir"] = build_dir.resolve(strict=True)
-
-        tasklist_config = dict(self.parser["DEFAULT"])
-        raw_section_config = dict(self.parser[section])
-
-        from collections import ChainMap
-
-        chained_dicts = ChainMap(raw_section_config, tasklist_config, self.env_config)
-        collapsed_dict = dict(chained_dicts)
-
-        # Load in SQL
-        section_config["sql"] = {k: collapsed_dict.get(k) for k in self._SQL_KEYS if k}
-
-        # Load in directories
-        section_config["dir"] = {}
-        for human, robot in self._KNOWN_DIRS.items():
-            section_config["dir"][robot] = build_dir / collapsed_dict.get(human, ".")
-
-        ignorables = self._SQL_KEYS + list(self._KNOWN_DIRS) + list(section_config)
-
-        section_config.update(
-            {k: v for k, v in collapsed_dict.items() if k not in ignorables}
-        )
-        return section_config
+class TaskInspector:
+    def __init__(self, file, location):
+        print(location)
+        print(file)
+        # i = importlib.import_module(str(file))
+        j = module_from_path(file)
+        print(j)
+        self.functions_list = [o for o in inspect.getmembers(j, inspect.isfunction)]
+        # self.functions_list = [o for o in inspect.getmembers(j)]
 
     def execute(self):
-        """Execute each task in the list.
+        print(self.functions_list)
 
-        .. todo::
 
-            Restore quiet?
+# def load_section_config(self, section="DEFAULT"):
+#     """Put together config from env, TaskList config, section config"""
 
-        """
-        n_tasks = len(self)
-        for i, task in enumerate(self.tasks):
-            log_prefix = f"Task {i + 1} of {n_tasks}: "
-            log_intro = f"{log_prefix}{task.identifier} {task.description}"
+#     specified_build = Path(self.parser[section].get("build_dir", "."))
+#     build_dir = self.location / specified_build
+#     section_config = {}
+#     section_config["build_dir"] = build_dir.resolve(strict=True)
 
-            logger.info(log_intro)
-            # Rotate results during implementation
-            self.prior_results = task.implement(self.prior_results)
-            logger.debug("%s complete", log_prefix)
+#     tasklist_config = dict(self.parser["DEFAULT"])
+#     raw_section_config = dict(self.parser[section])
 
-    def dry_run(self):
-        """List each task in the list. """
-        for i, task in enumerate(self.tasks):
-            logger.info(f"{(i + 1):>2}/{len(self)}: {str(task)}")
+#     from collections import ChainMap
 
-    def __len__(self):
-        return len(self.tasks)
+#     chained_dicts = ChainMap(raw_section_config, tasklist_config, self.env_config)
+#     collapsed_dict = dict(chained_dicts)
 
-    def __repr__(self):
-        return "<{} - {} - ({} tasks)>".format(
-            self.__class__.__name__, self.location, len(self)
-        )
+#     # Load in SQL
+#     section_config["sql"] = {k: collapsed_dict.get(k) for k in self._SQL_KEYS if k}
+
+#     # Load in directories
+#     section_config["dir"] = {}
+#     for human, robot in self._KNOWN_DIRS.items():
+#         section_config["dir"][robot] = build_dir / collapsed_dict.get(human, ".")
+
+#     ignorables = self._SQL_KEYS + list(self._KNOWN_DIRS) + list(section_config)
+
+#     section_config.update(
+#         {k: v for k, v in collapsed_dict.items() if k not in ignorables}
+#     )
+#     return section_config
+
+# def execute(self):
+#     """Execute each task in the list.
+
+#     .. todo::
+
+#         Restore quiet?
+
+#     """
+#     n_tasks = len(self)
+#     for i, task in enumerate(self.tasks):
+#         log_prefix = f"Task {i + 1} of {n_tasks}: "
+#         log_intro = f"{log_prefix}{task.identifier} {task.description}"
+
+#         logger.info(log_intro)
+#         # Rotate results during implementation
+#         self.prior_results = task.implement(self.prior_results)
+#         logger.debug("%s complete", log_prefix)
+
+# def dry_run(self):
+#     """List each task in the list. """
+#     for i, task in enumerate(self.tasks):
+#         logger.info(f"{(i + 1):>2}/{len(self)}: {str(task)}")
+
+# def __len__(self):
+#     return len(self.tasks)
+
+# def __repr__(self):
+#     return "<{} - {} - ({} tasks)>".format(
+#         self.__class__.__name__, self.location, len(self)
+#     )
 
 
 class Task:
@@ -243,7 +197,8 @@ class Task:
             target=target,
             content=raw_content,
             config=config,
-            identifier=f"{config.get('section', '')}.{raw_verb}",
+            # identifier=f"{config.get('section', '')}.{raw_verb}",
+            identifier="hi",
         )
 
     @classmethod
@@ -554,22 +509,3 @@ def load_env(path):
         except IOError:
             env_config = {}
     return env_config
-
-
-"""
-Copyright 2019 Matt VanEseltine.
-
-This file is part of laforge.
-
-laforge is free software: you can redistribute it and/or modify it under
-the terms of the GNU Affero General Public License as published by the Free
-Software Foundation, either version 3 of the License, or (at your option) any
-later version.
-
-laforge is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License along
-with laforge.  If not, see <https://www.gnu.org/licenses/>.
-"""

@@ -22,9 +22,11 @@ def run_cli():
     pass
 
 
-@click.command(help="Build an existing laforge build INI.")
+@click.command(help="Run an existing laforge buildfile.")
 @click.argument(
-    "ini", type=click.Path(exists=True, resolve_path=True, dir_okay=True), default="."
+    "buildfile",
+    type=click.Path(exists=True, resolve_path=True, dir_okay=True),
+    default=".",
 )
 @click.option("--debug", default=False, is_flag=True)
 @click.option("--dry-run", "-n", default=False, is_flag=True)
@@ -35,14 +37,15 @@ def run_cli():
     type=click.Path(resolve_path=True, dir_okay=False),
     help="Log build process at LOG.",
 )
-def build(ini, log="./laforge.log", debug=False, dry_run=False, loop=False):
-    from .builder import TaskList
+def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
+    # from .builder import TaskList
+    from .builder import TaskInspector
 
     runs = 1 if not loop else 100
     for _ in range(runs):
         run_build(
-            list_class=TaskList,
-            script_path=Path(ini),
+            list_class=TaskInspector,
+            script_path=Path(buildfile),
             log=Path(log),
             debug=debug,
             dry_run=dry_run,
@@ -55,7 +58,7 @@ def build(ini, log="./laforge.log", debug=False, dry_run=False, loop=False):
 
 
 def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
-    path = find_build_config(script_path)
+    path = find_buildfile(script_path)
 
     start_time = time.time()
     logger = get_package_logger(log, debug)
@@ -63,33 +66,35 @@ def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
     # THEN set logging -- helps avoid importing pandas at debug level
 
     logger.info("%s launched.", path)
-    if debug:
-        click.echo("Debug mode is on.")
-    logger.debug("Debug mode is on.")
+    # if debug:
+    #     click.echo("Debug mode is on.")
+    # logger.debug("Debug mode is on.")
 
-    task_list = list_class(path.read_text(), location=path.parent)
-    if dry_run:
-        task_list.dry_run()
-    else:
-        task_list.execute()
-        elapsed = round(time.time() - start_time, 2)
-        logger.info("%s completed in %s seconds.", path, elapsed)
+    task_list = list_class(path, location=path.parent)
+    # if dry_run:
+    #     task_list.dry_run()
+    # else:
+    task_list.execute()
+    elapsed = round(time.time() - start_time, 2)
+    logger.info("%s completed in %s seconds.", path, elapsed)
 
 
-def find_build_config(path):
+def find_buildfile(path):
     path = Path(path)
     if path.is_file():
         return path
-    _acceptable_globs = ["build*.ini", "*laforge*.ini"]
+    _acceptable_globs = ["build*.py", "*laforge*.py"]
     build_files = []
     for fileglob in _acceptable_globs:
         build_files.extend(list(path.glob(fileglob)))
     if not build_files:
         globs = " or ".join(_acceptable_globs)
-        raise FileNotFoundError(f"No laforge INI (e.g., {globs}) found in {path}.")
+        raise FileNotFoundError(
+            f"No laforge buildfile (e.g., {globs}) found in {path}."
+        )
     if len(build_files) > 1:
         found = "; ".join(str(x) for x in build_files)
-        raise FileExistsError(f"Multiple possible laforge INIs found: {found}.")
+        raise FileExistsError(f"Multiple possible laforge buildfiles found: {found}.")
     return build_files[0]
 
 
@@ -120,44 +125,6 @@ def get_package_logger(log_file, debug):
     return new_logger
 
 
-@click.command(hidden=True, help="Receive a quick engineering consultation.")
-@click.option("-n", type=int, default=1, help="Receive N consultations.")
-@click.option(
-    "--match",
-    type=str,
-    default="",
-    help="Try to receive consultation(s) including MATCH.",
-)
-def consult(n, match):
-    from .tech import Technobabbler
-
-    technobabble(Technobabbler, n, match)
-
-
-def technobabble(babbler, n=1, match=None):
-    for _ in range(n):
-        if match:
-            babble = babbler.find(match)
-        else:
-            babble = babbler().babble()
-        click.echo(babble)
-
-
-@click.command(help="Interactively create a new laforge build INI.")
-@click.argument(
-    "path",
-    type=click.Path(writable=True, resolve_path=True, dir_okay=False),
-    default=Path("./build.ini"),
-)
-def create(path):
-    from .create_ini import create_ini
-
-    return_code = create_ini(Path(path))
-    if return_code == 0:
-        click.echo(f"\nNew laforge INI written at: {path}\nEnjoy!")
-    sys.exit(return_code)
-
-
 @click.command(help="Describe the present build environment known to laforge.")
 @click.argument("path", type=click.Path(), nargs=-1)
 @click.option(
@@ -169,6 +136,7 @@ def create(path):
     + "in laforge build INIs, configs, or .envs. Continue?",
 )
 def env(no_warning=False, path=None):
+    raise NotImplementedError
     user_has_accepted_warning = no_warning
     if not user_has_accepted_warning:
         click.echo("Canceled.")
@@ -178,7 +146,7 @@ def env(no_warning=False, path=None):
 
     path = Path(" ".join(path) if path else ".")
     try:
-        build_path = find_build_config(path)
+        build_path = find_buildfile(path)
     except FileNotFoundError:
         build_path = path
 
@@ -189,8 +157,6 @@ def env(no_warning=False, path=None):
 
 
 run_cli.add_command(build)
-run_cli.add_command(consult)
-run_cli.add_command(create)
 run_cli.add_command(env)
 
 if __name__ == "__main__":

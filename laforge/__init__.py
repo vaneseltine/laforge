@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """A low-key build system for working with data."""
 
-__version__ = "0.2.0.dev0"
+__version__ = "2.0.0dev0"
 
 
 def run_laforge():
