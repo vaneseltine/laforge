@@ -100,8 +100,10 @@ class TaskExecutionError(RuntimeError):
 class TaskList:
     def __init__(self, file):
         # i = importlib.import_module(str(file))
-        mod = self.get_module_from_path(file)
-        self.functions = self.get_functions_from_modules(mod)
+        self.source = file
+        self.mod = self.get_module_from_path(self.source)
+        self.home = self.source.parent.resolve()
+        self.functions = self.get_functions_from_modules(self.mod)
 
     @staticmethod
     def get_functions_from_modules(mod, exclude=r"^_.*$"):

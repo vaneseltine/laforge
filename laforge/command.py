@@ -61,19 +61,17 @@ def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
     path = find_buildfile(script_path)
 
     start_time = time.time()
+    # THEN set logging -- helps avoid importing pandas at debug level
     logger = get_package_logger(log, debug)
 
-    # THEN set logging -- helps avoid importing pandas at debug level
-
     logger.info("%s launched.", path)
-    # if debug:
-    #     click.echo("Debug mode is on.")
-    # logger.debug("Debug mode is on.")
+    if debug:
+        logger.debug("Debug mode is on.")
 
     task_list = list_class(path)
-    # if dry_run:
-    #     task_list.dry_run()
-    # else:
+    if dry_run:
+        task_list.dry_run()
+        return
     task_list.execute()
     elapsed = round(time.time() - start_time, 2)
     logger.info("%s completed in %s seconds.", path, elapsed)
