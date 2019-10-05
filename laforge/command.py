@@ -70,7 +70,7 @@ def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
     #     click.echo("Debug mode is on.")
     # logger.debug("Debug mode is on.")
 
-    task_list = list_class(path, location=path.parent)
+    task_list = list_class(path)
     # if dry_run:
     #     task_list.dry_run()
     # else:

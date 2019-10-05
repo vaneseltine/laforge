@@ -7,6 +7,7 @@ import importlib.util
 import inspect
 import logging
 import os
+import re
 import runpy
 import textwrap
 import time
@@ -29,7 +30,7 @@ def show_env(path):
     """Show the calculated generic section environment"""
     from_string = path.read_text() if path.is_file() else ""
     location = path.parent if path.is_file() else path
-    task_list = TaskList(from_string=from_string, location=location)
+    task_list = TaskList(from_string=from_string)
     return task_list.load_section_config()
 
 
@@ -97,20 +98,20 @@ class TaskExecutionError(RuntimeError):
 
 
 class TaskList:
-    def __init__(self, file, location):
-        print(location)
-        print(file)
+    def __init__(self, file):
         # i = importlib.import_module(str(file))
         mod = self.get_module_from_path(file)
         self.functions = self.get_functions_from_modules(mod)
 
     @staticmethod
-    def get_functions_from_modules(mod):
+    def get_functions_from_modules(mod, exclude=r"^_.*$"):
+        # TODO -- make these a class instead
         return (
             (name, obj, inspect.getsourcelines(obj)[-1])
             for name, obj in inspect.getmembers(mod)
             # if callable(obj)
             if isinstance(obj, (types.FunctionType, functools.partial))
+            and not re.match(exclude, name)
         )
 
     @staticmethod
@@ -121,11 +122,9 @@ class TaskList:
         return mod
 
     def execute(self):
-        # print("functions", self.functions)
         for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
-            print(f"Running line #{lineno}, {name}")
+            logger.info(f"Running line #{lineno}, {name}()")
             obj()
-            print(f"Done with running {name}")
 
 
 class Task:
