@@ -29,4 +29,4 @@ def _skip_but_use_me_still(s):
 
 
 if __name__ == "__main__":
-    print("Run via laforge. Or try invoking lf.run()")
+    lf.build(__file__)

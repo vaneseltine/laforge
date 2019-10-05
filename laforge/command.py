@@ -14,64 +14,8 @@ from . import logo
 
 def run():
     print("hi")
-
-
-import click
-
-
-@click.command(help="Run an existing laforge buildfile.")
-@click.argument(
-    "buildfile",
-    type=click.Path(exists=True, resolve_path=True, dir_okay=True),
-    default=".",
-)
-@click.option("--debug", default=False, is_flag=True)
-@click.option("--dry-run", "-n", default=False, is_flag=True)
-@click.option("--loop", default=False, is_flag=True)
-@click.option(
-    "--log",
-    default="laforge.log",
-    type=click.Path(resolve_path=True, dir_okay=False),
-    help="Log build process at LOG.",
-)
-def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
-    # from .builder import TaskList
-    from .builder import TaskList
-
-    runs = 1 if not loop else 100
-    for _ in range(runs):
-        run_build(
-            list_class=TaskList,
-            script_path=Path(buildfile),
-            log=Path(log),
-            debug=debug,
-            dry_run=dry_run,
-        )
-        if loop:
-            response = input("\nEnter to rebuild, anything else to quit: ")
-            if response:
-                break
-            print("")
-
-
-def run_build(*, list_class, script_path, log, debug=False, dry_run=False):
-    path = find_buildfile(script_path)
-
-    start_time = time.time()
-    # THEN set logging -- helps avoid importing pandas at debug level
-    logger = get_package_logger(log, debug)
-
-    logger.info("%s launched.", path)
-    if debug:
-        logger.debug("Debug mode is on.")
-
-    task_list = list_class(path)
-    if dry_run:
-        task_list.dry_run()
-        return
-    task_list.execute()
-    elapsed = round(time.time() - start_time, 2)
-    logger.info("%s completed in %s seconds.", path, elapsed)
+    buildfile = find_buildfile(".")
+    build(buildfile)
 
 
 def find_buildfile(path):
@@ -91,6 +35,55 @@ def find_buildfile(path):
         found = "; ".join(str(x) for x in build_files)
         raise FileExistsError(f"Multiple possible laforge buildfiles found: {found}.")
     return build_files[0]
+
+
+# @click.command(help="Run an existing laforge buildfile.")
+# @click.option("--debug", default=False, is_flag=True)
+# @click.option("--dry-run", "-n", default=False, is_flag=True)
+# @click.option("--loop", default=False, is_flag=True)
+# @click.option(
+#     "--log",
+#     default="laforge.log",
+#     type=click.Path(resolve_path=True, dir_okay=False),
+#     help="Log build process at LOG.",
+# )
+def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
+    from .builder import TaskList
+
+    runs = 1 if not loop else 100
+    for _ in range(runs):
+        run_one_build(
+            list_class=TaskList,
+            script_path=Path(buildfile),
+            log=Path(log),
+            debug=debug,
+            dry_run=dry_run,
+        )
+        if loop:
+            response = input("\nEnter to rebuild, anything else to quit: ")
+            if response:
+                break
+            print("")
+
+
+def run_one_build(*, list_class, script_path, log, debug=False, dry_run=False):
+    path = find_buildfile(script_path)
+
+    start_time = time.time()
+    # THEN set logging -- helps avoid importing pandas at debug level
+    logger = get_package_logger(log, debug)
+
+    logger.info("%s launched.", path)
+    if debug:
+        logger.debug("Debug mode is on.")
+
+    task_list = list_class(path)
+    if dry_run:
+        task_list.dry_run()
+        return
+    task_list.execute()
+    elapsed = round(time.time() - start_time, 2)
+    logger.info("%s completed in %s seconds.", path, elapsed)
 
 
 def get_package_logger(log_file, debug):
@@ -118,25 +111,3 @@ def get_package_logger(log_file, debug):
     new_logger = logging.getLogger(__name__)
     new_logger.debug(f"Logging: {log_file}")
     return new_logger
-
-
-if __name__ == "__main__":
-    run()
-
-"""
-Copyright 2019 Matt VanEseltine.
-
-This file is part of laforge.
-
-laforge is free software: you can redistribute it and/or modify it under
-the terms of the GNU Affero General Public License as published by the Free
-Software Foundation, either version 3 of the License, or (at your option) any
-later version.
-
-laforge is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License along
-with laforge.  If not, see <https://www.gnu.org/licenses/>.
-"""

@@ -200,25 +200,6 @@ class Distro:
         return f"Distro('{self.name}')"
 
 
-class MySQL(Distro):
-    name = "mysql"
-    human_name = "MySQL/MariaDB"
-    regex = "^(my|maria).*"
-    driver = "pymysql"
-    resolver = "{schema}.`{name}`"
-
-    def create_spec(self, *, server, database, engine_kwargs):
-        username = engine_kwargs.pop("username")
-        password = engine_kwargs.pop("password")
-        url = (
-            f"{self.name}+{self.driver}:"
-            + f"//{username}:{password}@"
-            + f"{server}/{database}"
-            + f"?charset=utf8mb4"
-        )
-        return (url, engine_kwargs)
-
-
 class PostgresQL(Distro):
     name = "postgresql"
     human_name = "PostgreSQL"
