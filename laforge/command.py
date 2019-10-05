@@ -5,16 +5,22 @@ import logging
 import sys
 import time
 from pathlib import Path
-from pprint import pprint
 
 from . import __doc__ as package_docstring
-from . import __version__ as package_version
 from . import logo
+
+sys.argv = sys.argv[1:]
 
 
 def run():
     print("hi")
-    buildfile = find_buildfile(".")
+    if not sys.argv:
+        print("help")
+        exit(0)
+    if sys.argv[0] in ("-V", "--version"):
+        print(logo.get_version_display())
+        exit(0)
+    buildfile = find_buildfile(" ".join(sys.argv))
     build(buildfile)
 
 

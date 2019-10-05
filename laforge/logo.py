@@ -42,7 +42,7 @@ def get_version_display(monochrome=MONOCHROME):
     from . import __version__
 
     items_to_combine = [
-        (LOGO + " %(version)s\n", Color(102, 204, 255)),
+        (LOGO + f" {__version__}\n", Color(102, 204, 255)),
         (
             f"laforge {__version__} at {Path(__file__).parent.absolute()}",
             Color(127, 127, 127),
