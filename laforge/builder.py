@@ -96,7 +96,7 @@ class TaskExecutionError(RuntimeError):
     pass
 
 
-class TaskInspector:
+class TaskList:
     def __init__(self, file, location):
         print(location)
         print(file)
@@ -121,7 +121,7 @@ class TaskInspector:
         return mod
 
     def execute(self):
-        print("functions", self.functions)
+        # print("functions", self.functions)
         for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
             print(f"Running line #{lineno}, {name}")
             obj()

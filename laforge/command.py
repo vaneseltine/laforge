@@ -39,12 +39,12 @@ def run_cli():
 )
 def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
     # from .builder import TaskList
-    from .builder import TaskInspector
+    from .builder import TaskList
 
     runs = 1 if not loop else 100
     for _ in range(runs):
         run_build(
-            list_class=TaskInspector,
+            list_class=TaskList,
             script_path=Path(buildfile),
             log=Path(log),
             debug=debug,
