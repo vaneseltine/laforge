@@ -1,14 +1,20 @@
 """Builder reads and executes tasks and lists of tasks."""
 
 import configparser
+import functools
+import importlib
+import importlib.util
+import inspect
 import logging
 import os
 import runpy
 import textwrap
 import time
+import types
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
+from pprint import pprint
 
 import dotenv
 import pandas as pd
@@ -90,94 +96,36 @@ class TaskExecutionError(RuntimeError):
     pass
 
 
-import inspect
-
-import importlib
-
-
-def module_from_path(path):
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location("buildfile", str(path))
-    foo = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(foo)
-
-
 class TaskInspector:
     def __init__(self, file, location):
         print(location)
         print(file)
         # i = importlib.import_module(str(file))
-        j = module_from_path(file)
-        print(j)
-        self.functions_list = [o for o in inspect.getmembers(j, inspect.isfunction)]
-        # self.functions_list = [o for o in inspect.getmembers(j)]
+        mod = self.get_module_from_path(file)
+        self.functions = self.get_functions_from_modules(mod)
+
+    @staticmethod
+    def get_functions_from_modules(mod):
+        return (
+            (name, obj, inspect.getsourcelines(obj)[-1])
+            for name, obj in inspect.getmembers(mod)
+            # if callable(obj)
+            if isinstance(obj, (types.FunctionType, functools.partial))
+        )
+
+    @staticmethod
+    def get_module_from_path(path):
+        spec = importlib.util.spec_from_file_location("buildfile", str(path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
 
     def execute(self):
-        print(self.functions_list)
-
-
-# def load_section_config(self, section="DEFAULT"):
-#     """Put together config from env, TaskList config, section config"""
-
-#     specified_build = Path(self.parser[section].get("build_dir", "."))
-#     build_dir = self.location / specified_build
-#     section_config = {}
-#     section_config["build_dir"] = build_dir.resolve(strict=True)
-
-#     tasklist_config = dict(self.parser["DEFAULT"])
-#     raw_section_config = dict(self.parser[section])
-
-#     from collections import ChainMap
-
-#     chained_dicts = ChainMap(raw_section_config, tasklist_config, self.env_config)
-#     collapsed_dict = dict(chained_dicts)
-
-#     # Load in SQL
-#     section_config["sql"] = {k: collapsed_dict.get(k) for k in self._SQL_KEYS if k}
-
-#     # Load in directories
-#     section_config["dir"] = {}
-#     for human, robot in self._KNOWN_DIRS.items():
-#         section_config["dir"][robot] = build_dir / collapsed_dict.get(human, ".")
-
-#     ignorables = self._SQL_KEYS + list(self._KNOWN_DIRS) + list(section_config)
-
-#     section_config.update(
-#         {k: v for k, v in collapsed_dict.items() if k not in ignorables}
-#     )
-#     return section_config
-
-# def execute(self):
-#     """Execute each task in the list.
-
-#     .. todo::
-
-#         Restore quiet?
-
-#     """
-#     n_tasks = len(self)
-#     for i, task in enumerate(self.tasks):
-#         log_prefix = f"Task {i + 1} of {n_tasks}: "
-#         log_intro = f"{log_prefix}{task.identifier} {task.description}"
-
-#         logger.info(log_intro)
-#         # Rotate results during implementation
-#         self.prior_results = task.implement(self.prior_results)
-#         logger.debug("%s complete", log_prefix)
-
-# def dry_run(self):
-#     """List each task in the list. """
-#     for i, task in enumerate(self.tasks):
-#         logger.info(f"{(i + 1):>2}/{len(self)}: {str(task)}")
-
-# def __len__(self):
-#     return len(self.tasks)
-
-# def __repr__(self):
-#     return "<{} - {} - ({} tasks)>".format(
-#         self.__class__.__name__, self.location, len(self)
-#     )
+        print("functions", self.functions)
+        for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
+            print(f"Running line #{lineno}, {name}")
+            print(type(obj()))
+            print(f"Done running {name}")
 
 
 class Task:
