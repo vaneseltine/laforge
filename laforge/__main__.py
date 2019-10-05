@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from laforge.command import run_cli
+from laforge.command import run
 
-run_cli()
+run()

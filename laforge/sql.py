@@ -22,7 +22,7 @@ import yaml
 from .toolbox import flatten
 
 logger = logging.getLogger(__name__)
-logger.debug(__name__)
+logger.debug(logger.name)
 
 RESERVED_WORD_FILE = Path(__file__).parent / "data" / "reserved_words.yaml"
 RESERVED_WORDS = {x.lower() for x in yaml.safe_load(RESERVED_WORD_FILE.read_text())}

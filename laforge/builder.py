@@ -23,7 +23,7 @@ import pandas as pd
 from .sql import Channel, Script, Table, execute
 
 logger = logging.getLogger(__name__)
-logger.debug(__name__)
+logger.debug(logger.name)
 
 
 def show_env(path):

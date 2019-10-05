@@ -7,19 +7,16 @@ import time
 from pathlib import Path
 from pprint import pprint
 
-import click
-
 from . import __doc__ as package_docstring
 from . import __version__ as package_version
 from . import logo
 
-CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+
+def run():
+    print("hi")
 
 
-@click.group(context_settings=CONTEXT_SETTINGS, help=package_docstring)
-@click.version_option(version=package_version, message=logo.get_version_display())
-def run_cli():
-    pass
+import click
 
 
 @click.command(help="Run an existing laforge buildfile.")
@@ -123,42 +120,8 @@ def get_package_logger(log_file, debug):
     return new_logger
 
 
-@click.command(help="Describe the present build environment known to laforge.")
-@click.argument("path", type=click.Path(), nargs=-1)
-@click.option(
-    "--no-warning",
-    help="Do not display warning about cleartext.",
-    default=False,
-    is_flag=True,
-    prompt="WARNING: Output may include passwords or keys stored as cleartext "
-    + "in laforge build INIs, configs, or .envs. Continue?",
-)
-def env(no_warning=False, path=None):
-    raise NotImplementedError
-    user_has_accepted_warning = no_warning
-    if not user_has_accepted_warning:
-        click.echo("Canceled.")
-        return 1
-
-    from .builder import show_env
-
-    path = Path(" ".join(path) if path else ".")
-    try:
-        build_path = find_buildfile(path)
-    except FileNotFoundError:
-        build_path = path
-
-    result = show_env(build_path)
-    click.echo("Constructed build environment:")
-    pprint(result)  # noqa
-    return 0
-
-
-run_cli.add_command(build)
-run_cli.add_command(env)
-
 if __name__ == "__main__":
-    run_cli()
+    run()
 
 """
 Copyright 2019 Matt VanEseltine.

@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from .sql import Script, Table
 
 logger = logging.getLogger(__name__)
-logger.debug(__name__)
+logger.debug(logger.name)
 
 
 class SQLDistroNotFound(Exception):

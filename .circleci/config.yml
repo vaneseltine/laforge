@@ -13,11 +13,6 @@ jobs:
           POSTGRES_DB: lftest_postg
           POSTGRES_USER: geordi
           POSTGRES_PASSWORD: watson
-      - image: circleci/mysql:5.6
-        environment:
-          MYSQL_DATABASE: lftest_mysql
-          MYSQL_USER: geordi
-          MYSQL_PASSWORD: watson
       - image: microsoft/mssql-server-linux:2017-latest
         environment:
           ACCEPT_EULA: "Y"
@@ -109,11 +104,6 @@ jobs:
           POSTGRES_DB: lftest_postg
           POSTGRES_USER: geordi
           POSTGRES_PASSWORD: watson
-      - image: circleci/mysql:5.6
-        environment:
-          MYSQL_DATABASE: lftest_mysql
-          MYSQL_USER: geordi
-          MYSQL_PASSWORD: watson
       - image: microsoft/mssql-server-linux:2017-latest
         environment:
           ACCEPT_EULA: "Y"
@@ -160,5 +150,5 @@ workflows:
   version: 2
   multitest:
     jobs:
-      - ubuntu  # Note -- ubuntu job does not submit coverage
+      - ubuntu # Note -- ubuntu job does not submit coverage
       - herpephilia

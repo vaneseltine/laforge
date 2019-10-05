@@ -3,14 +3,12 @@
 
 __version__ = "0.8.0dev0"
 
-from .decoupage import read
 
-
-def run_laforge():
+def run():
     """Launch laforge command line tool."""
-    from laforge.command import run_cli
+    import laforge.command
 
-    run_cli()
+    laforge.command.run()
 
 
 """
