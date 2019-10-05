@@ -14,18 +14,26 @@ sys.argv = sys.argv[1:]
 
 def run():
     print("hi")
-    if not sys.argv:
-        print("help")
-        exit(0)
-    if sys.argv[0] in ("-V", "--version"):
+    if sys.argv in (["-V"], ["--version"]):
         print(logo.get_version_display())
         exit(0)
-    buildfile = find_buildfile(" ".join(sys.argv))
-    build(buildfile)
+    try:
+        buildfile = find_buildfile(" ".join(sys.argv))
+    except FileNotFoundError as err:
+        print("Error!", *err.args, sep="\n")
+    else:
+        build(buildfile)
+        exit(0)
+    print("help")
+    print("help")
+    print("help")
+    exit(0)
 
 
 def find_buildfile(path):
     path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"{path} does not exist.")
     if path.is_file():
         return path
     _acceptable_globs = ["build*.py", "*laforge*.py"]
@@ -39,7 +47,7 @@ def find_buildfile(path):
         )
     if len(build_files) > 1:
         found = "; ".join(str(x) for x in build_files)
-        raise FileExistsError(f"Multiple possible laforge buildfiles found: {found}.")
+        raise FileNotFoundError(f"Multiple possible laforge buildfiles found: {found}.")
     return build_files[0]
 
 
@@ -60,7 +68,7 @@ def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False
     for _ in range(runs):
         run_one_build(
             list_class=TaskList,
-            script_path=Path(buildfile),
+            path=Path(buildfile),
             log=Path(log),
             debug=debug,
             dry_run=dry_run,
@@ -72,9 +80,7 @@ def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False
             print("")
 
 
-def run_one_build(*, list_class, script_path, log, debug=False, dry_run=False):
-    path = find_buildfile(script_path)
-
+def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
     start_time = time.time()
     # THEN set logging -- helps avoid importing pandas at debug level
     logger = get_package_logger(log, debug)
