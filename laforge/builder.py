@@ -124,8 +124,8 @@ class TaskInspector:
         print("functions", self.functions)
         for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
             print(f"Running line #{lineno}, {name}")
-            print(type(obj()))
-            print(f"Done running {name}")
+            obj()
+            print(f"Done with running {name}")
 
 
 class Task:

@@ -20,7 +20,7 @@ def read(variable, content):
         # TODO: fucntools.wraps() this so it's the proper function?
         @functools.wraps(func)
         def wrapped_read():
-            return functools.partial(func, **kwargs)
+            return functools.partial(func, **kwargs)()
 
         return wrapped_read
 
