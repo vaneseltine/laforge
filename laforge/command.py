@@ -102,8 +102,8 @@ def find_buildfile(path):
 
 
 def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
-    print(sys.argv)
     if buildfile is None:
+        # Allow call directly from a buildfile
         buildfile = sys.argv[0]
     buildfile = Path(buildfile).resolve()
     os.chdir(buildfile.parent)

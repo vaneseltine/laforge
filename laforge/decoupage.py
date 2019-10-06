@@ -15,8 +15,25 @@ def execute():
     pass
 
 
-def exist():
-    pass
+def exist(content):
+    content = str(content)
+    target = Target.parse(content)
+    task = Task.from_qualified(verb=Verb.EXIST, target=target, content=content)
+    try:
+        result = task.implement()
+    except FileNotFoundError:
+        logger.error(f"{content} does not exist.")
+        exit(2)
+
+    def decorator_exist(func):
+        @functools.wraps(func)
+        def wrapped_exist():
+            return func()
+
+        logger.debug(f"Result of exist is {type(result)}")
+        return wrapped_exist
+
+    return decorator_exist
 
 
 def read(variable, content):
