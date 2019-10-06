@@ -6,32 +6,83 @@ import sys
 import time
 from pathlib import Path
 
-from . import __doc__ as package_docstring
-from . import logo
+import functools
+import importlib
+import importlib.util
+import inspect
+import io
+import re
+import types
+from contextlib import redirect_stdout
 
-sys.argv = sys.argv[1:]
+USAGE = """Usage: laforge [OPTIONS] (PATH)...
+
+laforge: A low-key build system for working with data.
+
+Options
+-V, --version   Show the package version.
+-h, --help      Show this usage message.
+--debug         Increase logging.
+
+Path            Path for buildfile; default current dir."""
 
 
-def run():
-    print("hi")
-    if sys.argv in (["-V"], ["--version"]):
-        print(logo.get_version_display())
-        exit(0)
+def run(args=None):
+    """Parse arguments as from CLI and execute buildfile
+
+    .. todo:
+
+        "--dry-run", "-n", default=False
+
+    .. todo:
+
+        "--loop", default=False
+
+    .. todo:
+
+        "--log=LOG"         default="laforge.log"
+    """
+    if args is None:
+        args = sys.argv[1:]
+
+    if args in (["-V"], ["--version"]):
+        version_info()
+
+    if set(args) & {"-h", "--help"}:
+        usage_info()
+
     try:
-        buildfile = find_buildfile(" ".join(sys.argv))
-    except FileNotFoundError as err:
-        print("Error!", *err.args, sep="\n")
+        args.remove("--debug")
+    except ValueError:
+        debug = False
     else:
-        build(buildfile)
-        exit(0)
-    print("help")
-    print("help")
-    print("help")
+        debug = True
+
+    try:
+        buildfile = find_buildfile(" ".join(args))
+    except FileNotFoundError as err:
+        print(" ".join(["Error!", *err.args]))
+        usage_info(exit_code=1)
+
+    build_dir = buildfile.parent
+    build(buildfile, build_dir=build_dir, debug=debug)
     exit(0)
 
 
+def version_info():
+    from .logo import get_version_display
+
+    print(get_version_display())
+    exit(0)
+
+
+def usage_info(exit_code=0):
+    print(USAGE)
+    exit(exit_code)
+
+
 def find_buildfile(path):
-    path = Path(path)
+    path = Path(path).resolve()
     if not path.exists():
         raise FileNotFoundError(f"{path} does not exist.")
     if path.is_file():
@@ -51,24 +102,15 @@ def find_buildfile(path):
     return build_files[0]
 
 
-# @click.command(help="Run an existing laforge buildfile.")
-# @click.option("--debug", default=False, is_flag=True)
-# @click.option("--dry-run", "-n", default=False, is_flag=True)
-# @click.option("--loop", default=False, is_flag=True)
-# @click.option(
-#     "--log",
-#     default="laforge.log",
-#     type=click.Path(resolve_path=True, dir_okay=False),
-#     help="Log build process at LOG.",
-# )
-def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
-    from .builder import TaskList
-
+def build(
+    buildfile, build_dir, log="./laforge.log", debug=False, dry_run=False, loop=False
+):
     runs = 1 if not loop else 100
     for _ in range(runs):
         run_one_build(
-            list_class=TaskList,
+            list_class=FuncList,
             path=Path(buildfile),
+            home=build_dir,
             log=Path(log),
             debug=debug,
             dry_run=dry_run,
@@ -80,7 +122,52 @@ def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False
             print("")
 
 
-def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
+HOME = None
+
+
+class FuncList:
+    def __init__(self, file, home, logger):
+        # i = importlib.import_module(str(file))
+        self.source = file
+        global HOME
+        HOME = home
+        self.logger = logger
+        self.mod = self.get_module_from_path(self.source)
+        self.functions = self.get_functions_from_modules(self.mod)
+
+    @staticmethod
+    def get_functions_from_modules(mod, exclude=r"^_.*$"):
+        # TODO -- make these a class instead
+        return (
+            (name, obj, inspect.getsourcelines(obj)[-1])
+            for name, obj in inspect.getmembers(mod)
+            # if callable(obj)
+            if isinstance(obj, (types.FunctionType, functools.partial))
+            and not re.match(exclude, name)
+        )
+
+    @staticmethod
+    def get_module_from_path(path):
+        spec = importlib.util.spec_from_file_location("buildfile", str(path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def execute(self):
+        for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
+            self.logger.info(f"Line #{lineno}")
+            self.logger.info(f"{name}()")
+
+            with io.StringIO() as buf, redirect_stdout(buf):
+                obj()
+                self.modified_print(buf.getvalue())
+
+    def modified_print(self, output):
+        for line in output.splitlines():
+            self.logger.info(f"|  {line}")
+
+
+def run_one_build(*, list_class, path, home, log, debug=False, dry_run=False):
     start_time = time.time()
     # THEN set logging -- helps avoid importing pandas at debug level
     logger = get_package_logger(log, debug)
@@ -89,7 +176,7 @@ def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
     if debug:
         logger.debug("Debug mode is on.")
 
-    task_list = list_class(path)
+    task_list = list_class(path, home=home, logger=logger)
     if dry_run:
         task_list.dry_run()
         return
@@ -103,13 +190,13 @@ def get_package_logger(log_file, debug):
 
     if noisiness == logging.DEBUG:
         formatter = logging.Formatter(
-            fmt="{asctime} {name:<20} {lineno:>3}:{levelname:<7} | {message}",
+            fmt="{asctime} {name:<20} {lineno:>3}:{levelname:<7} {message}",
             style="{",
             datefmt=r"%Y%m%d-%H%M%S",
         )
     else:
         formatter = logging.Formatter(
-            fmt="{asctime} {levelname:>7} | {message}", style="{", datefmt=r"%H:%M:%S"
+            fmt="{asctime} {levelname:>7} {message}", style="{", datefmt=r"%H:%M:%S"
         )
     file_handler = logging.FileHandler(filename=log_file)
     file_handler.setFormatter(formatter)

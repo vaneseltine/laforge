@@ -1,21 +1,12 @@
-"""Builder reads and executes tasks and lists of tasks."""
+"""Builder reads and executes tasks."""
 
-import configparser
-import functools
-import importlib
-import importlib.util
-import inspect
 import logging
 import os
-import re
-import runpy
 import textwrap
 import time
-import types
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-from pprint import pprint
 
 import dotenv
 import pandas as pd
@@ -24,14 +15,6 @@ from .sql import Channel, Script, Table, execute
 
 logger = logging.getLogger(__name__)
 logger.debug(logger.name)
-
-
-def show_env(path):
-    """Show the calculated generic section environment"""
-    from_string = path.read_text() if path.is_file() else ""
-    location = path.parent if path.is_file() else path
-    task_list = TaskList(from_string=from_string)
-    return task_list.load_section_config()
 
 
 class Verb(Enum):
@@ -97,38 +80,6 @@ class TaskExecutionError(RuntimeError):
     pass
 
 
-class TaskList:
-    def __init__(self, file):
-        # i = importlib.import_module(str(file))
-        self.source = file
-        self.mod = self.get_module_from_path(self.source)
-        self.home = self.source.parent.resolve()
-        self.functions = self.get_functions_from_modules(self.mod)
-
-    @staticmethod
-    def get_functions_from_modules(mod, exclude=r"^_.*$"):
-        # TODO -- make these a class instead
-        return (
-            (name, obj, inspect.getsourcelines(obj)[-1])
-            for name, obj in inspect.getmembers(mod)
-            # if callable(obj)
-            if isinstance(obj, (types.FunctionType, functools.partial))
-            and not re.match(exclude, name)
-        )
-
-    @staticmethod
-    def get_module_from_path(path):
-        spec = importlib.util.spec_from_file_location("buildfile", str(path))
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        return mod
-
-    def execute(self):
-        for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
-            logger.info(f"Running line #{lineno}, {name}()")
-            obj()
-
-
 class Task:
 
     _universal_handlers = {}
@@ -142,23 +93,20 @@ class Task:
         else:
             target = Target.parse(raw_content)
         return cls.from_qualified(
+            home=NotImplemented,
             verb=verb,
             target=target,
             content=raw_content,
             config=config,
-            # identifier=f"{config.get('section', '')}.{raw_verb}",
-            identifier="hi",
         )
 
     @classmethod
-    def from_qualified(cls, verb, target, content, config=None, identifier="TBD"):
+    def from_qualified(cls, home, verb, target, content, config=None):
         handler = cls._get_handler(verb, target)
+        from .command import HOME
+
         return handler(
-            identifier=identifier,
-            verb=verb,
-            target=target,
-            content=content,
-            config=config,
+            home=HOME, verb=verb, target=target, content=content, config=config
         )
 
     @classmethod
@@ -186,34 +134,16 @@ class Task:
         """Must be implemented by registered classe(s)"""
         raise NotImplementedError
 
-    @property
-    def identifier(self):
-        """Must be implemented by registered classe(s)"""
-        raise NotImplementedError
-
-    @property
-    def description(self):
-        """Must be implemented by registered classe(s)"""
-        raise NotImplementedError
-
 
 class BaseTask:
-    """Create a task to (verb) (something)
+    """Create a task to (verb) (something)"""
 
-    .. todo::
-
-            if ":" in self.content:
-               previous_result_key, actual_path_content = self.content.split(":")
-
-    """
-
-    def __init__(self, *, identifier, verb, target, content, config):
-        self.identifier = identifier
+    def __init__(self, *, home, verb, target, content, config):
+        self.home = home.resolve()
         self.verb = verb
         self.target = target
         self.content = content
         self.config = config
-        self.description = config.get("description", "")
 
     def implement(self, prior_results=None):
         raise NotImplementedError
@@ -221,8 +151,7 @@ class BaseTask:
     @property
     def path(self):
         """For handlers where dir[verb] + content = path"""
-        parent = Path(self.config["dir"].get(self.verb, "."))
-        return parent / self.content
+        return (self.home / self.content).resolve()
 
     def validate_results(self, results):
         if results is None:
@@ -237,7 +166,7 @@ class BaseTask:
         return textwrap.shorten(repr(self.content), 80)
 
     def __str__(self):
-        return f"{self.identifier:<30} {self.target.name:<10} {self.content}"
+        return f"{self.__class__.__name__:<30} {self.target.name:<10} {self.content}"
 
     def __repr__(self):
         return "<{}({}, {}, '{}')>".format(
@@ -264,38 +193,6 @@ class FileReader(BaseTask):
         df = getattr(pd, method)(self.path, **kwargs)
         logger.info("Read %s", self.path)
         return df
-
-
-@Task.register(Verb.EXECUTE, Target.PY)
-class InternalPythonExecutor(BaseTask):
-    """Execute (without importing) Python script by path
-
-    Allows script adjustment via setting the run name: `__main__ = 'laforge'`
-
-    ..todo ::
-
-        Allow implict/explicit return of results.
-
-    """
-
-    def implement(self, prior_results=None):
-
-        logger.debug("Running %s", self.path)
-        runpy.run_path(
-            str(self.path),
-            init_globals={"config": self.config, "prior_results": prior_results},
-            run_name="laforge",
-        )
-        logger.info("Executed: %s", self.path)
-
-
-@Task.register(Verb.ECHO)
-class Echoer(BaseTask):
-    def implement(self, prior_results=None):
-        logger.debug(f"Echoing {self.content}")
-        from click import echo
-
-        echo(self.content)
 
 
 @Task.register(Verb.READ, Target.RAWQUERY)
@@ -420,7 +317,7 @@ class ExistenceChecker(BaseTask):
             logger.info(f"Verified that {line} exists.")
 
     def _check_existence_path(self, line):
-        path = self.config["build_dir"] / line
+        path = self.build_dir / line
         if not path.exists():
             raise FileNotFoundError(path)
 
