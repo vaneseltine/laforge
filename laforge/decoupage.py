@@ -9,9 +9,7 @@ logger.debug(logger.name)
 
 def read(variable, content):
     target = Target.parse(content)
-    task = Task.from_qualified(
-        home=None, verb=Verb.READ, target=target, content=content, config={}
-    )
+    task = Task.from_qualified(verb=Verb.READ, target=target, content=content)
     result = task.implement()
     kwargs = {variable: result}
 

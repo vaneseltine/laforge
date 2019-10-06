@@ -93,21 +93,13 @@ class Task:
         else:
             target = Target.parse(raw_content)
         return cls.from_qualified(
-            home=NotImplemented,
-            verb=verb,
-            target=target,
-            content=raw_content,
-            config=config,
+            verb=verb, target=target, content=raw_content, config=config
         )
 
     @classmethod
-    def from_qualified(cls, home, verb, target, content, config=None):
+    def from_qualified(cls, verb, target, content, config=None):
         handler = cls._get_handler(verb, target)
-        from .command import HOME
-
-        return handler(
-            home=HOME, verb=verb, target=target, content=content, config=config
-        )
+        return handler(verb=verb, target=target, content=content, config=config)
 
     @classmethod
     def _get_handler(cls, verb, target):
@@ -138,12 +130,13 @@ class Task:
 class BaseTask:
     """Create a task to (verb) (something)"""
 
-    def __init__(self, *, home, verb, target, content, config):
-        self.home = home.resolve()
+    home = Path(".")
+
+    def __init__(self, *, verb, target, content, config=None):
         self.verb = verb
         self.target = target
         self.content = content
-        self.config = config
+        self.config = config or {}
 
     def implement(self, prior_results=None):
         raise NotImplementedError
@@ -317,7 +310,7 @@ class ExistenceChecker(BaseTask):
             logger.info(f"Verified that {line} exists.")
 
     def _check_existence_path(self, line):
-        path = self.build_dir / line
+        path = self.home / line
         if not path.exists():
             raise FileNotFoundError(path)
 
@@ -328,6 +321,18 @@ class ExistenceChecker(BaseTask):
     def _check_existence_sql_raw_query(self, line):
         df = execute(line, channel=Channel(**self.config["sql"]), fetch="df")
         assert not df.empty
+
+
+def load_env(path):
+    """Get .env values without dotenv's default to silently pull package dir"""
+    with DirectoryVisit(path):
+        try:
+            env_config = dotenv.dotenv_values(
+                dotenv.find_dotenv(usecwd=True, raise_error_if_not_found=True)
+            )
+        except IOError:
+            env_config = {}
+    return env_config
 
 
 class DirectoryVisit:
@@ -343,15 +348,3 @@ class DirectoryVisit:
     def __exit__(self, type, value, traceback):  # pylint: disable=redefined-builtin
         if self.old != self.new:
             os.chdir(self.old)
-
-
-def load_env(path):
-    """Get .env values without dotenv's default to silently pull package dir"""
-    with DirectoryVisit(path):
-        try:
-            env_config = dotenv.dotenv_values(
-                dotenv.find_dotenv(usecwd=True, raise_error_if_not_found=True)
-            )
-        except IOError:
-            env_config = {}
-    return env_config

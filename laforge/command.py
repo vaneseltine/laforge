@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
 """Command-line interface for laforge."""
 
-import logging
-import sys
-import time
-from pathlib import Path
-
 import functools
 import importlib
 import importlib.util
 import inspect
-import io
+import logging
+import os
 import re
+import sys
+import time
 import types
 from contextlib import redirect_stdout
+from pathlib import Path
 
 USAGE = """Usage: laforge [OPTIONS] (PATH)...
 
@@ -64,8 +63,7 @@ def run(args=None):
         print(" ".join(["Error!", *err.args]))
         usage_info(exit_code=1)
 
-    build_dir = buildfile.parent
-    build(buildfile, build_dir=build_dir, debug=debug)
+    build(buildfile, debug=debug)
     exit(0)
 
 
@@ -102,15 +100,15 @@ def find_buildfile(path):
     return build_files[0]
 
 
-def build(
-    buildfile, build_dir, log="./laforge.log", debug=False, dry_run=False, loop=False
-):
+def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
+
+    buildfile = Path(buildfile).resolve()
+    os.chdir(buildfile.parent)
     runs = 1 if not loop else 100
     for _ in range(runs):
         run_one_build(
             list_class=FuncList,
-            path=Path(buildfile),
-            home=build_dir,
+            path=buildfile,
             log=Path(log),
             debug=debug,
             dry_run=dry_run,
@@ -122,15 +120,10 @@ def build(
             print("")
 
 
-HOME = None
-
-
 class FuncList:
-    def __init__(self, file, home, logger):
+    def __init__(self, file, logger):
         # i = importlib.import_module(str(file))
         self.source = file
-        global HOME
-        HOME = home
         self.logger = logger
         self.mod = self.get_module_from_path(self.source)
         self.functions = self.get_functions_from_modules(self.mod)
@@ -158,44 +151,27 @@ class FuncList:
             self.logger.info(f"Line #{lineno}")
             self.logger.info(f"{name}()")
 
-            with redirect_stdout(FilteredPrint()):
+            capture_print_to_log = PrintCapture(self.logger)
+            with redirect_stdout(capture_print_to_log):
                 obj()
 
-    def modified_print(self, output):
-        for line in output.splitlines():
-            self.logger.info(f"|  {line}")
 
-
-class FilteredPrint(object):
-    def __init__(self, stream=sys.stdout, default_sep=" ", default_end="\n"):
-        self.stdout = stream
-        self.default_sep = default_sep
-        self.default_end = default_end
-        self.continuing_same_print = False
-        self.file = open("log.txt", "a")
+class PrintCapture(object):
+    def __init__(self, logger, stream=sys.stdout):
+        self.logger = logger
+        self.stream = stream
 
     def __getattr__(self, name):
-        return getattr(self.stdout, name)
+        return getattr(self.stream, name)
 
     def write(self, text):
-        if text is self.default_end:
-            self.continuing_same_print = False
-        elif text is self.default_sep:
-            self.continuing_same_print = True
-
-        new_text = text
-        if text in {self.default_sep, self.default_end}:
-            pass
-        elif self.continuing_same_print:
-            pass
-        else:
-            new_text = f"| {new_text}"
-
-        self.stdout.write(new_text)
-        self.flush()
+        useful_lines = (s for s in text.splitlines() if s)
+        for line in useful_lines:
+            new_line = f"  | {line}"
+            self.logger.info(new_line)
 
 
-def run_one_build(*, list_class, path, home, log, debug=False, dry_run=False):
+def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
     start_time = time.time()
     # THEN set logging -- helps avoid importing pandas at debug level
     logger = get_package_logger(log, debug)
@@ -204,7 +180,7 @@ def run_one_build(*, list_class, path, home, log, debug=False, dry_run=False):
     if debug:
         logger.debug("Debug mode is on.")
 
-    task_list = list_class(path, home=home, logger=logger)
+    task_list = list_class(path, logger=logger)
     if dry_run:
         task_list.dry_run()
         return
