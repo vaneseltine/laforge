@@ -115,21 +115,23 @@ def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
 class FuncList:
     def __init__(self, file, logger):
         # i = importlib.import_module(str(file))
-        self.source = file
+        self.source = Path(file)
         self.logger = logger
         self.mod = self.get_module_from_path(self.source)
         self.functions = list(self.get_functions_from_modules(self.mod))
 
-    @staticmethod
-    def get_functions_from_modules(mod, exclude=r"^_.*$"):
+    def get_functions_from_modules(self, mod, exclude=r"^_.*$"):
         # TODO -- make these a class instead
-        return (
-            (name, obj, inspect.getsourcelines(obj)[-1])
-            for name, obj in inspect.getmembers(mod)
-            # if callable(obj)
-            if isinstance(obj, (types.FunctionType, functools.partial))
-            and not re.match(exclude, name)
-        )
+        for name, obj in inspect.getmembers(mod):
+            if not isinstance(obj, (types.FunctionType, functools.partial)):
+                continue
+            _, line_number = inspect.getsourcelines(obj)
+            # self.logger.debug(str(inspect.getsourcelines(obj)))
+            if re.match(exclude, name):
+                self.logger.debug(f"Exclude {self.source.name}:{line_number} {name}()")
+                continue
+            self.logger.debug(f"Include {self.source.name}:{line_number:<4}{name}()")
+            yield (name, obj, line_number)
 
     @staticmethod
     def get_module_from_path(path):
@@ -141,8 +143,8 @@ class FuncList:
     def execute(self):
         total_number = len(self.functions)
         for i, stuff in enumerate(sorted(self.functions, key=lambda x: x[-1])):
-            name, func, lineno = stuff
-            self.logger.info(f"{i+1} of {total_number} (#{lineno}): {name}()")
+            name, func, _ = stuff
+            self.logger.info(f"{i+1} of {total_number} - {name}:")
 
             capture_print_to_log = PrintCapture(self.logger)
             with redirect_stdout(capture_print_to_log):
