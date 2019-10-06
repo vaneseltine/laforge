@@ -11,7 +11,9 @@ def read_in_data(small):
 
 def just_a_thing():
     print("BORING FUNNNCTTIOOONN")
+    from time import sleep
 
+    sleep(3)
     print("But we still run it. :)")
     _skip_but_use_me_still("oogabooga")
 

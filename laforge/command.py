@@ -158,13 +158,41 @@ class FuncList:
             self.logger.info(f"Line #{lineno}")
             self.logger.info(f"{name}()")
 
-            with io.StringIO() as buf, redirect_stdout(buf):
+            with redirect_stdout(FilteredPrint()):
                 obj()
-                self.modified_print(buf.getvalue())
 
     def modified_print(self, output):
         for line in output.splitlines():
             self.logger.info(f"|  {line}")
+
+
+class FilteredPrint(object):
+    def __init__(self, stream=sys.stdout, default_sep=" ", default_end="\n"):
+        self.stdout = stream
+        self.default_sep = default_sep
+        self.default_end = default_end
+        self.continuing_same_print = False
+        self.file = open("log.txt", "a")
+
+    def __getattr__(self, name):
+        return getattr(self.stdout, name)
+
+    def write(self, text):
+        if text is self.default_end:
+            self.continuing_same_print = False
+        elif text is self.default_sep:
+            self.continuing_same_print = True
+
+        new_text = text
+        if text in {self.default_sep, self.default_end}:
+            pass
+        elif self.continuing_same_print:
+            pass
+        else:
+            new_text = f"| {new_text}"
+
+        self.stdout.write(new_text)
+        self.flush()
 
 
 def run_one_build(*, list_class, path, home, log, debug=False, dry_run=False):
