@@ -14,16 +14,7 @@ import types
 from contextlib import redirect_stdout
 from pathlib import Path
 
-USAGE = """Usage: laforge [OPTIONS] (PATH)...
-
-laforge: A low-key build system for working with data.
-
-Options
--V, --version   Show the package version.
--h, --help      Show this usage message.
---debug         Increase logging.
-
-Path            Path for buildfile; default current dir."""
+from .logo import get_version_display
 
 
 def run(args=None):
@@ -68,14 +59,24 @@ def run(args=None):
 
 
 def version_info():
-    from .logo import get_version_display
-
     print(get_version_display())
     exit(0)
 
 
 def usage_info(exit_code=0):
-    print(USAGE)
+
+    usage = """Usage: laforge [OPTIONS] (PATH)...
+
+    laforge: A low-key build system for working with data.
+
+    Options
+    -V, --version   Show the package version.
+    -h, --help      Show this usage message.
+    --debug         Increase logging.
+
+    Path            Path for buildfile; default current dir."""
+
+    print(usage)
     exit(exit_code)
 
 
@@ -100,24 +101,15 @@ def find_buildfile(path):
     return build_files[0]
 
 
-def build(buildfile, log="./laforge.log", debug=False, dry_run=False, loop=False):
-
+def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
+    print(sys.argv)
+    if buildfile is None:
+        buildfile = sys.argv[0]
     buildfile = Path(buildfile).resolve()
     os.chdir(buildfile.parent)
-    runs = 1 if not loop else 100
-    for _ in range(runs):
-        run_one_build(
-            list_class=FuncList,
-            path=buildfile,
-            log=Path(log),
-            debug=debug,
-            dry_run=dry_run,
-        )
-        if loop:
-            response = input("\nEnter to rebuild, anything else to quit: ")
-            if response:
-                break
-            print("")
+    run_one_build(
+        list_class=FuncList, path=buildfile, log=Path(log), debug=debug, dry_run=dry_run
+    )
 
 
 class FuncList:
@@ -126,7 +118,7 @@ class FuncList:
         self.source = file
         self.logger = logger
         self.mod = self.get_module_from_path(self.source)
-        self.functions = self.get_functions_from_modules(self.mod)
+        self.functions = list(self.get_functions_from_modules(self.mod))
 
     @staticmethod
     def get_functions_from_modules(mod, exclude=r"^_.*$"):
@@ -147,13 +139,14 @@ class FuncList:
         return mod
 
     def execute(self):
-        for name, obj, lineno in sorted(self.functions, key=lambda x: x[-1]):
-            self.logger.info(f"Line #{lineno}")
-            self.logger.info(f"{name}()")
+        total_number = len(self.functions)
+        for i, stuff in enumerate(sorted(self.functions, key=lambda x: x[-1])):
+            name, func, lineno = stuff
+            self.logger.info(f"{i+1} of {total_number} (#{lineno}): {name}()")
 
             capture_print_to_log = PrintCapture(self.logger)
             with redirect_stdout(capture_print_to_log):
-                obj()
+                func()
 
 
 class PrintCapture(object):
@@ -174,7 +167,7 @@ class PrintCapture(object):
 def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
     start_time = time.time()
     # THEN set logging -- helps avoid importing pandas at debug level
-    logger = get_package_logger(log, debug)
+    logger = get_laforge_logger(log, debug)
 
     logger.info("%s launched.", path)
     if debug:
@@ -189,7 +182,7 @@ def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
     logger.info("%s completed in %s seconds.", path, elapsed)
 
 
-def get_package_logger(log_file, debug):
+def get_laforge_logger(log_file, debug):
     noisiness = logging.DEBUG if debug else logging.INFO
 
     if noisiness == logging.DEBUG:

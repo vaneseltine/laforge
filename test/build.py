@@ -3,7 +3,7 @@ from pathlib import Path
 import laforge as lf
 
 if __name__ == "__main__":
-    lf.build(__file__)
+    lf.build()
 
 
 @lf.read("small", Path("./samples/small.csv"))

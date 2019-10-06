@@ -7,6 +7,18 @@ logger = logging.getLogger(__name__)
 logger.debug(logger.name)
 
 
+def write():
+    pass
+
+
+def execute():
+    pass
+
+
+def exist():
+    pass
+
+
 def read(variable, content):
     target = Target.parse(content)
     task = Task.from_qualified(verb=Verb.READ, target=target, content=content)

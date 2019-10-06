@@ -20,7 +20,6 @@ logger.debug(logger.name)
 class Verb(Enum):
     READ = "read"
     WRITE = "write"
-    ECHO = "echo"
     EXECUTE = "execute"
     EXIST = "exist"
 
