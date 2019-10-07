@@ -294,19 +294,15 @@ class FileWriter(BaseTask):
 @Task.register(Verb.EXIST)
 class ExistenceChecker(BaseTask):
     def implement(self, prior_results=None):
-        # Ensure that some content exists in these lines
-        lines = [s for s in self.content.splitlines() if s.strip()]
-        assert lines, "Accidental blank line?"
-        for line in lines:
-            target = Target.parse(line)
-            logger.debug(f"Verifying that {line} ({target}) exists...")
-            if target is Target.SQLTABLE:
-                self._check_existence_sql_table(line)
-            elif target is Target.RAWQUERY:
-                self._check_existence_sql_raw_query(line)
-            else:
-                self._check_existence_path(line)
-            logger.info(f"Verified that {line} exists.")
+        target = Target.parse(self.content)
+        logger.debug(f"Verifying that {self.content} ({target}) exists...")
+        if target is Target.SQLTABLE:
+            self._check_existence_sql_table(self.content)
+        elif target is Target.RAWQUERY:
+            self._check_existence_sql_raw_query(self.content)
+        else:
+            self._check_existence_path(self.content)
+        logger.info(f"Verified that {self.content} exists.")
 
     def _check_existence_path(self, line):
         path = self.home / line

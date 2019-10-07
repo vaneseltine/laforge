@@ -23,23 +23,19 @@ def audit_action(action):
 
 # __all__ = ["save", "load", "write", "execute", "read", "exist"]
 
-ACCUMULATED_RESULTS = {}
+RESULTS = {}
 
 
 def save(variable):
-    """Specify a variable; return value will be provided as fixture."""
+    """Save return value of decorated function under `variable`."""
 
     def decorator_func(func):
         @functools.wraps(func)
         def wrapper_func(*args, **kwargs):
-            # Invoke the wrapped function first
-            retval = func(*args, **kwargs)
-            # Now do something here with retval and/or action
-            ACCUMULATED_RESULTS[variable] = retval
-            logger.debug(
-                f"Saved a {type(retval)} under ACCUMULATED_RESULTS['{variable}']..."
-            )
-            return retval
+            result = func(*args, **kwargs)
+            RESULTS[variable] = result
+            logger.debug(f"Saved a {type(result)} under RESULTS['{variable}']...")
+            return result
 
         return wrapper_func
 
@@ -47,17 +43,18 @@ def save(variable):
 
 
 def load(variable):
-    """Specify a variable; retrieve and pass earlier save."""
+    """Retrieve earlier result previously saved under `variable`."""
 
     def decorator_func(func):
         @functools.wraps(func)
         def wrapper_func(*args, **kwargs):
             # Invoke the wrapped function first
-            kwargs[variable] = ACCUMULATED_RESULTS[variable]
+            kwargs[variable] = RESULTS[variable]
             logger.debug(
-                f"Retrieved a {type(kwargs[variable])} under ACCUMULATED_RESULTS['{variable}']..."
+                f"Retrieved a {type(kwargs[variable])} under RESULTS['{variable}']..."
             )
-            return func(*args, **kwargs)
+            result = func(*args, **kwargs)
+            return result
 
         return wrapper_func
 
@@ -72,53 +69,45 @@ def execute():
     pass
 
 
-def exist(content):
-    assert content
-
-    def decorator_exist(func):
-        content = str(content)
-        target = Target.parse(content)
-        task = Task.from_qualified(verb=Verb.EXIST, target=target, content=content)
-        try:
-            result = task.implement()
-        except FileNotFoundError:
-            logger.error(f"{content} does not exist.")
-            exit(2)
-
-        @functools.wraps(func)
-        def wrapped_exist():
-            return func
-
-        logger.debug(f"Result of exist is {type(result)}")
-        return wrapped_exist()
-
-    return decorator_exist
-
-
 def read(variable, content):
-    logger.debug(f"Adding a read for {variable} of {content}")
+    """Pass DataFrame of target into function parameters"""
+    logger.debug(f"Adding a read of {content}, passing in as {variable}")
 
     def decorator_read(func):
-        # result = None
-
         @functools.wraps(func)
         def wrapped_read(*args, **kwargs):
             target = Target.parse(content)
             task = Task.from_qualified(verb=Verb.READ, target=target, content=content)
             result = task.implement()
             kwargs[variable] = result
-            logger.debug(f"Result of read is {type(result)}")
-            print(func)
-            setattr(func, variable, result)
             return functools.partial(func, *args, **kwargs)()
 
-        print("func", func)
-        print("wrapped_read", wrapped_read)
-        # Attach result to function
-        # setattr(wrapped_read, variable, result)
         return wrapped_read
 
-    print("decorator_read", decorator_read)
-    # setattr(wrapped_read, variable, result)
-
     return decorator_read
+
+
+def exists(content):
+    """Pass DataFrame of target into function parameters"""
+    logger.debug(f"Adding a existence check on {content}")
+
+    def decorator_exists(func):
+        @functools.wraps(func)
+        def wrapped_exists(*args, **kwargs):
+            target = Target.parse(content)
+            task = Task.from_qualified(verb=Verb.EXIST, target=target, content=content)
+            try:
+                task.implement()
+            except FileNotFoundError:
+                exit_failure(f"Could not verify existence of {content}", task)
+            return func(*args, **kwargs)
+
+        return wrapped_exists
+
+    return decorator_exists
+
+
+def exit_failure(reason, task):
+    logger.error(reason)
+    logger.debug(repr(task))
+    exit(9)
