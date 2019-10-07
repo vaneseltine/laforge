@@ -40,7 +40,7 @@ Suggested Environment
 
     # If desired, optional packages for Excel or other DBs...
     # python -m pip install -e .[excel]
-    # python -m pip install -e .[mysql]
+    # python -m pip install -e .[mssql]
     # python -m pip install -e .[all]
 
     # Run tests

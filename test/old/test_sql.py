@@ -73,8 +73,6 @@ class TestExecutions:
 
     very_simple = {
         "mssql": "select top 5 1 from information_schema.tables;",
-        "postgresql": "select 1, 2 from information_schema.tables limit 5;",
-        "mysql": "select 1, 2 from information_schema.tables limit 5;",
         "sqlite": "select 1, 2 from sqlite_master;",
     }
 
@@ -253,8 +251,6 @@ class TestScriptResults:
     def t_real_query_with_bad_columns(self, test_channel, test_distro, caplog):
         stmt = {
             "mssql": "select top 5 1 from information_schema.tables;",
-            "postgresql": "select 1, 2 from information_schema.tables limit 5;",
-            "mysql": "select 1, 2 from information_schema.tables limit 5;",
             "sqlite": "select 1, 2 from sqlite_master;",
         }[test_distro]
 
@@ -264,7 +260,7 @@ class TestScriptResults:
         assert len(df.columns) > 0
         # and there should be no bad columns in the final set
         assert not set(Identifier.BLACKLIST).intersection(df.columns)
-        # FYI, this is exactly what this should look like for mssql/postgresql
+        # FYI, this is exactly what this should look like for mssql
         # result = list(tuple(x) for x in df.to_records())
         # assert result == [(0, 1, 2), (1, 1, 2), (2, 1, 2), (3, 1, 2), (4, 1, 2)]
 

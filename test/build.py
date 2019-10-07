@@ -3,18 +3,15 @@ from pathlib import Path
 import laforge as lf
 from laforge import sql
 
-CHANNEL = sql.Channel(
-    distro="postgresql",
-    username="postgres",
-    password="postgres",
-    server="localhost",
-    database="tester",
-    schema="schemer",
-)
 
 SAMPLES = Path("./samples")
 OUTPUT = Path("./__output")
 OUTPUT.mkdir(exist_ok=True)
+
+
+@lf.save("channel")
+def setup_sql():
+    return sql.Channel(distro="sqlite", database="./__testdb.sqlite")
 
 
 @lf.read("small", SAMPLES / "small.csv")
@@ -42,21 +39,30 @@ def just_a_thing(details, details2):
 
 
 @lf.load("moo")
+@lf.load("channel")
 @lf.read("medium", SAMPLES / "medium.csv")
-def mooooooo(moo, medium):
+@lf.save("blah")
+def mooooooo(moo, medium, channel):
     print(moo)
-    tab = sql.Table("schemer.tabula")
-    print(tab.read())
-    x = sql.execute("select count(*) from information_schema.columns;", fetch="tuples")
-    tab2 = CHANNEL.find("%")[0]
-    print(tab == tab2)
-    print(x)
+    tab = sql.Table("roster")
     print(tab.exists())
-    # sql.execute("drop table schemer.tabula;")
-    # tab.read()
     tab.write(medium)
-    print(repr(tab), repr(tab.channel))
+    tab2 = channel.find("%")[0]
+    print(tab2)
+    # print(tab.exists())
+    # sql.execute("drop table schemer.tabula;")
+    print(sql.execute("select name, dob from roster;", fetch="tuples"))
+    # tab.write(medium)
+    # print(repr(tab), repr(tab.channel))
     # print(tab.read())
+    return "lolol"
+
+
+@lf.load("blah")
+@lf.exists("tabula")
+def sqlitey(blah):
+    print(sql.execute("select count(*) from sqlite_master;", fetch="tuples"))
+    print(blah)
 
 
 def _skip_me_with_exclude_pattern():

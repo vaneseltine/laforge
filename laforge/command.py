@@ -114,19 +114,17 @@ def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
 
 class FuncList:
     def __init__(self, file, logger):
-        # i = importlib.import_module(str(file))
         self.source = Path(file)
         self.logger = logger
         self.mod = self.get_module_from_path(self.source)
         self.functions = list(self.get_functions_from_modules(self.mod))
 
     def get_functions_from_modules(self, mod, exclude=r"^_.*$"):
-        # TODO -- make these a class instead
+        # Make these a class instead
         for name, obj in inspect.getmembers(mod):
             if not isinstance(obj, (types.FunctionType, functools.partial)):
                 continue
             _, line_number = inspect.getsourcelines(obj)
-            # self.logger.debug(str(inspect.getsourcelines(obj)))
             if re.match(exclude, name):
                 self.logger.debug(f"Exclude {self.source.name}:{line_number} {name}()")
                 continue
@@ -151,7 +149,7 @@ class FuncList:
                 func()
 
 
-class PrintCapture(object):
+class PrintCapture:
     """A simplified capture of sys.stdout into logging
 
     This chops up things a bit, but is fairly straightforward.

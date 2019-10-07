@@ -200,20 +200,6 @@ class Distro:
         return f"Distro('{self.name}')"
 
 
-class PostgresQL(Distro):
-    name = "postgresql"
-    human_name = "PostgreSQL"
-    regex = r"^post.*"
-    driver = "psycopg2"
-    resolver = "{schema}.{name}"
-
-    def create_spec(self, *, server, database, engine_kwargs):
-        username = engine_kwargs.pop("username")
-        password = engine_kwargs.pop("password")
-        url = f"{self.name}+{self.driver}://{username}:{password}@{server}/{database}"
-        return (url, engine_kwargs)
-
-
 class MSSQL(Distro):
     name = "mssql"
     human_name = "Microsoft SQL Server"

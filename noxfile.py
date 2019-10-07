@@ -19,7 +19,7 @@ nox.options.reuse_existing_virtualenvs = False
 nox.options.stop_on_first_error = True
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")  # , "python3.8") - numpy
-DISTROS = ["mssql", "postgresql", "sqlite"]
+DISTROS = ["mssql", "sqlite"]
 WINDOWS = sys.platform.startswith("win")
 
 # Pull variables, especially LFTEST_*, into os.environ

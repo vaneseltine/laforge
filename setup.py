@@ -7,7 +7,6 @@ BASICS = [  # For maximums tested, see requirements.txt
     "SQLAlchemy>=1.1",
 ]
 EXTRAS = {
-    "postgresql": ["psycopg2>=2.8"],  # PostgreSQL
     "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server
     "excel": ["xlrd==1.2.0", "XlsxWriter==1.1.8"],  # Pandas backends
 }

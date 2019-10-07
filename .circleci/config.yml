@@ -1,5 +1,4 @@
 # https://circleci.com/docs/2.0/language-python/
-# https://circleci.com/docs/2.0/postgres-config/
 version: 2
 jobs:
   ubuntu:
@@ -8,11 +7,6 @@ jobs:
         environment:
           LC_ALL: C.UTF-8
           LANG: C.UTF-8
-      - image: circleci/postgres:latest-ram
-        environment:
-          POSTGRES_DB: lftest_postg
-          POSTGRES_USER: geordi
-          POSTGRES_PASSWORD: watson
       - image: microsoft/mssql-server-linux:2017-latest
         environment:
           ACCEPT_EULA: "Y"
@@ -34,8 +28,6 @@ jobs:
           name: Prepare Linux environment
           command: |
             apt-get install -qy curl git gnupg2 software-properties-common
-            # postgresql
-            apt-get install -qy libpq-dev
       - run:
           name: Install Pythons
           command: |
@@ -99,11 +91,6 @@ jobs:
         environment:
           LC_ALL: C.UTF-8
           LANG: C.UTF-8
-      - image: circleci/postgres:latest-ram
-        environment:
-          POSTGRES_DB: lftest_postg
-          POSTGRES_USER: geordi
-          POSTGRES_PASSWORD: watson
       - image: microsoft/mssql-server-linux:2017-latest
         environment:
           ACCEPT_EULA: "Y"

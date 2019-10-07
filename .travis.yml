@@ -1,7 +1,7 @@
 git:
   depth: false
   quiet: true
-dist: xenial   # required for Python >= 3.7
+dist: xenial # required for Python >= 3.7
 language: python
 matrix:
   fast_finish: true
@@ -19,7 +19,7 @@ python:
   - "nightly"
 install:
   - pip install --no-cache-dir -q -r requirements.txt
-  - pip install --no-cache-dir -q -e .['postgresql,mysql,excel']
+  - pip install --no-cache-dir -q -e .['all']
   - pip freeze
 script:
   - python -m laforge --version

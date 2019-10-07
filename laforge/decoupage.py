@@ -7,22 +7,6 @@ logger = logging.getLogger(__name__)
 logger.debug(logger.name)
 
 
-"""
-https://stackoverflow.com/questions/14703310/
-def audit_action(action):
-    def decorator_func(func):
-        def wrapper_func(*args, **kwargs):
-            # Invoke the wrapped function first
-            retval = func(*args, **kwargs)
-            # Now do something here with retval and/or action
-            print('In wrapper_func, handling action {!r} after wrapped function returned {!r}'.format(action, retval))
-            return retval
-        return wrapper_func
-    return decorator_func
-"""
-
-# __all__ = ["save", "load", "write", "execute", "read", "exist"]
-
 RESULTS = {}
 
 

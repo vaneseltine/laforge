@@ -1,48 +1,48 @@
 image: archlinux
 environment:
-  PATH: "${PATH}:$HOME/.local/bin"
+      PATH: "${PATH}:$HOME/.local/bin"
 secrets:
-  - 2b416998-c1cc-496b-8365-2da512b3fc43
+      - 2b416998-c1cc-496b-8365-2da512b3fc43
 packages:
-  - python
-  - python-pip
-  - python-setuptools
-  - python-numpy
+      - python
+      - python-pip
+      - python-setuptools
+      - python-numpy
 sources:
-  - https://git.sr.ht/~matvan/laforge
+      - https://git.sr.ht/~matvan/laforge
 tasks:
-  - install: |
-        cat ~/.buildenv
-        cd laforge
-        python -m pip install --user -q --upgrade pip
-        python -m pip -V
-        python -m pip install --user --upgrade setuptools
-        python -m pip install --user -q -r requirements.txt
-        python -m pip install --user -q -e .['mysql,excel']
-        python -m pip freeze
-  - pytest: |
-        cd laforge
-        python -m pytest --version
-        python -m pytest -x -rs
-  - black: |
-        cd laforge
-        python -m black --version
-        python -m black --diff ./laforge
-  - flake8: |
-        cd laforge
-        python -m flake8 --version
-        python -m flake8 --statistics ./laforge
-  - pylint: |
-        cd laforge
-        python -m pylint --version
-        python -m pylint --disable=R,C ./laforge
-  - cli: |
-        python -m laforge --version
-        laforge --version
-        laforge consult
-  - deploy: |
-        cd ./laforge
-        echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
-        git remote add github git@github.com:vaneseltine/laforge.git
-        git checkout master
-        git push --quiet --follow-tags github
+      - install: |
+              cat ~/.buildenv
+              cd laforge
+              python -m pip install --user -q --upgrade pip
+              python -m pip -V
+              python -m pip install --user --upgrade setuptools
+              python -m pip install --user -q -r requirements.txt
+              python -m pip install --user -q -e .['excel']
+              python -m pip freeze
+      - pytest: |
+              cd laforge
+              python -m pytest --version
+              python -m pytest -x -rs
+      - black: |
+              cd laforge
+              python -m black --version
+              python -m black --diff ./laforge
+      - flake8: |
+              cd laforge
+              python -m flake8 --version
+              python -m flake8 --statistics ./laforge
+      - pylint: |
+              cd laforge
+              python -m pylint --version
+              python -m pylint --disable=R,C ./laforge
+      - cli: |
+              python -m laforge --version
+              laforge --version
+              laforge consult
+      - deploy: |
+              cd ./laforge
+              echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==' >> ~/.ssh/known_hosts
+              git remote add github git@github.com:vaneseltine/laforge.git
+              git checkout master
+              git push --quiet --follow-tags github

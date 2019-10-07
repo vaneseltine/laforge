@@ -195,27 +195,22 @@ class SQLQueryReader(BaseTask):
         fetch = "df"
         if self.verb is Verb.EXECUTE:
             fetch = False
-        df = execute(self.content, channel=Channel(**self.config["sql"]), fetch=fetch)
+        channel = Channel(**self.config["sql"]) if "sql" in self.config else None
+        df = execute(self.content, channel=channel, fetch=fetch)
         logger.info("Read in from %s", self.short_content)
         return df
-
-
-@Task.register(Verb.EXECUTE, Target.SQL)
-class SQLExecutor(BaseTask):
-    def implement(self, prior_results=None):
-        query = self.path.read_text()
-        query_len = query.count("\n")
-        logger.debug(f"Query for execution is {query_len} lines long.")
-        sql_script = Script(query, channel=Channel(**self.config["sql"]))
-        sql_script.execute()
-        logger.debug("Executed: %s", self.content)
 
 
 @Task.register(Verb.READ, Target.SQLTABLE)
 @Task.register(Verb.WRITE, Target.SQLTABLE)
 class SQLReaderWriter(BaseTask):
     def implement(self, prior_results=None):
-        table = Table(self.content, channel=Channel(**self.config["sql"]))
+
+        if "sql" in self.config:
+            channel = Channel(**self.config["sql"])
+        else:
+            channel = None
+        table = Table(self.content, channel=channel)
         if self.verb is Verb.WRITE:
             logger.debug("Writing %s", table)
             self.validate_results(prior_results)
@@ -310,7 +305,13 @@ class ExistenceChecker(BaseTask):
             raise FileNotFoundError(path)
 
     def _check_existence_sql_table(self, line):
-        table = Table(line, channel=Channel(**self.config["sql"]))
+
+        if "sql" in self.config:
+            channel = Channel(**self.config["sql"])
+        else:
+            channel = None
+
+        table = Table(line, channel=channel)
         assert table.exists()
 
     def _check_existence_sql_raw_query(self, line):
