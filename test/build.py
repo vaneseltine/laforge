@@ -7,26 +7,34 @@ if __name__ == "__main__":
 
 SAMPLES = Path("./samples")
 OUTPUT = Path("./__output")
+OUTPUT.mkdir(exist_ok=True)
 
 
+@lf.save("details")
+@lf.save("details2")
 @lf.read("small", SAMPLES / "small.csv")
-def read_in_data(small):
+@lf.read("medium", SAMPLES / "medium.csv")
+def read_in_data(small, medium):
     print("HERE GOEEEESSS MY FUNCTIONNNNN")
-    print(f"Wow, the dimensions are {small.shape}")
-    print(small)
+    print(f"Wow, the dimensions are {small.shape} and {medium.shape}")
+    # print(small)
+    small.to_csv(OUTPUT / "howdy.csv")
+    return str(small.describe())
 
 
-@lf.exist(SAMPLES / "smafll.csv")
-def just_a_thing():
-    # print(read_in_data.small.shape)
+@lf.read("howdy", OUTPUT / "howdy.csv")
+@lf.load("details")
+def just_a_thing(howdy, details):
+    print(howdy.shape)
+    print(";".join(details.splitlines()))
     print("BORING FUNNNCTTIOOONN")
     print("But we still run it. :)")
-    _skip_but_use_me_still("oogabooga")
+    _skip_but_can_still_call_internally("oogabooga")
 
 
 def _skip_me_with_exclude_pattern():
     raise RuntimeError
 
 
-def _skip_but_use_me_still(s):
-    print(f" -- ", f"yes we still say {s}", " --", sep="\n")
+def _skip_but_can_still_call_internally(s):
+    print(f"Okay {s}")

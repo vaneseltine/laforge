@@ -3,7 +3,7 @@
 
 __version__ = "0.8.0dev0"
 
-from .decoupage import read, write, execute, exist
+from .decoupage import *
 from .command import build
 
 
