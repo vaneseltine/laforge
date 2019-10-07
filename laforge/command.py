@@ -152,6 +152,11 @@ class FuncList:
 
 
 class PrintCapture(object):
+    """A simplified capture of sys.stdout into logging
+
+    This chops up things a bit, but is fairly straightforward.
+    """
+
     def __init__(self, logger, stream=sys.stdout):
         self.logger = logger
         self.stream = stream
@@ -160,7 +165,7 @@ class PrintCapture(object):
         return getattr(self.stream, name)
 
     def write(self, text):
-        useful_lines = (s for s in text.splitlines() if s)
+        useful_lines = (s for s in text.splitlines() if s.strip())
         for line in useful_lines:
             new_line = f"  | {line}"
             self.logger.info(new_line)

@@ -3,12 +3,13 @@ from pathlib import Path
 import laforge as lf
 from laforge import sql
 
-sql.Channel(
+CHANNEL = sql.Channel(
     distro="postgresql",
     username="postgres",
     password="postgres",
     server="localhost",
     database="tester",
+    schema="schemer",
 )
 
 SAMPLES = Path("./samples")
@@ -41,8 +42,21 @@ def just_a_thing(details, details2):
 
 
 @lf.load("moo")
-def mooooooo(moo):
+@lf.read("medium", SAMPLES / "medium.csv")
+def mooooooo(moo, medium):
     print(moo)
+    tab = sql.Table("schemer.tabula")
+    print(tab.read())
+    x = sql.execute("select count(*) from information_schema.columns;", fetch="tuples")
+    tab2 = CHANNEL.find("%")[0]
+    print(tab == tab2)
+    print(x)
+    print(tab.exists())
+    # sql.execute("drop table schemer.tabula;")
+    # tab.read()
+    tab.write(medium)
+    print(repr(tab), repr(tab.channel))
+    # print(tab.read())
 
 
 def _skip_me_with_exclude_pattern():
