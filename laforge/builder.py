@@ -11,7 +11,7 @@ from pathlib import Path
 import dotenv
 import pandas as pd
 
-from .sql import Channel, Script, Table, execute
+from .sql import Channel, Table, execute
 
 logger = logging.getLogger(__name__)
 logger.debug(logger.name)
