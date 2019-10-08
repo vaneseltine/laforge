@@ -3,6 +3,7 @@ import importlib
 import importlib.util
 import inspect
 import logging
+import os
 import re
 import sys
 import time
@@ -37,25 +38,39 @@ class FuncRunner:
         spec.loader.exec_module(mod)
         return mod
 
+    def filter(self, keywords):
+        self.logger.info(f"Filtering to {repr(keywords)}")
+        self.functions = [x for x in self.functions if keywords in x[0]]
+        # print(self.functions)
+
+    @property
+    def orderly_list(self):
+        return (
+            (i + 1, stuff)
+            for i, stuff in enumerate(sorted(self.functions, key=lambda x: x[-1]))
+        )
+
+    def list_only(self):
+        for i, stuff in self.orderly_list:
+            print(i, stuff)
+
+    def __len__(self):
+        return len(self.functions)
+
     def execute(self):
-        total_number = len(self.functions)
-        for i, stuff in enumerate(sorted(self.functions, key=lambda x: x[-1])):
-            human_number = i + 1
+        for i, stuff in self.orderly_list:
             name, func, _ = stuff
             print()
-            self.logger.info(f"{human_number} of {total_number}: {name}()")
+            self.logger.info(f"{i} of {len(self)}: {name}()")
 
             capture_print_to_log = PrintCapture(self.logger)
             with redirect_stdout(capture_print_to_log):
                 try:
                     func()
-                    self.logger.info(f"{human_number} of {total_number}: complete")
+                    self.logger.info(f"{i} of {len(self)}: complete")
                 except Exception as err:  # pylint: disable=broad-except
                     handle_mid_task_exception(
-                        err=err,
-                        logger=self.logger,
-                        human_number=human_number,
-                        task_name=name,
+                        err=err, logger=self.logger, human_number=i, task_name=name
                     )
         print()
 
@@ -86,23 +101,36 @@ class PrintCapture:
             self.logger.info(new_line)
 
 
-def engage(*, path, log, debug=False, dry_run=False, list_class=FuncRunner):
+def engage(
+    *,
+    buildfile,
+    log,
+    debug=False,
+    list_only=False,
+    keywords=None,
+    list_class=FuncRunner,
+):
+    os.chdir(buildfile.parent)
+
     start_time = time.time()
     # Only now set logging helps avoid pandas load time
     # And keeps pandas from logging at debug level
     logger = get_laforge_logger(Path(log), debug)
 
-    logger.info("%s launched.", path)
+    logger.info("%s launched.", buildfile)
     if debug:
         logger.debug("Debug mode is on.")
 
-    task_list = list_class(path, logger=logger)
-    if dry_run:
-        task_list.dry_run()
+    task_list = list_class(buildfile, logger=logger)
+    if keywords:
+        task_list.filter(keywords)
+    if list_only:
+        logger.info("Build plan:")
+        task_list.list_only()
         return
     task_list.execute()
     elapsed = round(time.time() - start_time, 2)
-    logger.info("%s completed in %s seconds.", path, elapsed)
+    logger.info("%s completed in %s seconds.", buildfile, elapsed)
 
 
 def get_laforge_logger(log_file, debug):

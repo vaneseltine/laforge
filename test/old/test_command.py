@@ -142,10 +142,10 @@ class TestBuild:
             assert "launched" not in result.output
             assert "launched" not in caplog.text
 
-    def t_dry_run(self, cli_runner, barebones_build, caplog):
+    def t_list_only(self, cli_runner, barebones_build, caplog):
         with cli_runner.isolated_filesystem():
             Path("build.ini").write_text(barebones_build)
-            result = cli_runner.invoke(run_cli, ["build", "--dry-run"])
+            result = cli_runner.invoke(run_cli, ["build", "--list"])
             assert result.exit_code == 0
             assert "info" in caplog.text.lower()
             assert "hello" in barebones_build.lower()

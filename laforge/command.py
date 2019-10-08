@@ -1,77 +1,75 @@
 #!/usr/bin/env python3
 """Command-line interface for laforge."""
 
+
 import os
 import sys
 from pathlib import Path
 
-from .logo import get_version_display
+import click
+
+from . import __doc__ as LF_DOCSTRING
+from . import __version__ as LF_VERSION
+from . import logo
+from .runner import engage
+
+CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
+DEFAULT_LOG_FILE = "./laforge.log"
 
 
-def run(args=None):
-    """Parse arguments as from CLI and execute buildfile
+@click.command(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
+@click.option(
+    "-k", "--keywords", help="Run only functions matching the given substring."
+)
+@click.option(
+    "-l", "--list", "list_only", is_flag=True, help="List build plan and exit."
+)
+@click.option("--debug", default=False, is_flag=True)
+@click.argument(
+    "buildfile",
+    type=click.Path(exists=True, resolve_path=True, dir_okay=True),
+    default=Path("."),
+)
+@click.option(
+    "--log",
+    default=DEFAULT_LOG_FILE,
+    type=click.Path(resolve_path=True, dir_okay=False),
+    help=f"Log file for build process (default: {DEFAULT_LOG_FILE}).",
+)
+@click.version_option(version=LF_VERSION, message=logo.get_version_display())
+def run(keywords, list_only, debug, buildfile, log):
+    """Parse arguments as from CLI and execute buildfile"""
 
-    .. todo:
-
-        "--dry-run", "-n", default=False
-
-    .. todo:
-
-        "--loop", default=False
-
-    .. todo:
-
-        "--log=LOG"         default="laforge.log"
-    """
-    if args is None:
-        args = sys.argv[1:]
-
-    if args in (["-V"], ["--version"]):
-        version_info()
-
-    if set(args) & {"-h", "--help"}:
-        usage_info()
+    print("keywords:", repr(keywords))
 
     try:
-        args.remove("--debug")
-    except ValueError:
-        debug = False
-    else:
-        debug = True
-
-    try:
-        buildfile = find_buildfile(" ".join(args))
+        buildfile = find_buildfile(buildfile)
     except FileNotFoundError as err:
-        print(" ".join(["Error!", *err.args]))
-        usage_info(exit_code=1)
+        print(err)
+        exit(1)
 
-    build(buildfile, debug=debug)
+    build(buildfile, debug=debug, log=log, keywords=keywords, list_only=list_only)
     exit(0)
 
 
-def version_info():
-    print(get_version_display())
-    exit(0)
+def build(
+    buildfile=None, log="./laforge.log", debug=False, keywords=None, list_only=False
+):
+    if buildfile is None:
+        # Allow call directly from a buildfile
+        buildfile = sys.argv[0]
+    buildfile = Path(buildfile).resolve()
+
+    engage(
+        buildfile=buildfile,
+        log=log,
+        debug=debug,
+        keywords=keywords,
+        list_only=list_only,
+    )
 
 
-def usage_info(exit_code=0):
-
-    usage = """Usage: laforge [OPTIONS] (PATH)...
-
-    laforge: A low-key build system for working with data.
-
-    Options
-    -V, --version   Show the package version.
-    -h, --help      Show this usage message.
-    --debug         Increase logging.
-
-    Path            Path for buildfile; default current dir."""
-
-    print(usage)
-    exit(exit_code)
-
-
-def find_buildfile(path):
+def find_buildfile(path="."):
     path = Path(path).resolve()
     if not path.exists():
         raise FileNotFoundError(f"{path} does not exist.")
@@ -87,17 +85,8 @@ def find_buildfile(path):
             f"No laforge buildfile (e.g., {globs}) found in {path}."
         )
     if len(build_files) > 1:
-        found = "; ".join(str(x) for x in build_files)
-        raise FileNotFoundError(f"Multiple possible laforge buildfiles found: {found}.")
+        found = (str(x) for x in build_files)
+        raise FileNotFoundError(
+            "\n  ".join(("Multiple possible laforge buildfiles found:", *found))
+        )
     return build_files[0]
-
-
-def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
-    if buildfile is None:
-        # Allow call directly from a buildfile
-        buildfile = sys.argv[0]
-    buildfile = Path(buildfile).resolve()
-    os.chdir(buildfile.parent)
-    from .runner import engage
-
-    engage(path=buildfile, log=log, debug=debug, dry_run=dry_run)
