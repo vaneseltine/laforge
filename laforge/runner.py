@@ -57,6 +57,7 @@ class FuncRunner:
                         human_number=human_number,
                         task_name=name,
                     )
+        print()
 
 
 def handle_mid_task_exception(err, logger, human_number, task_name):
@@ -87,8 +88,9 @@ class PrintCapture:
 
 def engage(*, path, log, debug=False, dry_run=False, list_class=FuncRunner):
     start_time = time.time()
-    # THEN set logging -- helps avoid importing pandas at debug level
-    logger = get_laforge_logger(log, debug)
+    # Only now set logging helps avoid pandas load time
+    # And keeps pandas from logging at debug level
+    logger = get_laforge_logger(Path(log), debug)
 
     logger.info("%s launched.", path)
     if debug:

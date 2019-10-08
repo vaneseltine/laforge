@@ -1,5 +1,6 @@
-"""Builder reads and executes tasks."""
+""".garnish provides decorators for common data tasks."""
 
+import functools
 import logging
 import os
 import textwrap
@@ -11,10 +12,12 @@ from pathlib import Path
 import dotenv
 import pandas as pd
 
-from .sql import Channel, Table, execute
+from . import sql
 
 logger = logging.getLogger(__name__)
 logger.debug(logger.name)
+
+RESULTS = {}
 
 
 class Verb(Enum):
@@ -22,20 +25,6 @@ class Verb(Enum):
     WRITE = "write"
     EXECUTE = "execute"
     EXIST = "exist"
-
-
-def get_verb(raw):
-    translations = {"exists": "exist"}
-    verb = translations[raw] if raw in translations else raw
-    return Verb(verb)
-
-
-def is_verb(raw):
-    try:
-        _ = get_verb(raw)
-    except ValueError:
-        return False
-    return True
 
 
 class Target(Enum):
@@ -83,17 +72,6 @@ class Task:
 
     _universal_handlers = {}
     _handlers = {}
-
-    @classmethod
-    def from_strings(cls, *, raw_verb, raw_content, config):
-        verb = get_verb(raw_verb)
-        if verb in cls._handlers:
-            target = Target.ANY
-        else:
-            target = Target.parse(raw_content)
-        return cls.from_qualified(
-            verb=verb, target=target, content=raw_content, config=config
-        )
 
     @classmethod
     def from_qualified(cls, verb, target, content, config=None):
@@ -192,13 +170,17 @@ class FileReader(BaseTask):
 class SQLQueryReader(BaseTask):
     def implement(self, prior_results=None):
         logger.debug("Reading from %s", self.short_content)
-        fetch = "df"
+        channel = sql.Channel(**self.config["sql"]) if "sql" in self.config else None
+        script = sql.Script(self.content, channel=channel)
+
+        result = None
         if self.verb is Verb.EXECUTE:
-            fetch = False
-        channel = Channel(**self.config["sql"]) if "sql" in self.config else None
-        df = execute(self.content, channel=channel, fetch=fetch)
+            script.execute()
+        else:
+            result = script.to_table()
+
         logger.info("Read in from %s", self.short_content)
-        return df
+        return result
 
 
 @Task.register(Verb.READ, Target.SQLTABLE)
@@ -207,10 +189,10 @@ class SQLReaderWriter(BaseTask):
     def implement(self, prior_results=None):
 
         if "sql" in self.config:
-            channel = Channel(**self.config["sql"])
+            channel = sql.Channel(**self.config["sql"])
         else:
             channel = None
-        table = Table(self.content, channel=channel)
+        table = sql.Table(self.content, channel=channel)
         if self.verb is Verb.WRITE:
             logger.debug("Writing %s", table)
             self.validate_results(prior_results)
@@ -257,7 +239,7 @@ class FileWriter(BaseTask):
             f"Preparing to write {len(df):,} rows, {len(df.columns)} columns to {path}"
         )
 
-        pd.set_option("display.max_colwidth", 100)  # Weirdly affects html output
+        pd.set_option("display.max_colwidth", 100)  # Weirdly, affects html output
 
         if df.empty:
             logger.warning(f"Writing an empty dataset to {path}")
@@ -307,15 +289,15 @@ class ExistenceChecker(BaseTask):
     def _check_existence_sql_table(self, line):
 
         if "sql" in self.config:
-            channel = Channel(**self.config["sql"])
+            channel = sql.Channel(**self.config["sql"])
         else:
             channel = None
 
-        table = Table(line, channel=channel)
+        table = sql.Table(line, channel=channel)
         assert table.exists()
 
     def _check_existence_sql_raw_query(self, line):
-        df = execute(line, channel=Channel(**self.config["sql"]), fetch="df")
+        df = sql.execute(line, channel=sql.Channel(**self.config["sql"]), fetch="df")
         assert not df.empty
 
 
@@ -344,3 +326,100 @@ class DirectoryVisit:
     def __exit__(self, type, value, traceback):  # pylint: disable=redefined-builtin
         if self.old != self.new:
             os.chdir(self.old)
+
+
+def save(variable):
+    """Save return value of decorated function under `variable`."""
+
+    def decorator_func(func):
+        @functools.wraps(func)
+        def wrapper_func(*args, **kwargs):
+            result = func(*args, **kwargs)
+            RESULTS[variable] = result
+            logger.debug(f"Saved a {type(result)} under RESULTS['{variable}']...")
+            return result
+
+        return wrapper_func
+
+    return decorator_func
+
+
+def write(content):
+    """Return value will be written to specified target."""
+    logger.debug(f"Writing a return value to {content}.")
+
+    def decorator_write(func):
+        @functools.wraps(func)
+        def wrapped_write(*args, **kwargs):
+            result = func(*args, **kwargs)
+            target = Target.parse(content)
+            task = Task.from_qualified(verb=Verb.WRITE, target=target, content=content)
+            task.implement(result)
+            return result
+
+        return wrapped_write
+
+    return decorator_write
+
+
+def load(variable):
+    """Retrieve earlier result previously saved under `variable`."""
+
+    def decorator_func(func):
+        @functools.wraps(func)
+        def wrapper_func(*args, **kwargs):
+            # Invoke the wrapped function first
+            kwargs[variable] = RESULTS[variable]
+            logger.debug(
+                f"Retrieved a {type(kwargs[variable])} under RESULTS['{variable}']..."
+            )
+            result = func(*args, **kwargs)
+            return result
+
+        return wrapper_func
+
+    return decorator_func
+
+
+def read(variable, content):
+    """Pass DataFrame of target into function parameters"""
+    logger.debug(f"Adding a read of {content}, passing in as {variable}")
+
+    def decorator_read(func):
+        @functools.wraps(func)
+        def wrapped_read(*args, **kwargs):
+            target = Target.parse(content)
+            task = Task.from_qualified(verb=Verb.READ, target=target, content=content)
+            result = task.implement()
+            kwargs[variable] = result
+            return functools.partial(func, *args, **kwargs)()
+
+        return wrapped_read
+
+    return decorator_read
+
+
+def exists(content):
+    """Pass DataFrame of target into function parameters"""
+    logger.debug(f"Adding a existence check on {content}")
+
+    def decorator_exists(func):
+        @functools.wraps(func)
+        def wrapped_exists(*args, **kwargs):
+            target = Target.parse(content)
+            task = Task.from_qualified(verb=Verb.EXIST, target=target, content=content)
+            try:
+                task.implement()
+            except FileNotFoundError:
+                exit_failure(f"Could not verify existence of {content}", task)
+            return func(*args, **kwargs)
+
+        return wrapped_exists
+
+    return decorator_exists
+
+
+def exit_failure(reason, task):
+    logger.error(reason)
+    logger.debug(repr(task))
+    exit(9)

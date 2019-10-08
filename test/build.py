@@ -35,7 +35,7 @@ def just_a_thing(details, details2):
     print("BORING FUNNNCTTIOOONN")
     print("But we still run it. :)")
     _skip_but_can_still_call_internally("oogabooga")
-    print(read_in_data.sladijf)
+    print(read_in_data)
     return "moo"
 
 
@@ -61,9 +61,13 @@ def mooooooo(moo, medium, channel):
 
 @lf.load("blah")
 @lf.exists("tabula")
-def sqlitey(blah):
-    print(sql.execute("select count(*) from sqlite_master;", fetch="tuples"))
+@lf.write(OUTPUT / "__lol.html")
+@lf.read("df2", "sqlite_master")
+def sqlitey(blah, df2):
+    df = sql.execute("select * from sqlite_master;", fetch="df")
     print(blah)
+    print(df == df2)
+    return df
 
 
 def _skip_me_with_exclude_pattern():

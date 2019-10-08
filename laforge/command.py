@@ -100,4 +100,4 @@ def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
     os.chdir(buildfile.parent)
     from .runner import engage
 
-    engage(path=buildfile, log=Path(log), debug=debug, dry_run=dry_run)
+    engage(path=buildfile, log=log, debug=debug, dry_run=dry_run)
