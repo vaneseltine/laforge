@@ -35,6 +35,7 @@ def just_a_thing(details, details2):
     print("BORING FUNNNCTTIOOONN")
     print("But we still run it. :)")
     _skip_but_can_still_call_internally("oogabooga")
+    print(read_in_data.sladijf)
     return "moo"
 
 

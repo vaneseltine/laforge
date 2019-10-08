@@ -107,9 +107,7 @@ def build(buildfile=None, log="./laforge.log", debug=False, dry_run=False):
         buildfile = sys.argv[0]
     buildfile = Path(buildfile).resolve()
     os.chdir(buildfile.parent)
-    run_one_build(
-        list_class=FuncList, path=buildfile, log=Path(log), debug=debug, dry_run=dry_run
-    )
+    engage(path=buildfile, log=Path(log), debug=debug, dry_run=dry_run)
 
 
 class FuncList:
@@ -141,12 +139,29 @@ class FuncList:
     def execute(self):
         total_number = len(self.functions)
         for i, stuff in enumerate(sorted(self.functions, key=lambda x: x[-1])):
+            human_number = i + 1
             name, func, _ = stuff
-            self.logger.info(f"{i+1} of {total_number} - {name}:")
+            print()
+            self.logger.info(f"{human_number} of {total_number}: {name}()")
 
             capture_print_to_log = PrintCapture(self.logger)
             with redirect_stdout(capture_print_to_log):
-                func()
+                try:
+                    func()
+                    self.logger.info(f"{human_number} of {total_number}: complete")
+                except Exception as err:
+                    handle_mid_task_exception(
+                        err=err,
+                        logger=self.logger,
+                        human_number=human_number,
+                        task_name=name,
+                    )
+
+
+def handle_mid_task_exception(err, logger, human_number, task_name):
+    logger.exception(err)
+    logger.error(f"-- HALTED at #{human_number}: {task_name} raised {repr(err)}.")
+    exit(1)
 
 
 class PrintCapture:
@@ -169,7 +184,7 @@ class PrintCapture:
             self.logger.info(new_line)
 
 
-def run_one_build(*, list_class, path, log, debug=False, dry_run=False):
+def engage(*, path, log, debug=False, dry_run=False, list_class=FuncList):
     start_time = time.time()
     # THEN set logging -- helps avoid importing pandas at debug level
     logger = get_laforge_logger(log, debug)
