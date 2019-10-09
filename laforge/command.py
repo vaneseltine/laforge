@@ -68,8 +68,8 @@ def build(
     buildfile=None,
     log="./laforge.log",
     debug=False,
-    include=None,
-    exclude=None,
+    include="",
+    exclude="",
     list_only=False,
 ):
     if buildfile is None:

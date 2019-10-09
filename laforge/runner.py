@@ -13,10 +13,6 @@ from pathlib import Path
 
 
 class Func:
-
-    DEFAULT_INCLUDE = None
-    DEFAULT_EXCLUDE = None
-
     def __init__(self, name, function_object, line, module, logger):
         self.name = name
         self.function_object = function_object
@@ -25,17 +21,12 @@ class Func:
         self.logger = logger
         self.live = False
 
-    def filter(self, *, include=None, exclude=None):
-        include = include or self.DEFAULT_INCLUDE
-        exclude = exclude or self.DEFAULT_EXCLUDE
-        if exclude and re.search(exclude, self.name):
-            self.logger.debug("{self} excluded.")
-            self.live = False
-        else:
-            self.live = (not include) or bool(re.search(include, self.name))
+    def filter(self, *, include="", exclude=""):
+        included = not include or re.search(include, self.name)
+        excluded = exclude and re.search(exclude, self.name)
+        self.live = included and not excluded
 
     def __call__(self, *args, **kwargs):
-        # @functools.wraps(self.function_object)
         return self.function_object(*args, **kwargs)
 
     def __str__(self):
@@ -55,7 +46,7 @@ class FuncRunner:
 
     MANDATORY_EXCLUDE = "^_"
 
-    def __init__(self, file, *, include=None, exclude=None, logger=logging.NullHandler):
+    def __init__(self, file, *, include="", exclude="", logger=logging.NullHandler):
         self.source = Path(file)
         self.include = include
         self.exclude = exclude
@@ -158,8 +149,8 @@ def engage(
     log,
     debug=False,
     list_only=False,
-    include=None,
-    exclude=None,
+    include="",
+    exclude="",
     list_class=FuncRunner,
 ):
     os.chdir(buildfile.parent)
