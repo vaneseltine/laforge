@@ -17,7 +17,16 @@ DEFAULT_LOG_FILE = "./laforge.log"
 
 @click.command(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
 @click.option(
-    "-k", "--keywords", help="Run only functions matching the given substring."
+    "-i",
+    "--include",
+    help="Include only functions matching the given pattern. (default: '.')",
+    metavar="<pattern>",
+)
+@click.option(
+    "-x",
+    "--exclude",
+    help="Exclude functions matching the given pattern. (default: '^_')",
+    metavar="<pattern>",
 )
 @click.option(
     "-l", "--list", "list_only", is_flag=True, help="List build plan and exit."
@@ -35,10 +44,8 @@ DEFAULT_LOG_FILE = "./laforge.log"
     help=f"Log file for build process (default: {DEFAULT_LOG_FILE}).",
 )
 @click.version_option(version=LF_VERSION, message=logo.get_version_display())
-def run(keywords, list_only, debug, buildfile, log):
+def run(buildfile, debug, include, exclude, list_only, log):
     """Parse arguments as from CLI and execute buildfile"""
-
-    print("keywords:", repr(keywords))
 
     try:
         buildfile = find_buildfile(buildfile)
@@ -46,12 +53,24 @@ def run(keywords, list_only, debug, buildfile, log):
         print(err)
         exit(1)
 
-    build(buildfile, debug=debug, log=log, keywords=keywords, list_only=list_only)
+    build(
+        buildfile,
+        debug=debug,
+        log=log,
+        include=include,
+        exclude=exclude,
+        list_only=list_only,
+    )
     exit(0)
 
 
 def build(
-    buildfile=None, log="./laforge.log", debug=False, keywords=None, list_only=False
+    buildfile=None,
+    log="./laforge.log",
+    debug=False,
+    include=None,
+    exclude=None,
+    list_only=False,
 ):
     if buildfile is None:
         # Allow call directly from a buildfile
@@ -62,7 +81,8 @@ def build(
         buildfile=buildfile,
         log=log,
         debug=debug,
-        keywords=keywords,
+        include=include,
+        exclude=exclude,
         list_only=list_only,
     )
 

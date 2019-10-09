@@ -13,6 +13,10 @@ from pathlib import Path
 
 
 class Func:
+
+    DEFAULT_INCLUDE = None
+    DEFAULT_EXCLUDE = None
+
     def __init__(self, name, function_object, line, module, logger):
         self.name = name
         self.function_object = function_object
@@ -21,9 +25,14 @@ class Func:
         self.logger = logger
         self.live = False
 
-    def filter(self, *, include, exclude):
-        self.live = re.match(include, self.name) and not re.match(exclude, self.name)
-        self.logger.debug(self)
+    def filter(self, *, include=None, exclude=None):
+        include = include or self.DEFAULT_INCLUDE
+        exclude = exclude or self.DEFAULT_EXCLUDE
+        if exclude and re.search(exclude, self.name):
+            self.logger.debug("{self} excluded.")
+            self.live = False
+        else:
+            self.live = (not include) or bool(re.search(include, self.name))
 
     def __call__(self, *args, **kwargs):
         # @functools.wraps(self.function_object)
@@ -44,28 +53,17 @@ class Func:
 
 class FuncRunner:
 
-    DEFAULT_EXCLUDE = r"^_.*$"
-    DEFAULT_INCLUDE = r"^.*$"
+    MANDATORY_EXCLUDE = "^_"
 
-    def __init__(self, file, *, keywords=None, logger=logging.NullHandler):
+    def __init__(self, file, *, include=None, exclude=None, logger=logging.NullHandler):
         self.source = Path(file)
+        self.include = include
+        self.exclude = exclude
         self.logger = logger
         self.module = self.get_module_from_path(self.source)
-        if keywords:
-            logger.debug(keywords)
-        exclude, include = self.parse_keywords(keywords)
-        self.functions = sorted(self.collect_functions(self.module, exclude, include))
-        print(self.functions)
+        self.functions = sorted(self.collect_functions(self.module))
 
-    def parse_keywords(self, keywords):
-        if not keywords:
-            return None, None
-        print(keywords)
-        exit(1)
-
-    def collect_functions(
-        self, module, exclude=DEFAULT_EXCLUDE, include=DEFAULT_INCLUDE
-    ):
+    def collect_functions(self, module):
         for line, name, function_object in self.pull_all_functions(module):
             func = Func(
                 name=name,
@@ -74,12 +72,15 @@ class FuncRunner:
                 module=self.module,
                 logger=self.logger,
             )
-            func.filter(include=include, exclude=exclude)
+            func.filter(include=self.include, exclude=self.exclude)
+            print(func, func.live)
             yield func
 
-    @staticmethod
-    def pull_all_functions(module):
+    @classmethod
+    def pull_all_functions(cls, module):
         for name, function_object in inspect.getmembers(module):
+            if re.search(cls.MANDATORY_EXCLUDE, name):
+                continue
             if not isinstance(function_object, (types.FunctionType, functools.partial)):
                 continue
             _, line = inspect.getsourcelines(function_object)
@@ -157,7 +158,8 @@ def engage(
     log,
     debug=False,
     list_only=False,
-    keywords=None,
+    include=None,
+    exclude=None,
     list_class=FuncRunner,
 ):
     os.chdir(buildfile.parent)
@@ -171,7 +173,7 @@ def engage(
     if debug:
         logger.debug("Debug mode is on.")
 
-    task_list = list_class(buildfile, keywords=keywords, logger=logger)
+    task_list = list_class(buildfile, include=include, exclude=exclude, logger=logger)
     if list_only:
         logger.info("Build plan:")
         task_list.list_only()
