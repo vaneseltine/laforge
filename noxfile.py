@@ -113,7 +113,7 @@ def coveralls(session):
 
 
 @nox.session(python=False)
-def docs_doc8(session):
+def lint_docs(session):
     if WINDOWS:
         session.run("doc8", "./docs", "-q", "--ignore=D002", "--ignore=D004")
     else:

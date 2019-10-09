@@ -45,7 +45,13 @@ DEFAULT_LOG_FILE = "./laforge.log"
 )
 @click.version_option(version=LF_VERSION, message=logo.get_version_display())
 def run(buildfile, debug, include, exclude, list_only, log):
-    """Parse arguments as from CLI and execute buildfile"""
+    """Parse arguments as from CLI and execute buildfile
+
+    ..todo :
+
+        Raise exception as Click
+
+    """
 
     try:
         buildfile = find_buildfile(buildfile)
