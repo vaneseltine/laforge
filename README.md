@@ -12,7 +12,7 @@
 
 *You know, I've always thought technology could solve almost any problem.*
 
-```
+<!-- ```
 $ python -m pip install laforge -q
 ...
 
@@ -30,10 +30,10 @@ Creating /home/matvan/science/build.ini
 New laforge INI written at: /home/matvan/science/build.ini
 Enjoy!
 
-```
+``` -->
 
 *There's theory and then there's application. They don't always jibe.*
-
+<!--
 ```ini
 $ vim ./build.ini
 ...
@@ -71,7 +71,7 @@ read:
         on agg.v1 = r1.v2
     order by newid();"
 write: results_peek.html
-```
+``` -->
 
 *Yeah, but that's imposs—yes, sir.*
 
@@ -107,25 +107,24 @@ https://laforge.readthedocs.io/en/latest/
 
 [![libraries.io audits PyPI dependencies status.](https://img.shields.io/librariesio/release/pypi/laforge.svg?style=for-the-badge&label=libraries.io)](https://libraries.io/pypi/laforge)
 
-[![Documentation is hosted on Read the Docs.](https://img.shields.io/readthedocs/laforge.svg?style=for-the-badge&label=Read%20the%20Docs)](https://readthedocs.org/projects/laforge/builds/)
+<!-- [![Documentation is hosted on Read the Docs.](https://img.shields.io/readthedocs/laforge.svg?style=for-the-badge&label=Read%20the%20Docs)](https://readthedocs.org/projects/laforge/builds/) -->
 
-[![Travis tests across supported Python versions.)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis&logo=travis-ci&logoColor=fff)](https://travis-ci.com/vaneseltine/laforge)
+<!-- [![Travis tests across supported Python versions.)](https://img.shields.io/travis/com/vaneseltine/laforge.svg?style=for-the-badge&label=Travis&logo=travis-ci&logoColor=fff)](https://travis-ci.com/vaneseltine/laforge) -->
 
-[![CircleCI is my new best friend.](https://img.shields.io/circleci/build/github/vaneseltine/laforge.svg?label=CircleCI&style=for-the-badge&logo=circleci&logoColor=fff)](https://circleci.com/gh/vaneseltine/laforge)
+<!-- [![CircleCI is my new best friend.](https://img.shields.io/circleci/build/github/vaneseltine/laforge.svg?label=CircleCI&style=for-the-badge&logo=circleci&logoColor=fff)](https://circleci.com/gh/vaneseltine/laforge) -->
 
-[![Coveralls reports coverage in a cute way.](https://img.shields.io/coveralls/github/vaneseltine/laforge.svg?style=for-the-badge&logo=coveralls)](https://coveralls.io/github/vaneseltine/laforge)
-
-
-
+<!-- [![Coveralls reports coverage in a cute way.](https://img.shields.io/coveralls/github/vaneseltine/laforge.svg?style=for-the-badge&logo=coveralls)](https://coveralls.io/github/vaneseltine/laforge) -->
 
 ### 🧙‍ Author
 
 [![Matt VanEseltine](https://img.shields.io/badge/name-matt_vaneseltine-888.svg?style=for-the-badge&logo=linux&logoColor=fff&color=violet)](https://vaneseltine.github.io)
 
-[![matvan@umich.edu](https://img.shields.io/badge/email-matvan@umich.edu-888.svg?style=for-the-badge&logo=gmail&logoColor=fff&color=00274c)](matvan@umich.edu)
+[![matvan@umich.edu](https://img.shields.io/badge/email-matvan@umich.edu-888.svg?style=for-the-badge&logo=gmail&logoColor=fff&color=00274c)](mailto:matvan@umich.edu)
 
 [![https://github.com/vaneseltine](https://img.shields.io/badge/github-vaneseltine-888.svg?style=for-the-badge&logo=github&logoColor=fff&color=2b3137)](https://github.com/vaneseltine)
 
 [![https://twitter.com/vaneseltine](https://img.shields.io/badge/twitter-@vaneseltine-blue.svg?style=for-the-badge&logo=twitter&logoColor=fff&color=1da1f2)](https://twitter.com/vaneseltine)
 
 [![https://stackoverflow.com/users/7846185/matt-vaneseltine](https://img.shields.io/badge/stack_overflow-matt_vaneseltine-888.svg?style=for-the-badge&logo=stack-overflow&logoColor=fff&color=f48024)](https://stackoverflow.com/users/7846185/matt-vaneseltine)
+
+[![https://shields.io/](https://img.shields.io/badge/badge_volume-17-red.svg?style=for-the-badge&logo=mozilla-firefox&logoColor=fff&color=red)](https://shields.io/)
