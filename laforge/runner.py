@@ -43,14 +43,29 @@ class Func:
 
 
 class FuncRunner:
-    def __init__(self, file, logger):
+
+    DEFAULT_EXCLUDE = r"^_.*$"
+    DEFAULT_INCLUDE = r"^.*$"
+
+    def __init__(self, file, *, keywords=None, logger=logging.NullHandler):
         self.source = Path(file)
         self.logger = logger
         self.module = self.get_module_from_path(self.source)
-        self.functions = sorted(self.collect_functions(self.module))
+        if keywords:
+            logger.debug(keywords)
+        exclude, include = self.parse_keywords(keywords)
+        self.functions = sorted(self.collect_functions(self.module, exclude, include))
         print(self.functions)
 
-    def collect_functions(self, module, exclude=r"^_.*$", include=".*"):
+    def parse_keywords(self, keywords):
+        if not keywords:
+            return None, None
+        print(keywords)
+        exit(1)
+
+    def collect_functions(
+        self, module, exclude=DEFAULT_EXCLUDE, include=DEFAULT_INCLUDE
+    ):
         for line, name, function_object in self.pull_all_functions(module):
             func = Func(
                 name=name,
@@ -156,9 +171,7 @@ def engage(
     if debug:
         logger.debug("Debug mode is on.")
 
-    task_list = list_class(buildfile, logger=logger)
-    if keywords:
-        task_list.filter(keywords)
+    task_list = list_class(buildfile, keywords=keywords, logger=logger)
     if list_only:
         logger.info("Build plan:")
         task_list.list_only()
