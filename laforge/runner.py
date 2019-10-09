@@ -21,7 +21,7 @@ class Func:
         self.logger = logger
         self.live = False
 
-    def filter(self, *, include="", exclude=""):
+    def apply_filters(self, *, include="", exclude=""):
         included = not include or re.search(include, self.name)
         excluded = exclude and re.search(exclude, self.name)
         self.live = included and not excluded
@@ -63,8 +63,8 @@ class FuncRunner:
                 module=self.module,
                 logger=self.logger,
             )
-            func.filter(include=self.include, exclude=self.exclude)
-            print(func, func.live)
+            func.apply_filters(include=self.include, exclude=self.exclude)
+            self.logger.debug(f"Collected {func}; active: {func.live}")
             yield func
 
     @classmethod
@@ -118,6 +118,7 @@ class FuncRunner:
 
 
 def handle_mid_task_exception(err, logger, human_number, task_name):
+    # TODO: move to Func, I think
     logger.exception(err)
     logger.error(f"-- HALTED at #{human_number}: {task_name} raised {repr(err)}.")
     exit(1)
@@ -156,8 +157,7 @@ def engage(
     os.chdir(buildfile.parent)
 
     start_time = time.time()
-    # Only now set logging helps avoid pandas load time
-    # And keeps pandas from logging at debug level
+    # Keeps pandas from logging at debug level
     logger = get_laforge_logger(Path(log), debug)
 
     logger.info("%s launched.", buildfile)
