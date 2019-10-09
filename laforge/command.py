@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Command-line interface for laforge."""
 
-
-import os
 import sys
 from pathlib import Path
 

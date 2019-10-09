@@ -3,7 +3,6 @@ from pathlib import Path
 import laforge as lf
 from laforge import sql
 
-
 SAMPLES = Path("./samples")
 OUTPUT = Path("./__output")
 OUTPUT.mkdir(exist_ok=True)

@@ -12,56 +12,91 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 
+class Func:
+    def __init__(self, name, function_object, line, module, logger):
+        self.name = name
+        self.function_object = function_object
+        self.line = line
+        self.module = module
+        self.logger = logger
+        self.live = False
+
+    def filter(self, *, include, exclude):
+        self.live = re.match(include, self.name) and not re.match(exclude, self.name)
+        self.logger.debug(self)
+
+    def __call__(self, *args, **kwargs):
+        # @functools.wraps(self.function_object)
+        return self.function_object(*args, **kwargs)
+
+    def __str__(self):
+        return f"{str(self.module.__name__)}:{self.line} {self.name}"
+
+    def __repr__(self):
+        return str(self)
+
+    def __eq__(self, other):
+        return self.function_object == other.function_object
+
+    def __lt__(self, other):
+        return self.line < other.line
+
+
 class FuncRunner:
     def __init__(self, file, logger):
         self.source = Path(file)
         self.logger = logger
-        self.mod = self.get_module_from_path(self.source)
-        self.functions = list(self.get_functions_from_modules(self.mod))
+        self.module = self.get_module_from_path(self.source)
+        self.functions = sorted(self.collect_functions(self.module))
+        print(self.functions)
 
-    def get_functions_from_modules(self, mod, exclude=r"^_.*$"):
-        # Make these a class instead
-        for name, obj in inspect.getmembers(mod):
-            if not isinstance(obj, (types.FunctionType, functools.partial)):
+    def collect_functions(self, module, exclude=r"^_.*$", include=".*"):
+        for line, name, function_object in self.pull_all_functions(module):
+            func = Func(
+                name=name,
+                function_object=function_object,
+                line=line,
+                module=self.module,
+                logger=self.logger,
+            )
+            func.filter(include=include, exclude=exclude)
+            yield func
+
+    @staticmethod
+    def pull_all_functions(module):
+        for name, function_object in inspect.getmembers(module):
+            if not isinstance(function_object, (types.FunctionType, functools.partial)):
                 continue
-            _, line_number = inspect.getsourcelines(obj)
-            if re.match(exclude, name):
-                self.logger.debug(f"Exclude {self.source.name}:{line_number} {name}()")
-                continue
-            self.logger.debug(f"Include {self.source.name}:{line_number:<4}{name}()")
-            yield (name, obj, line_number)
+            _, line = inspect.getsourcelines(function_object)
+            yield line, name, function_object
 
     @staticmethod
     def get_module_from_path(path):
         spec = importlib.util.spec_from_file_location("buildfile", str(path))
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        return mod
-
-    def filter(self, keywords):
-        self.logger.info(f"Filtering to {repr(keywords)}")
-        self.functions = [x for x in self.functions if keywords in x[0]]
-        # print(self.functions)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
 
     @property
-    def orderly_list(self):
+    def live_functions(self):
         return (
-            (i + 1, stuff)
-            for i, stuff in enumerate(sorted(self.functions, key=lambda x: x[-1]))
+            (i + 1, func) for i, func in enumerate(f for f in self.functions if f.live)
         )
 
     def list_only(self):
-        for i, stuff in self.orderly_list:
-            print(i, stuff)
+        for func in self.functions:
+            human = " + " if func.live else " - "
+            self.logger.info(f"{human}{func}")
 
     def __len__(self):
-        return len(self.functions)
+        return len([x for x in self.functions if x.live])
 
     def execute(self):
-        for i, stuff in self.orderly_list:
-            name, func, _ = stuff
+        for i, func in self.live_functions:
+            if not func.live:
+                continue
             print()
-            self.logger.info(f"{i} of {len(self)}: {name}()")
+            self.logger.info(f"{i} of {len(self)}: {func}")
 
             capture_print_to_log = PrintCapture(self.logger)
             with redirect_stdout(capture_print_to_log):
@@ -70,7 +105,7 @@ class FuncRunner:
                     self.logger.info(f"{i} of {len(self)}: complete")
                 except Exception as err:  # pylint: disable=broad-except
                     handle_mid_task_exception(
-                        err=err, logger=self.logger, human_number=i, task_name=name
+                        err=err, logger=self.logger, human_number=i, task_name=func.name
                     )
         print()
 
