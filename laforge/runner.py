@@ -13,11 +13,13 @@ from pathlib import Path
 
 
 class Func:
-    def __init__(self, name, function_object, line, module, logger):
+    def __init__(self, name, function_object, code, line, module, logger):
         self.name = name
         self.function_object = function_object
+        self.code = code
         self.line = line
         self.module = module
+        self.file = Path(self.module.__file__).relative_to(Path(".").absolute())
         self.logger = logger
         self.live = False
 
@@ -30,10 +32,10 @@ class Func:
         return self.function_object(*args, **kwargs)
 
     def __str__(self):
-        return f"{str(self.module.__name__)}:{self.line} {self.name}"
+        return f"{self.name}, lines {self.line}-{self.line + len(self.code) - 1}"
 
     def __repr__(self):
-        return str(self)
+        return f"Func({self.file.stem}.{self.name})"
 
     def __eq__(self, other):
         return self.function_object == other.function_object
@@ -55,10 +57,11 @@ class FuncRunner:
         self.functions = sorted(self.collect_functions(self.module))
 
     def collect_functions(self, module):
-        for line, name, function_object in self.pull_all_functions(module):
+        for code, line, name, function_object in self.pull_all_functions(module):
             func = Func(
                 name=name,
                 function_object=function_object,
+                code=code,
                 line=line,
                 module=self.module,
                 logger=self.logger,
@@ -74,8 +77,8 @@ class FuncRunner:
                 continue
             if not isinstance(function_object, (types.FunctionType, functools.partial)):
                 continue
-            _, line = inspect.getsourcelines(function_object)
-            yield line, name, function_object
+            code, line = inspect.getsourcelines(function_object)
+            yield code, line, name, function_object
 
     @staticmethod
     def get_module_from_path(path):
@@ -171,7 +174,7 @@ def engage(
 
     task_list = list_class(buildfile, include=include, exclude=exclude, logger=logger)
     if list_only:
-        logger.info("Build plan:")
+        logger.info(f"Build plan for {buildfile.absolute()}:")
         task_list.list_only()
         return
     task_list.execute()

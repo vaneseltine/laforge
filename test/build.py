@@ -54,8 +54,8 @@ def mooooooo(moo, medium, channel):
     print(sql.execute("select name, dob from roster;", fetch="tuples"))
     # tab.write(medium)
     # print(repr(tab), repr(tab.channel))
-    # print(tab.read())
     return "lolol"
+    # print(tab.read())
 
 
 @lf.load("blah")
