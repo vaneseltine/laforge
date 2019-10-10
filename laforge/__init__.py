@@ -11,4 +11,4 @@ def run():
     """Launch laforge command line tool."""
     import laforge.command
 
-    laforge.command.run()
+    laforge.command.run()  # pylint: disable=no-value-for-parameter
