@@ -8,12 +8,17 @@ import click
 
 from . import __doc__ as LF_DOCSTRING
 from . import __version__ as LF_VERSION
-from . import logo
+from .logo import get_version_display
 from .runner import engage
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_LOG_FILE = "./laforge.log"
 DEFAULT_GLOBS = ["build*.py", "*laforge*.py"]
+
+
+def show_version(ctx, param, value):
+    click.echo(get_version_display())
+    ctx.exit()
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
@@ -44,7 +49,15 @@ DEFAULT_GLOBS = ["build*.py", "*laforge*.py"]
     type=click.Path(resolve_path=True, dir_okay=False),
     help=f"Log file for build process (default: {DEFAULT_LOG_FILE}).",
 )
-@click.version_option(version=LF_VERSION, message=logo.get_version_display())
+# @click.version_option(version=LF_VERSION, message=get_version_display())
+@click.option(
+    "-V",
+    "--version",
+    is_flag=True,
+    callback=show_version,
+    expose_value=False,
+    is_eager=True,
+)
 @click.pass_context
 def run(ctx, buildfile, debug, include, exclude, list_only, log):
     """Parse arguments as from CLI and execute buildfile
