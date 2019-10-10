@@ -44,7 +44,8 @@ DEFAULT_LOG_FILE = "./laforge.log"
     help=f"Log file for build process (default: {DEFAULT_LOG_FILE}).",
 )
 @click.version_option(version=LF_VERSION, message=logo.get_version_display())
-def run(buildfile, debug, include, exclude, list_only, log):
+@click.pass_context
+def run(ctx, buildfile, debug, include, exclude, list_only, log):
     """Parse arguments as from CLI and execute buildfile
 
     ..todo :
@@ -56,8 +57,7 @@ def run(buildfile, debug, include, exclude, list_only, log):
     try:
         buildfile = find_buildfile(buildfile)
     except FileNotFoundError as err:
-        print(err)
-        exit(1)
+        raise click.UsageError(err.args, ctx=ctx)
 
     build(
         buildfile,
