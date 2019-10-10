@@ -28,6 +28,11 @@ class Func:
         excluded = exclude and re.search(exclude, self.name)
         self.live = included and not excluded
 
+    def raise_exception(self, i, err):
+        self.logger.exception(err)
+        self.logger.error(f"BUILD HALTED at #{i}: {self.name} raised {repr(err)}.")
+        exit(1)
+
     def __call__(self, *args, **kwargs):
         return self.function_object(*args, **kwargs)
 
@@ -119,17 +124,8 @@ class FuncRunner:
                     func()
                     self.logger.info(f"{i} of {len(self)}: complete")
                 except Exception as err:  # pylint: disable=broad-except
-                    handle_mid_task_exception(
-                        err=err, logger=self.logger, human_number=i, task_name=func.name
-                    )
+                    func.raise_exception(i, err)
         print()
-
-
-def handle_mid_task_exception(err, logger, human_number, task_name):
-    # TODO: move to Func, I think
-    logger.exception(err)
-    logger.error(f"-- HALTED at #{human_number}: {task_name} raised {repr(err)}.")
-    exit(1)
 
 
 class PrintCapture:
