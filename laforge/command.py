@@ -7,7 +7,6 @@ from pathlib import Path
 import click
 
 from . import __doc__ as LF_DOCSTRING
-from . import __version__ as LF_VERSION
 from .logo import get_version_display
 from .runner import engage
 
@@ -16,7 +15,9 @@ DEFAULT_LOG_FILE = "./laforge.log"
 DEFAULT_GLOBS = ["build*.py", "*laforge*.py"]
 
 
-def show_version(ctx, param, value):
+def show_version(ctx, _param, value):
+    if not value or ctx.resilient_parsing:
+        return
     click.echo(get_version_display())
     ctx.exit()
 
@@ -49,7 +50,6 @@ def show_version(ctx, param, value):
     type=click.Path(resolve_path=True, dir_okay=False),
     help=f"Log file for build process (default: {DEFAULT_LOG_FILE}).",
 )
-# @click.version_option(version=LF_VERSION, message=get_version_display())
 @click.option(
     "-V",
     "--version",

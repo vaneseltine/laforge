@@ -38,7 +38,7 @@ def colorize(s, fore=None, back=None, monochrome=False):
     return colored
 
 
-def get_version_display(*args, monochrome=MONOCHROME):
+def get_version_display(monochrome=MONOCHROME):
     from . import __version__
 
     items_to_combine = [
