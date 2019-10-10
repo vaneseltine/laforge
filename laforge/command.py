@@ -13,6 +13,7 @@ from .runner import engage
 
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_LOG_FILE = "./laforge.log"
+DEFAULT_GLOBS = ["build*.py", "*laforge*.py"]
 
 
 @click.command(context_settings=CONTEXT_SETTINGS, help=LF_DOCSTRING)
@@ -99,12 +100,11 @@ def find_buildfile(path="."):
         raise FileNotFoundError(f"{path} does not exist.")
     if path.is_file():
         return path
-    _acceptable_globs = ["build*.py", "*laforge*.py"]
     build_files = []
-    for fileglob in _acceptable_globs:
+    for fileglob in DEFAULT_GLOBS:
         build_files.extend(list(path.glob(fileglob)))
     if not build_files:
-        globs = " or ".join(_acceptable_globs)
+        globs = " or ".join(DEFAULT_GLOBS)
         raise FileNotFoundError(
             f"No laforge buildfile (e.g., {globs}) found in {path}."
         )

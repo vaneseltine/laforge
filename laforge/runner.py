@@ -91,9 +91,14 @@ class FuncRunner:
         )
 
     def list_only(self):
+        live_count = 0
         for func in self.functions:
-            human = " + " if func.live else " - "
-            self.logger.info(f"{human}{func}")
+            if func.live:
+                live_count += 1
+                human = human = f"{live_count} of {len(self)}"
+            else:
+                human = "-"
+            self.logger.info(f"{human:>8} {func}")
 
     def __len__(self):
         return len([x for x in self.functions if x.live])
