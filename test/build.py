@@ -75,3 +75,7 @@ def _skip_me_with_exclude_pattern():
 
 def _skip_but_can_still_call_internally(s):
     print(f"Okay {s}")
+
+
+if __name__ == "__main__":
+    lf.build()
