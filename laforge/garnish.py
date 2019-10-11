@@ -2,14 +2,12 @@
 
 import functools
 import logging
-import os
 import textwrap
 import time
 from collections import namedtuple
 from enum import Enum
 from pathlib import Path
 
-import dotenv
 import pandas as pd
 
 from . import sql
@@ -114,6 +112,7 @@ class BaseTask:
         self.target = target
         self.content = content
         self.config = config or {}
+        print("x" * 50, repr(self.config))
 
     def implement(self, prior_results=None):
         raise NotImplementedError
@@ -299,33 +298,6 @@ class ExistenceChecker(BaseTask):
     def _check_existence_sql_raw_query(self, line):
         df = sql.execute(line, channel=sql.Channel(**self.config["sql"]), fetch="df")
         assert not df.empty
-
-
-def load_env(path):
-    """Get .env values without dotenv's default to silently pull package dir"""
-    with DirectoryVisit(path):
-        try:
-            env_config = dotenv.dotenv_values(
-                dotenv.find_dotenv(usecwd=True, raise_error_if_not_found=True)
-            )
-        except IOError:
-            env_config = {}
-    return env_config
-
-
-class DirectoryVisit:
-    def __init__(self, path):
-        self.old = Path(".").resolve()
-        self.new = Path(path).resolve()
-        if self.old != self.new:
-            os.chdir(self.new)
-
-    def __enter__(self):
-        return self.new
-
-    def __exit__(self, type, value, traceback):  # pylint: disable=redefined-builtin
-        if self.old != self.new:
-            os.chdir(self.old)
 
 
 def save(variable):

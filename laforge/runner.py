@@ -10,6 +10,8 @@ import types
 from contextlib import redirect_stdout
 from pathlib import Path
 
+import dotenv
+
 
 class Func:
     def __init__(self, name, function_object, code, line, module, logger):
@@ -52,10 +54,13 @@ class FuncRunner:
 
     MANDATORY_EXCLUDE = "^_"
 
-    def __init__(self, file, *, include="", exclude="", logger=logging.NullHandler):
+    def __init__(
+        self, file, *, include="", exclude="", config=None, logger=logging.NullHandler
+    ):
         self.source = Path(file)
         self.include = include
         self.exclude = exclude
+        self.config = config or {}
         self.logger = logger
         self.module = self.get_module_from_path(self.source)
         self.functions = sorted(self.collect_functions(self.module))
@@ -156,9 +161,9 @@ def engage(
     include="",
     exclude="",
     list_class=FuncRunner,
+    config=None,
 ):
     os.chdir(buildfile.parent)
-
     start_time = time.time()
     # Keeps pandas from logging at debug level
     logger = get_laforge_logger(log, debug)
@@ -167,12 +172,14 @@ def engage(
     if debug:
         logger.debug("Debug mode is on.")
 
-    task_list = list_class(buildfile, include=include, exclude=exclude, logger=logger)
+    func_list = list_class(
+        buildfile, include=include, exclude=exclude, config=config, logger=logger
+    )
     if list_only:
         logger.info(f"Build plan for {buildfile.absolute()}:")
-        task_list.list_only()
+        func_list.list_only()
         return
-    task_list.execute()
+    func_list.execute()
     elapsed = round(time.time() - start_time, 2)
     logger.info("%s completed in %s seconds.", buildfile, elapsed)
 
