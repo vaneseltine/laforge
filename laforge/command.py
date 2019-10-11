@@ -47,7 +47,7 @@ def show_version(ctx, _param, value):
 @click.option(
     "--log",
     default=DEFAULT_LOG_FILE,
-    type=click.Path(resolve_path=True, dir_okay=False),
+    type=click.Path(resolve_path=True, writable=True, dir_okay=False),
     help=f"Log file for build process (default: {DEFAULT_LOG_FILE}).",
 )
 @click.option(
@@ -73,10 +73,14 @@ def run(ctx, buildfile, debug, include, exclude, list_only, log):
     except FileNotFoundError as err:
         raise click.UsageError(err.args, ctx=ctx)
 
+    log_path = Path(log)
+    if not log_path.parent.exists():
+        raise click.FileError(log, f"{log_path.parent} does not exist.")
+
     build(
         buildfile,
         debug=debug,
-        log=log,
+        log=log_path,
         include=include,
         exclude=exclude,
         list_only=list_only,

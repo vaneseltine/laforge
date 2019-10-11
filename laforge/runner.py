@@ -150,7 +150,7 @@ class PrintCapture:
 def engage(
     *,
     buildfile,
-    log,
+    log=None,
     debug=False,
     list_only=False,
     include="",
@@ -161,7 +161,7 @@ def engage(
 
     start_time = time.time()
     # Keeps pandas from logging at debug level
-    logger = get_laforge_logger(Path(log), debug)
+    logger = get_laforge_logger(log, debug)
 
     logger.info("%s launched.", buildfile)
     if debug:
@@ -177,7 +177,7 @@ def engage(
     logger.info("%s completed in %s seconds.", buildfile, elapsed)
 
 
-def get_laforge_logger(log_file, debug):
+def get_laforge_logger(log_file=None, debug=False):
     noisiness = logging.DEBUG if debug else logging.INFO
 
     if noisiness == logging.DEBUG:
@@ -190,11 +190,13 @@ def get_laforge_logger(log_file, debug):
         formatter = logging.Formatter(
             fmt="{asctime} {levelname:>7} {message}", style="{", datefmt=r"%H:%M:%S"
         )
-    file_handler = logging.FileHandler(filename=log_file)
-    file_handler.setFormatter(formatter)
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setFormatter(formatter)
-    handlers = [file_handler, stream_handler]
+    handlers = [stream_handler]
+    if log_file is not None:
+        file_handler = logging.FileHandler(filename=log_file)
+        file_handler.setFormatter(formatter)
+        handlers.append(file_handler)
     logging.basicConfig(level=logging.INFO, handlers=handlers)
 
     logging.getLogger().setLevel(noisiness)

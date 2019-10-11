@@ -136,12 +136,12 @@ def lint_flake8(session):
 
 @nox.session(python=False)
 def lint_pylint(session):
-    session.run("pylint", "./laforge", "-d", "import-error")
+    session.run("pylint", "./laforge", "-d", "import-error", "--score=n")
 
 
 @nox.session(python=False)
 def lint_black(session):
-    session.run("python", "-m", "black", "--target-version", "py36", ".")
+    session.run("python", "-m", "black", "--target-version", "py36", "-q", ".")
 
 
 if __name__ == "__main__":
