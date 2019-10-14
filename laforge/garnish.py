@@ -107,7 +107,7 @@ class BaseTask:
 
     home = Path(".")
 
-    def __init__(self, *, verb, target, content, config=None):
+    def __init__(self, *, verb, target, content, config):
         self.verb = verb
         self.target = target
         self.content = content
