@@ -4,6 +4,6 @@ import laforge as lf
 
 
 @lf.read("small", "small.csv")
-@lf.save("small")
+@lf.save("smallsaved")
 def read_in_data(small):
-    small.to_csv("small_out.csv")
+    small.to_csv("small_out.csv", index=False)

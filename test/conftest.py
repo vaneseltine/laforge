@@ -2,11 +2,25 @@ import shutil
 from pathlib import Path
 
 import pytest
+import subprocess
 
-BUILDFILES = Path("./buildfiles")
+TEST_DIR = Path(__file__).parent
+BUILDFILES = TEST_DIR / "buildfiles"
 
 
-@pytest.fixture()
+@pytest.fixture
+def equal_csvs():
+    def equal_checker(path1, path2):
+        text1 = Path(path1).read_text()
+        text2 = Path(path2).read_text()
+        print(text1)
+        print(text2)
+        return text1 == text2
+
+    return equal_checker
+
+
+@pytest.fixture
 def make_temp(tmp_path):
     """Move the buildfile and other specified files into a temp folder.
 
@@ -25,3 +39,12 @@ def make_temp(tmp_path):
         return first_file
 
     return temp_maker
+
+
+@pytest.fixture
+def run_cli():
+    def cli_runner(s):
+        complete = ["laforge", *s.split()]
+        subprocess.check_output(complete)
+
+    return cli_runner

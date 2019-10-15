@@ -10,8 +10,6 @@ import types
 from contextlib import redirect_stdout
 from pathlib import Path
 
-import dotenv
-
 
 class Func:
     def __init__(self, name, function_object, code, line, module, logger):

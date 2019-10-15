@@ -98,7 +98,7 @@ def run(ctx, buildfile, debug, include, exclude, list_only, config_file, log):
 
 def build(
     buildfile=None,
-    log="./laforge.log",
+    log=None,
     debug=False,
     include="",
     exclude="",

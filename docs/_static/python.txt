@@ -1,55 +1,15 @@
 Undocumented Python objects
 ===========================
-laforge.builder
----------------
-Functions:
- * get_verb
- * is_verb
-
-Classes:
- * BaseTask -- missing methods:
-
-   - implement
-   - validate_results
- * DirectoryVisit
- * Echoer -- missing methods:
-
-   - implement
- * ExistenceChecker -- missing methods:
-
-   - implement
- * FileReader -- missing methods:
-
-   - implement
- * FileWriter -- missing methods:
-
-   - implement
-   - write
- * InternalPythonExecutor -- missing methods:
-
-   - implement
- * SQLExecutor -- missing methods:
-
-   - implement
- * SQLQueryReader -- missing methods:
-
-   - implement
- * SQLReaderWriter -- missing methods:
-
-   - implement
- * Task
- * TaskList -- missing methods:
-
-   - load_tasks
-   - template_content
-
 laforge.command
 ---------------
 Functions:
- * find_build_config
- * get_package_logger
- * run_build
- * technobabble
+ * build
+ * env_path_to_dict
+ * find_buildfile
+ * show_version
+
+Classes:
+ * DirectoryVisit
 
 laforge.distros
 ---------------
@@ -65,12 +25,6 @@ Classes:
 
    - create_spec
    - find
- * MySQL -- missing methods:
-
-   - create_spec
- * PostgresQL -- missing methods:
-
-   - create_spec
  * SQLite -- missing methods:
 
    - create_spec
@@ -100,13 +54,4 @@ Classes:
 
    - exists
    - resolve
-
-laforge.tech
-------------
-Functions:
- * capitalize_sentences
-
-Classes:
- * ModifiableVerb
- * Technobabbler
 
