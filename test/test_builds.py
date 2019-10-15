@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from laforge import build
 
 TEST_DIR = Path(__file__).parent

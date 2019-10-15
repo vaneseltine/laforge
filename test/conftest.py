@@ -2,7 +2,6 @@ import shutil
 from pathlib import Path
 
 import pytest
-import subprocess
 
 TEST_DIR = Path(__file__).parent
 BUILDFILES = TEST_DIR / "buildfiles"
@@ -39,12 +38,3 @@ def make_temp(tmp_path):
         return first_file
 
     return temp_maker
-
-
-@pytest.fixture
-def run_cli():
-    def cli_runner(s):
-        complete = ["laforge", *s.split()]
-        subprocess.check_output(complete)
-
-    return cli_runner

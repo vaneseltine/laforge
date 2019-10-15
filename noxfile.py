@@ -1,7 +1,4 @@
-"""Nox
-
-cf. https://github.com/saltstack/salt/blob
-    /328989d6cc8f81fc100c9aa900a4e3613dc7c19d/noxfile.py
+"""Run via nox
 
 For .env setup, see .circleci/env"""
 
@@ -19,7 +16,6 @@ nox.options.reuse_existing_virtualenvs = False
 nox.options.stop_on_first_error = True
 
 SUPPORTED_PYTHONS = ("python3.6", "python3.7")  # , "python3.8")
-DISTROS = ["mssql", "sqlite"]
 WINDOWS = sys.platform.startswith("win")
 
 # Pull variables, especially LFTEST_*, into os.environ
@@ -35,32 +31,6 @@ def clean_dir(s):
     folder = Path(s)
     if folder.exists():
         rmtree(folder, ignore_errors=True)
-
-
-# @nox.session(reuse_venv=False)
-# @nox.parametrize("distro", get_machine_distros(DISTROS))
-# def test_database(session, distro):
-#     session.install("-r", "requirements.txt")
-#     session.install("-e", f".[{distro},excel]")
-#     session.run(
-#         "coverage",
-#         "run",
-#         "--parallel-mode",
-#         "-m",
-#         "pytest",
-#         "-rxXs",
-#         f"test/distro_specific/{distro}.py",
-#         env={"LFTEST_DISTRO": distro},
-#     )
-#     session.run(
-#         "coverage",
-#         "run",
-#         "--parallel-mode",
-#         "-m",
-#         "pytest",
-#         "-rxXs",
-#         env={"LFTEST_DISTRO": distro},
-#     )
 
 
 @nox.session(python=SUPPORTED_PYTHONS)
@@ -82,14 +52,11 @@ def test_version(session):
     )
 
 
-# @nox.session(python=SUPPORTED_PYTHONS)
-# def cli(session):
-#     session.install("-e", ".")
-#     session.chdir("/")
-#     session.run("python", "-m", "laforge", "--version", silent=True)
-#     session.run("laforge", "--version", silent=True)
-#     session.run("laforge", "env", "--no-warning", silent=True)
-#     session.run("laforge", "consult", "--match", "diagnostic", silent=True)
+@nox.session(python=SUPPORTED_PYTHONS)
+def cli(session):
+    session.install("-e", ".")
+    session.chdir("/")
+    session.run("laforge", "--version", silent=True)
 
 
 @nox.session(python=False)
@@ -112,21 +79,12 @@ def coveralls(session):
     session.run("coveralls")
 
 
-# @nox.session(python=False)
-# def lint_docs(session):
-#     if WINDOWS:
-#         session.run("doc8", "./docs", "-q", "--ignore=D002", "--ignore=D004")
-#     else:
-#         session.run("doc8", "./docs", "-q")
-
-
-# @nox.session(python=False)
-# def docs_sphinx(session):
-#     # Treat warnings as errors.
-#     session.env["SPHINXOPTS"] = "-W"
-#     clean_dir("./build/sphinx")
-#     session.run("python", "-m", "sphinx", "-b", "coverage", "./docs", "./docs/_static")
-#     session.run("python", "setup.py", "build_sphinx", "-b", "html", "-W")
+@nox.session(python=False)
+def lint_docs(session):
+    if WINDOWS:
+        session.run("doc8", "./docs", "-q", "--ignore=D002", "--ignore=D004")
+    else:
+        session.run("doc8", "./docs", "-q")
 
 
 @nox.session(python=False)

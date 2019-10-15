@@ -6,6 +6,7 @@ BASICS = [  # For maximums tested, see requirements.txt
     "pyparsing>=2.0",
     "SQLAlchemy>=1.1",
     "pyyaml>=3.0",
+    "Click==7.0",
 ]
 EXTRAS = {
     "mssql": ["pyodbc>=4.0"],  # Microsoft SQL Server

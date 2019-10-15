@@ -15,7 +15,7 @@ from .runner import engage
 CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 DEFAULT_LOG_FILE = "./laforge.log"
 DEFAULT_CONFIG_FILE = "./.env"
-DEFAULT_GLOBS = ["build*.py", "*laforge*.py"]
+DEFAULT_BUILD_GLOBS = ["build*.py", "*laforge*.py"]
 
 
 def show_version(ctx, _param, value):
@@ -123,17 +123,18 @@ def build(
     )
 
 
-def find_buildfile(path="."):
+def find_buildfile(path=".", buildglobs=None):
+    buildglobs = buildglobs or DEFAULT_BUILD_GLOBS
     path = Path(path).resolve()
     if not path.exists():
         raise FileNotFoundError(f"{path} does not exist.")
     if path.is_file():
         return path
     build_files = []
-    for fileglob in DEFAULT_GLOBS:
-        build_files.extend(list(path.glob(fileglob)))
+    for buildglob in buildglobs:
+        build_files.extend(list(path.glob(buildglob)))
     if not build_files:
-        globs = " or ".join(DEFAULT_GLOBS)
+        globs = " or ".join(buildglobs)
         raise FileNotFoundError(
             f"No laforge buildfile (e.g., {globs}) found in {path}."
         )
