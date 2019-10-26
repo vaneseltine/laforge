@@ -17,7 +17,7 @@ flake8-isort==2.3
 hypothesis[pandas]==4.38.2
 nox==2019.5.30
 pylint==2.3.1
-pytest==5.2.0
+pytest==5.2.2
 twine==2.0.0
 wheel==0.33.6
 -r ./docs/requirements.txt
