@@ -602,3 +602,50 @@ def fix_bad_columns(df):
     new_columns = [Identifier(c, extra=i).normalized for i, c in enumerate(df.columns)]
     new_df = df.set_axis(labels=new_columns, axis="columns", inplace=False)
     return new_df
+
+
+class Server:
+    def __init__(self, name):
+        self.name = name
+
+    def __getattr__(self, attr):
+        return Database(attr, self)
+
+    def database(self, name):
+        return Database(name, self)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}('{self.name}')"
+
+    def __str__(self):
+        return self.name
+
+
+class Database:
+    def __init__(self, name, server):
+        self.name = name
+        self.server = server
+
+    def __getattr__(self, attr):
+        return Schema(attr, self)
+
+    def schema(self, name):
+        return Schema(name, self)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}('{self.name}', {repr(self.server)})"
+
+    def __str__(self):
+        return f"{self.server}.{self.name}"
+
+
+class Schema:
+    def __init__(self, name, database):
+        self.name = name
+        self.database = database
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}('{self.name}')"
+
+    def __str__(self):
+        return f"{self.database}.{self.name}"
